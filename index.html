@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="hi" class="scroll-smooth dark" data-theme="dark">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>राज्य संपोषित +2 उच्च विद्यालय, गोला (स्थापना: 1940) | S.S. +2 High School, Gola</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap"
+        rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ['Cinzel', 'Tiro Devanagari Hindi', 'serif'],
+                        hindi: ['Tiro Devanagari Hindi', 'Plus Jakarta Sans', 'sans-serif'],
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="stylesheet" href="./styles.css" />
+</head>
+
+<body class="sacred-bg-mesh min-h-screen antialiased selection:bg-amber-500 selection:text-black">
+
+    <!-- 1. LIVE RISING DIYA SPARKS CANVAS -->
+    <canvas id="sacred-particles-canvas" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <!-- 2. DUAL ROTATING SURYA MANDALA HALO -->
+    <div class="fixed inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center opacity-[0.09]">
+        <svg class="w-[820px] h-[820px] chakra-spin t-gold absolute" viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="95" stroke="currentColor" stroke-width="1.2" stroke-dasharray="4 4" />
+            <circle cx="100" cy="100" r="80" stroke="currentColor" stroke-width="1.2" />
+            <path d="M100 5 L100 195 M5 100 L195 100 M32 32 L168 168 M168 32 L32 168" stroke="currentColor"
+                stroke-width="0.9" />
+            <polygon points="100,12 120,74 185,74 132,112 152,175 100,137 48,175 68,112 15,74 80,74"
+                stroke="currentColor" stroke-width="1.4" fill="none" />
+        </svg>
+        <svg class="w-[500px] h-[500px] chakra-spin-reverse t-saffron absolute" viewBox="0 0 200 200" fill="none">
+            <circle cx="100" cy="100" r="70" stroke="currentColor" stroke-width="1.5" stroke-dasharray="6 4" />
+            <rect x="52" y="52" width="96" height="96" stroke="currentColor" stroke-width="1.4"
+                transform="rotate(45 100 100)" />
+            <rect x="52" y="52" width="96" height="96" stroke="currentColor" stroke-width="1.4" />
+        </svg>
+    </div>
+
+    <!-- 3. TOP SACRED SANKALP STRIP -->
+    <div
+        class="relative z-30 border-b border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-orange-500/20 to-amber-500/15 backdrop-blur-md">
+        <div
+            class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div class="flex items-center gap-2 font-hindi font-bold t-gold">
+                <span class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping"></span>
+                <span id="top-shloka-bar">॥ सा विद्या या विमुक्तये • न हि ज्ञानेन सदृशं पवित्रमिह विद्यते ॥</span>
+            </div>
+            <div class="flex items-center gap-2.5 font-mono text-[11px] font-bold">
+                <span class="px-2.5 py-0.5 rounded-md bg-amber-500/20 t-gold border border-amber-500/40">ESTD:
+                    1940</span>
+                <span
+                    class="px-2.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">UDISE:
+                    20240701206</span>
+                <span id="backend-status-badge"
+                    class="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md bg-orange-500/20 t-saffron border border-orange-500/40">
+                    Connecting Cloud...
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. STICKY TEMPLE MANDAPAM HEADER + SWINGING BELL & TORAN -->
+    <header class="sticky top-0 z-40 sacred-header-surface shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between gap-3">
+
+            <div class="flex items-center gap-3">
+                <!-- Interactive Swinging Temple Bell -->
+                <div onclick="ringTempleBell(this)" class="temple-bell hidden sm:flex flex-col items-center t-gold"
+                    title="Click to Ring Sacred Temple Bell">
+                    <div class="w-0.5 h-3 bg-amber-500"></div>
+                    <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+                        <path
+                            d="M12 2a2 2 0 0 0-2 2v.34C7.16 5.16 5 7.82 5 11v5l-2 2v1h18v-1l-2-2v-5c0-3.18-2.16-5.84-5-6.66V4a2 2 0 0 0-2-2zm0 20a2.5 2.5 0 0 0 2.45-2h-4.9A2.5 2.5 0 0 0 12 22z" />
+                    </svg>
+                </div>
+
+                <button onclick="switchView('home')"
+                    class="flex items-center gap-3.5 text-left group focus:outline-none">
+                    <div
+                        class="relative w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-600 to-red-700 p-[2px] shadow-lg shadow-orange-500/30 group-hover:scale-105 transition-transform">
+                        <div
+                            class="w-full h-full rounded-[14px] bg-stone-950 flex flex-col items-center justify-center text-amber-400">
+                            <i data-lucide="flame" class="w-5 h-5 text-orange-400 sacred-pulse"></i>
+                            <span class="font-mono text-[9px] font-bold tracking-tighter text-amber-300">1940</span>
+                        </div>
+                    </div>
+                    <div>
+                        <span
+                            class="text-[10px] font-mono uppercase tracking-widest px-2 py-0.5 rounded-full bg-amber-500/20 t-gold border border-amber-500/40 font-bold"
+                            data-i18n="header_badge">
+                            झारखंड सरकार • विद्या मंदिर (कक्षा 1–12)
+                        </span>
+                        <h1 class="font-hindi text-base sm:text-xl font-extrabold tracking-tight t-heading mt-0.5"
+                            data-i18n="school_name_main">
+                            राज्य संपोषित +2 उच्च विद्यालय, गोला
+                        </h1>
+                        <p class="text-[11px] font-mono t-muted hidden sm:block" data-i18n="school_location_sub">
+                            S.S. +2 High School, Gola • जिला: रामगढ़, झारखंड
+                        </p>
+                    </div>
+                </button>
+            </div>
+
+            <!-- Navigation & Action Controls -->
+            <div class="flex items-center gap-2 sm:gap-2.5">
+                <button id="nav-btn-home" onclick="switchView('home')"
+                    class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold transition-all flex items-center gap-1.5 bg-amber-500/20 t-gold border border-amber-500/40">
+                    <i data-lucide="landmark" class="w-4 h-4"></i>
+                    <span class="hidden md:inline" data-i18n="nav_home">विद्या मंदिर</span>
+                </button>
+
+                <button id="nav-btn-guru" onclick="switchView('guru-stambh')"
+                    class="px-3.5 sm:px-4 py-2 rounded-xl text-xs sm:text-sm font-extrabold text-stone-950 bg-gradient-to-r from-amber-400 via-orange-400 to-amber-500 hover:from-amber-300 hover:to-orange-400 shadow-lg shadow-amber-500/30 transition-all flex items-center gap-1.5">
+                    <i data-lucide="award" class="w-4 h-4 text-stone-950"></i>
+                    <span data-i18n="nav_guru">गुरु स्तंभ (Faculty)</span>
+                </button>
+
+                <button id="nav-btn-gaurav" onclick="switchView('gaurav-stambh')"
+                    class="px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold border border-amber-500/40 hover:bg-amber-500/15 t-heading transition-all flex items-center gap-1.5">
+                    <i data-lucide="trophy" class="w-4 h-4 t-gold"></i>
+                    <span class="hidden lg:inline" data-i18n="nav_gaurav">गौरव स्तंभ (Alumni)</span>
+                </button>
+
+                <!-- Full-Page Instant Language Switcher -->
+                <button onclick="toggleLanguage()" id="lang-toggle-btn"
+                    class="px-3.5 py-2 rounded-xl border-2 border-amber-500/50 bg-amber-500/15 hover:bg-amber-500 hover:text-stone-950 text-xs font-mono font-extrabold t-gold transition-all">
+                    <span id="lang-btn-label">EN / हिंदी</span>
+                </button>
+
+                <!-- True Day/Night Temple Theme Switcher -->
+                <button onclick="toggleTheme()" id="theme-toggle-btn"
+                    class="px-3.5 py-2 rounded-xl border-2 border-amber-500/50 bg-amber-500/15 hover:bg-amber-500/30 t-gold font-mono text-xs font-extrabold flex items-center gap-1.5 transition-all">
+                    <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 hidden text-amber-400"></i>
+                    <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4 text-amber-700"></i>
+                    <span id="theme-mode-label" class="hidden xl:inline">Day Mode</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Ornamental Marigold Toran Scallop Border -->
+        <div class="w-full overflow-hidden h-3 bg-repeat-x opacity-90"
+            style="background-image: radial-gradient(circle at 12px 0, #F59E0B 6px, #EA580C 9px, transparent 10px); background-size: 24px 12px;">
+        </div>
+    </header>
+
+    <!-- ============================================================================
+       VIEW 1: MAIN VIDYA MANDIR DASHBOARD (`#view-home`)
+       ============================================================================ -->
+    <main id="view-home" class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 space-y-16">
+
+        <!-- 1. GRAND VIDYA MANDIR HERO SECTION -->
+        <section class="relative rounded-3xl sacred-card temple-shikhar-border p-6 sm:p-10 lg:p-12">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10 items-center">
+
+                <div class="lg:col-span-7 space-y-6">
+                    <div
+                        class="inline-flex flex-wrap items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/15 border border-amber-500/40 t-gold text-xs font-extrabold">
+                        <i data-lucide="sparkles" class="w-4 h-4 t-saffron"></i>
+                        <span data-i18n="hero_badge">॥ हमारा विद्यालय: एक पावन विद्या मंदिर • गौरवशाली स्थापना: 1940
+                            ॥</span>
+                    </div>
+
+                    <div class="space-y-3">
+                        <h2
+                            class="font-hindi text-3xl sm:text-5xl lg:text-[50px] font-extrabold tracking-tight leading-[1.24] t-heading">
+                            <span data-i18n="hero_title_1">राज्य संपोषित +2 उच्च विद्यालय,</span>
+                            <span class="suvarna-text" data-i18n="hero_title_2"> गोला (रामगढ़)</span>
+                        </h2>
+                        <p class="font-display text-sm sm:text-lg font-extrabold tracking-wider uppercase t-gold"
+                            data-i18n="hero_subtitle">
+                            S.S. +2 High School, Gola • Our School As A Temple
+                        </p>
+                    </div>
+
+                    <!-- Sacred Sanskrit Shloka Plaque -->
+                    <div class="p-5 rounded-2xl shloka-plaque space-y-2 shadow-md">
+                        <div class="flex items-center gap-2 t-gold font-hindi text-base sm:text-xl font-extrabold">
+                            <span>🕉️</span>
+                            <span>॥ सा विद्या या विमुक्तये • न हि ज्ञानेन सदृशं पवित्रमिह विद्यते ॥</span>
+                        </div>
+                        <p id="hero-shloka-meaning" class="text-xs sm:text-sm t-body font-semibold devanagari-leading">
+                        </p>
+                    </div>
+
+                    <!-- LIVE FIREBASE VIDYA DEEP + QUICK JUMP -->
+                    <div class="flex flex-wrap items-center gap-3.5 pt-2">
+                        <button id="btn-light-deep" onclick="handleLightVidyaDeep()"
+                            class="px-6 py-3.5 rounded-xl font-extrabold text-xs sm:text-sm bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-stone-950 shadow-xl shadow-orange-500/30 hover:scale-[1.03] active:scale-[0.98] transition-all flex items-center gap-2">
+                            <i data-lucide="flame" class="w-5 h-5 fill-stone-950"></i>
+                            <span data-i18n="btn_light_deep">प्रज्ज्वलित करें विद्या दीप (Light Sacred Lamp)</span>
+                        </button>
+
+                        <div
+                            class="px-4 py-3 rounded-xl sacred-inner-box text-xs font-mono flex items-center gap-2 t-heading">
+                            <span class="inline-block w-2.5 h-2.5 rounded-full bg-orange-500 animate-ping"></span>
+                            <span data-i18n="deep_counter_label">अखंड प्रज्ज्वलित दीप:</span>
+                            <strong id="vidya-deep-count" class="t-gold text-base font-extrabold">1,940</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right 5 Cols: Sacred Garbhagriha Identity Matrix -->
+                <div class="lg:col-span-5">
+                    <div class="rounded-3xl p-6 sm:p-7 sacred-inner-box space-y-5 relative overflow-hidden">
+                        <div class="flex items-center justify-between border-b border-amber-500/30 pb-4">
+                            <div>
+                                <span class="text-[10px] font-mono uppercase tracking-widest t-gold font-bold block"
+                                    data-i18n="matrix_tag">Sacred Garbhagriha Matrix</span>
+                                <h3 class="font-hindi text-xl font-extrabold t-heading mt-0.5" data-i18n="matrix_title">
+                                    विद्यालय दर्पण (Identity Matrix)</h3>
+                            </div>
+                            <div class="relative w-14 h-14 flex items-center justify-center kalash-float">
+                                <svg class="w-14 h-14 chakra-spin absolute t-gold opacity-60" viewBox="0 0 100 100"
+                                    fill="none">
+                                    <circle cx="50" cy="50" r="44" stroke="currentColor" stroke-width="2.5"
+                                        stroke-dasharray="5 4" />
+                                </svg>
+                                <div
+                                    class="w-10 h-10 rounded-full bg-gradient-to-br from-amber-400 to-orange-600 flex items-center justify-center text-stone-950 shadow-lg">
+                                    <i data-lucide="flame" class="w-5 h-5 fill-stone-950"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-3.5">
+                            <div class="p-3.5 rounded-xl sacred-card">
+                                <span class="text-[11px] font-mono t-muted font-bold block"
+                                    data-i18n="m_estd_label">स्थापना वर्ष (ESTD)</span>
+                                <span class="font-mono text-2xl font-extrabold t-gold">1940</span>
+                                <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold block mt-0.5"
+                                    data-i18n="m_estd_sub">86+ वर्षों की साधना</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl sacred-card">
+                                <span class="text-[11px] font-mono t-muted font-bold block">UDISE CODE</span>
+                                <span
+                                    class="font-mono text-lg sm:text-xl font-extrabold t-heading tracking-tight">20240701206</span>
+                                <span class="text-[10px] t-gold font-bold block mt-0.5" data-i18n="m_udise_sub">सत्यापित
+                                    सरकारी कोड</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl sacred-card">
+                                <span class="text-[11px] font-mono t-muted font-bold block"
+                                    data-i18n="m_students_label">कुल विद्यार्थी (Strength)</span>
+                                <span id="metric-student-count"
+                                    class="font-mono text-2xl font-extrabold t-saffron">0000</span>
+                                <span class="text-[10px] t-muted font-bold block mt-0.5"
+                                    data-i18n="m_students_sub">कक्षा 1 से 12 तक</span>
+                            </div>
+                            <div class="p-3.5 rounded-xl sacred-card">
+                                <span class="text-[11px] font-mono t-muted font-bold block"
+                                    data-i18n="m_wings_label">शैक्षणिक संकाय</span>
+                                <span
+                                    class="font-mono text-xl font-extrabold text-emerald-600 dark:text-emerald-400">Class
+                                    1–12</span>
+                                <span class="text-[10px] t-muted font-bold block mt-0.5">Sci • Arts • Com</span>
+                            </div>
+                        </div>
+
+                        <div
+                            class="pt-3 border-t border-amber-500/30 flex items-center justify-between text-xs t-body font-bold">
+                            <span class="flex items-center gap-1.5">
+                                <i data-lucide="user-check" class="w-4 h-4 t-gold"></i>
+                                <span data-i18n="m_principal_prefix">प्रधानाचार्य:</span>
+                                <strong id="matrix-principal-name" class="t-heading">श्रीमती अनुपा पुष्पा
+                                    तिर्की</strong>
+                            </span>
+                            <span
+                                class="font-mono text-[11px] px-2 py-0.5 rounded bg-amber-500/20 t-gold font-extrabold">JAC
+                                Ranchi</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- 2. PRINCIPAL'S DESK -->
+        <section class="sacred-card rounded-3xl p-6 sm:p-9 border-l-4 border-l-amber-500">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
+                <div class="lg:col-span-4 flex items-center gap-4">
+                    <div
+                        class="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center shrink-0 shadow-lg">
+                        <i data-lucide="feather" class="w-8 h-8 t-gold"></i>
+                    </div>
+                    <div>
+                        <span class="text-[11px] font-mono uppercase tracking-widest t-gold font-extrabold block"
+                            data-i18n="principal_label">
+                            प्रधानाचार्य की कलम से
+                        </span>
+                        <h3 id="principal-name-display"
+                            class="font-hindi text-xl sm:text-2xl font-extrabold t-heading mt-0.5"></h3>
+                        <p id="principal-role-display" class="text-xs t-muted font-bold"></p>
+                    </div>
+                </div>
+                <div class="lg:col-span-8 sacred-inner-box rounded-2xl p-5 sm:p-6">
+                    <p id="principal-message-display"
+                        class="font-hindi text-sm sm:text-base italic font-semibold devanagari-leading t-heading"></p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. 4-WING ACADEMIC MATRIX (`#academic-wings`) -->
+        <section id="academic-wings" class="space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                <div>
+                    <span class="text-xs font-mono uppercase tracking-widest t-gold font-extrabold"
+                        data-i18n="wings_tag">
+                        4-Wing Gurukul Academic Architecture
+                    </span>
+                    <h2 class="font-hindi text-2xl sm:text-4xl font-extrabold t-heading mt-1" data-i18n="wings_heading">
+                        चतुर्स्तरीय शैक्षणिक स्तंभ (कक्षा 1 से 12)
+                    </h2>
+                </div>
+                <p class="text-xs sm:text-sm t-body font-medium max-w-md" data-i18n="wings_sub">
+                    प्रारंभिक बाल शिक्षा से लेकर +2 इंटरमीडिएट (विज्ञान, कला एवं वाणिज्य) तक एकीकृत सरकारी उत्कृष्टता।
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="sacred-card rounded-2xl p-6 flex flex-col justify-between space-y-5">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="px-2.5 py-1 rounded-lg text-xs font-mono font-extrabold bg-amber-500/20 t-gold border border-amber-500/40">
+                                WING 01 • CLASS 1–5
+                            </span>
+                            <i data-lucide="sprout" class="w-5 h-5 t-gold"></i>
+                        </div>
+                        <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="w1_title">प्राथमिक प्रभाग
+                            (अंकुरण)</h3>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="w1_desc">
+                            बुनियादी साक्षरता एवं संख्या ज्ञान (FLN), नैतिक संस्कार, खेल-आधारित शिक्षण तथा प्रधानमंत्री
+                            पोषण शक्ति निर्माण।
+                        </p>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-amber-500/25 text-[11px] font-mono font-bold t-gold flex items-center justify-between">
+                        <span>Foundational Wing</span>
+                        <span data-i18n="w1_foot">निःशुल्क पुस्तकें व पोशाक</span>
+                    </div>
+                </div>
+
+                <div class="sacred-card rounded-2xl p-6 flex flex-col justify-between space-y-5">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="px-2.5 py-1 rounded-lg text-xs font-mono font-extrabold bg-orange-500/20 t-saffron border border-orange-500/40">
+                                WING 02 • CLASS 6–8
+                            </span>
+                            <i data-lucide="compass" class="w-5 h-5 t-saffron"></i>
+                        </div>
+                        <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="w2_title">उच्च प्राथमिक
+                            प्रभाग (अन्वेषण)</h3>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="w2_desc">
+                            विज्ञान एवं गणित की प्रयोगात्मक नींव, कंप्यूटर साक्षरता (ICT परिचय), एनसीसी एवं साइकिल वितरण
+                            योजना पात्रता।
+                        </p>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-amber-500/25 text-[11px] font-mono font-bold t-saffron flex items-center justify-between">
+                        <span>Smart Class & ICT</span>
+                        <span data-i18n="w2_foot">किशोरी समृद्धि (कक्षा 8)</span>
+                    </div>
+                </div>
+
+                <div class="sacred-card rounded-2xl p-6 flex flex-col justify-between space-y-5">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="px-2.5 py-1 rounded-lg text-xs font-mono font-extrabold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
+                                WING 03 • CLASS 9–10
+                            </span>
+                            <i data-lucide="flame-kindling" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+                        </div>
+                        <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="w3_title">माध्यमिक प्रभाग
+                            (मैट्रिक संकल्प)</h3>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="w3_desc">
+                            JAC मैट्रिक बोर्ड परीक्षा की सघन तैयारी, भौतिकी-रसायन-जीव विज्ञान प्रैक्टिकल, IT व्यावसायिक
+                            शिक्षा एवं मेधा छात्रवृत्ति।
+                        </p>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-amber-500/25 text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center justify-between">
+                        <span>JAC Secondary Board</span>
+                        <span data-i18n="w3_foot">Science & IT प्रैक्टिकल</span>
+                    </div>
+                </div>
+
+                <div
+                    class="sacred-card rounded-2xl p-6 flex flex-col justify-between space-y-5 ring-2 ring-amber-500/60">
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between">
+                            <span
+                                class="px-2.5 py-1 rounded-lg text-xs font-mono font-extrabold bg-amber-500 text-stone-950">
+                                WING 04 • CLASS 11–12 (+2)
+                            </span>
+                            <i data-lucide="graduation-cap" class="w-5 h-5 t-gold"></i>
+                        </div>
+                        <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="w4_title">+2 इंटरमीडिएट (शिखर
+                            संकाय)</h3>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="w4_desc">
+                            विज्ञान (PCM/PCB), कला (Arts) एवं वाणिज्य (Commerce) — उच्च स्तरीय प्रयोगशालाएं, करियर
+                            मार्गदर्शन एवं गुरुजी क्रेडिट कार्ड सपोर्ट।
+                        </p>
+                    </div>
+                    <div
+                        class="pt-3 border-t border-amber-500/25 text-[11px] font-mono font-bold t-gold flex items-center justify-between">
+                        <span>Science • Arts • Com</span>
+                        <span>JAC +2 Inter Hub</span>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. LIVE NOTICE BOARD & CAMPUS LABS -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+            <div class="lg:col-span-5 space-y-4">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <span class="text-xs font-mono uppercase tracking-widest t-saffron font-extrabold">Official
+                            Dispatch</span>
+                        <h3 class="font-hindi text-2xl font-extrabold t-heading mt-0.5" data-i18n="notice_heading">सूचना
+                            पट्ट (Live Notice Board)</h3>
+                    </div>
+                    <span
+                        class="px-2.5 py-1 rounded-full text-[11px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                        Cloud Synced
+                    </span>
+                </div>
+
+                <div id="notices-container" class="space-y-3.5"></div>
+            </div>
+
+            <div class="lg:col-span-7 space-y-4">
+                <div>
+                    <span class="text-xs font-mono uppercase tracking-widest t-gold font-extrabold">Sacred Gurukul
+                        Infrastructure</span>
+                    <h3 class="font-hindi text-2xl font-extrabold t-heading mt-0.5" data-i18n="labs_heading">
+                        प्रयोगशालाएं, स्मार्ट क्लास, खेल मैदान एवं एनसीसी</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="sacred-card rounded-2xl p-5 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center t-gold">
+                                <i data-lucide="monitor" class="w-5 h-5"></i>
+                            </div>
+                            <span
+                                class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-amber-500/20 t-gold font-extrabold">ICT
+                                + IT LAB</span>
+                        </div>
+                        <h4 class="font-hindi text-lg font-extrabold t-heading" data-i18n="lab1_title">ICT कंप्यूटर लैब
+                            एवं IT प्रयोगशाला</h4>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="lab1_desc">
+                            आधुनिक कंप्यूटर सिस्टम्स, डिजिटल लर्निंग और व्यावसायिक IT प्रशिक्षण के लिए समर्पित दोहरे
+                            कंप्यूटर केंद्र।
+                        </p>
+                    </div>
+
+                    <div class="sacred-card rounded-2xl p-5 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-orange-500/20 border border-orange-500/40 flex items-center justify-center t-saffron">
+                                <i data-lucide="tv" class="w-5 h-5"></i>
+                            </div>
+                            <span
+                                class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-orange-500/20 t-saffron font-extrabold">SMART
+                                CLASS</span>
+                        </div>
+                        <h4 class="font-hindi text-lg font-extrabold t-heading" data-i18n="lab2_title">डिजिटल स्मार्ट
+                            क्लासरूम</h4>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="lab2_desc">
+                            इंटरैक्टिव डिजिटल पैनल और ई-कंटेंट के माध्यम से कठिन विषयों का दृश्य-श्रव्य
+                            (3D/Audio-Visual) शिक्षण।
+                        </p>
+                    </div>
+
+                    <div class="sacred-card rounded-2xl p-5 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
+                                <i data-lucide="flask-conical" class="w-5 h-5"></i>
+                            </div>
+                            <span
+                                class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold">PCM
+                                / PCB LABS</span>
+                        </div>
+                        <h4 class="font-hindi text-lg font-extrabold t-heading" data-i18n="lab3_title">भौतिकी, रसायन एवं
+                            जीव विज्ञान लैब</h4>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="lab3_desc">
+                            मैट्रिक एवं +2 विज्ञान संकाय के विद्यार्थियों के लिए पूर्णतः सुसज्जित तीनों अलग-अलग
+                            वैज्ञानिक प्रयोगशालाएं।
+                        </p>
+                    </div>
+
+                    <div class="sacred-card rounded-2xl p-5 space-y-2.5">
+                        <div class="flex items-center justify-between">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-500/40 flex items-center justify-center text-blue-600 dark:text-blue-400">
+                                <i data-lucide="medal" class="w-5 h-5"></i>
+                            </div>
+                            <span
+                                class="text-[11px] font-mono px-2.5 py-0.5 rounded bg-blue-500/20 text-blue-600 dark:text-blue-400 font-extrabold">NCC
+                                & PLAYGROUND</span>
+                        </div>
+                        <h4 class="font-hindi text-lg font-extrabold t-heading" data-i18n="lab4_title">सक्रिय NCC इकाई
+                            एवं विशाल खेल मैदान</h4>
+                        <p class="text-xs t-body devanagari-leading" data-i18n="lab4_desc">
+                            एकता और अनुशासन के लिए गौरवशाली एनसीसी (NCC) प्लाटून तथा फुटबॉल, एथलेटिक्स व परेड के लिए
+                            विस्तृत मैदान।
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- 5. JHARKHAND GOVT STUDENT WELFARE & SCHEMES HUB (`#welfare-schemes`) -->
+        <section id="welfare-schemes" class="space-y-6">
+            <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
+                <div>
+                    <span class="text-xs font-mono uppercase tracking-widest t-gold font-extrabold">
+                        Verified Jharkhand Government Welfare Portal (2026-27)
+                    </span>
+                    <h2 class="font-hindi text-2xl sm:text-4xl font-extrabold t-heading mt-1"
+                        data-i18n="schemes_heading">
+                        झारखंड सरकार छात्र कल्याण एवं छात्रवृत्ति योजनाएं
+                    </h2>
+                </div>
+
+                <div class="flex flex-wrap gap-2">
+                    <button onclick="filterSchemes('all')" data-scheme-filter="all"
+                        class="scheme-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-extrabold bg-amber-500 text-stone-950"
+                        data-i18n="f_all">
+                        सभी योजनाएं (All)
+                    </button>
+                    <button onclick="filterSchemes('pre-matric')" data-scheme-filter="pre-matric"
+                        class="scheme-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 t-heading"
+                        data-i18n="f_pre">
+                        कक्षा 1–10 (Pre-Matric)
+                    </button>
+                    <button onclick="filterSchemes('post-matric')" data-scheme-filter="post-matric"
+                        class="scheme-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 t-heading"
+                        data-i18n="f_post">
+                        कक्षा 11–12 व उच्च शिक्षा (+2)
+                    </button>
+                    <button onclick="filterSchemes('girls')" data-scheme-filter="girls"
+                        class="scheme-filter-btn px-3.5 py-1.5 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 t-heading"
+                        data-i18n="f_girls">
+                        बालिका विशेष (Girls)
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dynamically Rendered Bilingual Schemes Grid -->
+            <div id="schemes-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </section>
+
+    </main>
+
+    <!-- ============================================================================
+       VIEW 2: SPECIAL ROUTE — "GURU STAMBH" (`#view-guru-stambh`)
+       ============================================================================ -->
+    <section id="view-guru-stambh" class="hidden relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+        <div class="sacred-card temple-shikhar-border rounded-3xl p-8 sm:p-12 text-center space-y-5">
+            <div
+                class="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto t-gold">
+                <i data-lucide="award" class="w-8 h-8"></i>
+            </div>
+            <span
+                class="px-3.5 py-1 rounded-full text-xs font-mono font-extrabold bg-amber-500/20 t-gold border border-amber-500/40">
+                SPECIAL ROUTE READY • GURU STAMBH
+            </span>
+            <h2 class="font-hindi text-3xl sm:text-5xl font-extrabold t-heading" data-i18n="guru_heading">
+                गुरु ब्रह्मा गुरुर्विष्णुः • आचार्य एवं शिक्षक गौरव स्तंभ
+            </h2>
+            <p class="max-w-2xl mx-auto text-sm sm:text-base t-body devanagari-leading" data-i18n="guru_sub">
+                राज्य संपोषित +2 उच्च विद्यालय, गोला (1940) के श्रद्धेय प्रधानाचार्यों एवं शिक्षकों का समर्पित पोर्टल।
+                विद्यालय से सभी शिक्षकों का विस्तृत डेटा संकलित होते ही यहाँ प्रत्येक गुरुजन का गौरवशाली प्रोफाइल कार्ड
+                प्रदर्शित किया जाएगा।
+            </p>
+            <div class="pt-2">
+                <button onclick="switchView('home')"
+                    class="px-5 py-2.5 rounded-xl bg-amber-500 text-stone-950 font-extrabold text-xs sm:text-sm inline-flex items-center gap-2">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span data-i18n="btn_back_home">मुख्य विद्या मंदिर पटल पर लौटें</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="sacred-card rounded-2xl p-6 border-t-4 border-t-amber-500 space-y-3">
+                <span
+                    class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
+                    VERIFIED LEADERSHIP
+                </span>
+                <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="guru_p_name">श्रीमती अनुपा पुष्पा
+                    तिर्की</h3>
+                <p class="text-xs font-mono font-bold t-gold">Principal • S.S. +2 High School, Gola</p>
+                <p class="text-xs t-body" data-i18n="guru_p_desc">
+                    विद्यालय के शैक्षणिक अनुशासन, प्रशासन एवं समग्र विकास की प्रमुख मार्गदर्शक।
+                </p>
+            </div>
+
+            <div class="sacred-card rounded-2xl p-6 border border-dashed border-amber-500/50 space-y-3">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 t-gold">
+                    SLOT READY • PGT (+2 INTER WING)
+                </span>
+                <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="guru_pgt_title">[PGT शिक्षक डेटा
+                    संकलन प्रतीक्षित]</h3>
+                <p class="text-xs font-mono t-muted">Science • Arts • Commerce</p>
+                <p class="text-xs t-body" data-i18n="guru_pgt_desc">
+                    डेटा कलेक्ट होते ही यहाँ विषय, योग्यता एवं अनुभव के साथ पूर्ण कार्ड जोड़े जाएंगे।
+                </p>
+            </div>
+
+            <div class="sacred-card rounded-2xl p-6 border border-dashed border-amber-500/50 space-y-3">
+                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-orange-500/20 t-saffron">
+                    SLOT READY • TGT & PRIMARY WING
+                </span>
+                <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="guru_tgt_title">[TGT एवं प्राथमिक
+                    शिक्षक स्लॉट]</h3>
+                <p class="text-xs font-mono t-muted">Class 1 to 10 Wings</p>
+                <p class="text-xs t-body" data-i18n="guru_tgt_desc">
+                    हमारे सभी शिक्षकों के सम्मान में यह विशेष सेक्शन अंतिम चरण में लाइव डेटा से भरा जाएगा।
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- ============================================================================
+       VIEW 3: SPECIAL ROUTE — "GAURAV STAMBH" (`#view-gaurav-stambh`)
+       ============================================================================ -->
+    <section id="view-gaurav-stambh"
+        class="hidden relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-12">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+            <div class="lg:col-span-6 sacred-card temple-shikhar-border rounded-3xl p-8 space-y-5">
+                <span
+                    class="px-3 py-1 rounded-full text-xs font-mono font-extrabold bg-amber-500/20 t-gold border border-amber-500/40">
+                    GAURAV STAMBH • 1940–2026
+                </span>
+                <h2 class="font-hindi text-3xl sm:text-4xl font-extrabold t-heading" data-i18n="gaurav_heading">
+                    गौरव स्तंभ — हमारे टॉपर्स एवं प्रतिष्ठित पूर्व छात्र
+                </h2>
+                <p class="text-sm t-body devanagari-leading" data-i18n="gaurav_sub">
+                    क्या आप राज्य संपोषित +2 उच्च विद्यालय, गोला के पूर्व छात्र (Alumni) या बोर्ड टॉपर रहे हैं? अपना
+                    विवरण फॉर्म में दर्ज करें। एडमिन द्वारा Firebase Console में स्टेटस approved करते ही आपका नाम नीचे
+                    सत्यापित गौरव दीवार पर चमकने लगेगा!
+                </p>
+                <button onclick="switchView('home')"
+                    class="px-5 py-2.5 rounded-xl border border-amber-500/40 hover:bg-amber-500/15 font-extrabold text-xs inline-flex items-center gap-2 t-heading">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                    <span data-i18n="btn_back_home">मुख्य विद्या मंदिर पटल पर लौटें</span>
+                </button>
+            </div>
+
+            <div class="lg:col-span-6 sacred-card rounded-3xl p-8 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="font-hindi text-xl font-extrabold t-gold" data-i18n="form_title">पूर्व छात्र (Alumni)
+                        पंजीकरण फॉर्म</h3>
+                    <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400">Firebase
+                        Protected</span>
+                </div>
+                <form onsubmit="handleAlumniSubmit(event)" class="space-y-3.5 text-xs sm:text-sm">
+                    <input id="inp-name" name="fullName" required placeholder="आपका पूरा नाम (Full Name) *"
+                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                    <div class="grid grid-cols-2 gap-3">
+                        <input id="inp-batch" name="batchYear" required placeholder="बैच वर्ष (e.g. 2020) *"
+                            class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                        <input id="inp-stream" name="stream" placeholder="संकाय (Science / Arts / Com / 10th)"
+                            class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                    </div>
+                    <input id="inp-role" name="achievement"
+                        placeholder="वर्तमान पद / उपलब्धि (Current Role / Achievement)"
+                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                    <input id="inp-contact" name="contact"
+                        placeholder="मोबाइल नंबर या ईमेल (केवल एडमिन सत्यापन हेतु — गोपनीय)"
+                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                    <div id="alumni-form-status" class="hidden"></div>
+                    <button type="submit"
+                        class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 font-extrabold shadow-lg shadow-orange-500/25 hover:opacity-95 transition-all"
+                        data-i18n="btn_submit_alumni">
+                        गौरव स्तंभ हेतु विवरण भेजें (Submit for Verification)
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="space-y-5">
+            <div class="flex items-center justify-between border-b border-amber-500/30 pb-3">
+                <div>
+                    <span
+                        class="text-xs font-mono uppercase tracking-widest text-emerald-600 dark:text-emerald-400 font-extrabold">Live
+                        Cloud Verified</span>
+                    <h3 class="font-hindi text-2xl font-extrabold t-heading mt-0.5" data-i18n="wall_heading">सत्यापित
+                        गौरव स्तंभ (Verified Alumni & Toppers Wall)</h3>
+                </div>
+                <span class="text-xs font-mono t-muted">Auto-synced with Firebase</span>
+            </div>
+
+            <div id="verified-alumni-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+        </div>
+    </section>
+
+    <!-- ============================================================================
+       SACRED FOOTER
+       ============================================================================ -->
+    <footer class="relative z-10 sacred-footer-surface mt-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-start">
+                <div class="space-y-2">
+                    <h4 class="font-hindi text-lg font-extrabold t-gold" data-i18n="school_name_main">
+                        राज्य संपोषित +2 उच्च विद्यालय, गोला
+                    </h4>
+                    <p class="text-xs t-body">
+                        S.S. +2 High School, Gola • District: Ramgarh, Jharkhand (829110)
+                    </p>
+                    <p class="text-xs font-mono font-bold t-muted">
+                        ESTD: 1940 | UDISE: 20240701206
+                    </p>
+                </div>
+
+                <div class="space-y-2 text-xs t-body">
+                    <span class="font-mono uppercase t-gold font-extrabold block">Quick Sacred Navigation</span>
+                    <div class="flex flex-wrap gap-3 pt-1 font-bold">
+                        <button onclick="switchView('home')" class="hover:text-amber-500 underline"
+                            data-i18n="nav_home">विद्या मंदिर</button>
+                        <button onclick="switchView('guru-stambh')" class="hover:text-amber-500 underline"
+                            data-i18n="nav_guru">गुरु स्तंभ (Faculty)</button>
+                        <button onclick="switchView('gaurav-stambh')" class="hover:text-amber-500 underline"
+                            data-i18n="nav_gaurav">गौरव स्तंभ (Alumni)</button>
+                    </div>
+                </div>
+
+                <div class="p-4 rounded-2xl sacred-inner-box space-y-1">
+                    <span class="text-[10px] font-mono uppercase tracking-widest t-gold font-extrabold block">
+                        Alma Mater Flagship Tribute
+                    </span>
+                    <p class="text-xs font-bold t-heading">
+                        Architected with reverence by: <span id="creator-name-slot"
+                            class="font-mono t-gold font-extrabold"></span>
+                    </p>
+                    <p id="creator-batch-slot" class="text-[11px] font-mono t-body"></p>
+                </div>
+            </div>
+
+            <div
+                class="pt-6 border-t border-amber-500/20 flex flex-col sm:flex-row items-center justify-between text-xs t-muted gap-2">
+                <span data-i18n="footer_copy">© 1940–2026 राज्य संपोषित +2 उच्च विद्यालय, गोला (रामगढ़, झारखंड)।
+                    सर्वाधिकार सुरक्षित।</span>
+                <span onclick="openSecretAdminModal()"
+                    class="font-hindi font-bold text-amber-700 dark:text-amber-400 cursor-pointer select-none"
+                    title="Admin Access">
+                    🔒 ॥ विद्यालय एक पावन मंदिर ॥
+                </span>
+            </div>
+        </div>
+    </footer>
+    <!-- ============================================================================
+       🔐 SECRET ADMIN COMMAND CENTER MODAL (HIDDEN FROM PUBLIC)
+       Opens via clicking Footer "॥ विद्यालय एक पावन मंदिर ॥" or pressing Ctrl+Shift+A
+       ============================================================================ -->
+    <div id="secret-admin-modal"
+        class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+        <div
+            class="sacred-card temple-shikhar-border rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto border-2 border-amber-500/50">
+
+            <!-- Modal Header -->
+            <div class="flex items-center justify-between border-b border-amber-500/30 pb-4">
+                <div class="flex items-center gap-2.5">
+                    <div
+                        class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500">
+                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <span
+                            class="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-extrabold block">Zero-Trust
+                            Firebase Auth</span>
+                        <h3 class="font-hindi text-xl font-extrabold theme-heading">सीक्रेट एडमिन कंट्रोल पैनल (S.S. +2
+                            High School, Gola)</h3>
+                    </div>
+                </div>
+                <button onclick="closeSecretAdminModal()"
+                    class="p-2 rounded-xl border border-amber-500/30 hover:bg-red-500/20 text-red-400 font-mono text-xs font-bold">
+                    ✕ Close
+                </button>
+            </div>
+
+            <!-- STATE 1: ADMIN LOGIN FORM (Shown when not logged in) -->
+            <div id="admin-login-view" class="space-y-4">
+                <p class="text-xs theme-subtext">
+                    यह पैनल केवल विद्यालय के अधिकृत डेवलपर/एडमिन के लिए है। अपने Firebase Authentication ईमेल और पासवर्ड
+                    से लॉगिन करें:
+                </p>
+                <form onsubmit="handleAdminLogin(event)" class="space-y-3.5 text-xs sm:text-sm">
+                    <input name="email" type="email" required placeholder="Admin Email (e.g. admin@golaschool.com)"
+                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                    <input name="password" type="password" required placeholder="Secret Admin Password"
+                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+                    <div id="admin-login-error"
+                        class="hidden p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-bold">
+                    </div>
+                    <button type="submit"
+                        class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 font-extrabold shadow-lg">
+                        🔐 अनलॉक एडमिन कमांड सेंटर (Login)
+                    </button>
+                </form>
+            </div>
+
+            <!-- STATE 2: LOGGED-IN ADMIN DASHBOARD (Notice Publisher + 1-Click Alumni Approver) -->
+            <div id="admin-dashboard-view" class="hidden space-y-8">
+                <div
+                    class="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-xs">
+                    <span class="font-mono font-bold text-emerald-400">✅ Logged in as: <strong
+                            id="admin-email-label"></strong></span>
+                    <button onclick="handleAdminLogout()"
+                        class="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 font-mono font-bold">
+                        Logout
+                    </button>
+                </div>
+
+                <!-- MODULE A: PUBLISH NEW LIVE NOTICE -->
+                <div class="space-y-3">
+                    <h4 class="font-hindi text-lg font-extrabold text-amber-500 flex items-center gap-2">
+                        <i data-lucide="megaphone" class="w-5 h-5"></i>
+                        <span>1. नया लाइव नोटिस प्रकाशित करें (Publish Instant Notice)</span>
+                    </h4>
+                    <form onsubmit="handlePublishNotice(event)" class="space-y-3 text-xs">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <input name="date" placeholder="तारीख (e.g. 18 Oct 2026)"
+                                class="sacred-input px-3.5 py-2.5 rounded-xl" />
+                            <input name="tagHi" placeholder="हिंदी टैग (e.g. अति महत्वपूर्ण)"
+                                class="sacred-input px-3.5 py-2.5 rounded-xl" />
+                            <input name="tagEn" placeholder="English Tag (e.g. URGENT)"
+                                class="sacred-input px-3.5 py-2.5 rounded-xl" />
+                        </div>
+                        <input name="titleHi" required placeholder="नोटिस का हिंदी शीर्षक (Hindi Title) *"
+                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl" />
+                        <input name="titleEn" placeholder="English Title (Optional - खाली छोड़ने पर हिंदी ही दिखेगा)"
+                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl" />
+                        <textarea name="descHi" required rows="2"
+                            placeholder="नोटिस का पूरा विवरण हिंदी में (Hindi Description) *"
+                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
+                        <textarea name="descEn" rows="2" placeholder="English Description (Optional)"
+                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
+                        <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+                            <input type="checkbox" name="isNew" checked class="accent-amber-500 w-4 h-4" />
+                            <span>Highlight as New/Urgent Notice (नारंगी बॉर्डर के साथ चमकाएं)</span>
+                        </label>
+                        <button type="submit"
+                            class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold">
+                            🚀 लाइव नोटिस बोर्ड पर पब्लिश करें
+                        </button>
+                    </form>
+
+                    <!-- Existing Cloud Notices List with 1-Click Delete -->
+                    <div class="pt-3 space-y-2">
+                        <span class="text-[11px] font-mono uppercase text-amber-400 font-bold block">Manage Live Cloud
+                            Notices:</span>
+                        <div id="admin-notices-list" class="space-y-2 max-h-44 overflow-y-auto"></div>
+                    </div>
+                </div>
+
+                <!-- MODULE B: 1-CLICK ALUMNI VERIFICATION & APPROVAL -->
+                <div class="space-y-3 border-t border-amber-500/30 pt-6">
+                    <h4 class="font-hindi text-lg font-extrabold text-emerald-400 flex items-center gap-2">
+                        <i data-lucide="user-check" class="w-5 h-5"></i>
+                        <span>2. पूर्व छात्र (Alumni) सत्यापन कतार (1-Click Approve / Delete)</span>
+                    </h4>
+                    <div id="admin-alumni-list" class="space-y-2.5 max-h-60 overflow-y-auto"></div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script src="./config.js"></script>
+    <script type="module" src="./firebase-backend.js"></script>
+    <script src="./app.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,512 @@
+/* ============================================================================
+   FILE 1: styles.css — FINAL PRO TEMPLE THEME ENGINE (100% CONTRAST GUARANTEED)
+   ============================================================================ */
+
+/* DAYLIGHT MODE: Warm Sandstone & Deep Espresso/Maroon Text (Crystal Clear) */
+html[data-theme="light"] {
+  --bg-page: #FDF6E9;
+  --bg-header: rgba(253, 246, 233, 0.92);
+  --bg-secondary: #F5E6CC;
+  --bg-card: #FFFDF9;
+  --bg-card-inner: #FAF0DC;
+  --text-main: #1C0D06;        /* Pitch Dark Espresso - 100% Readable */
+  --text-body: #3D2314;        /* Rich Dark Temple Brown */
+  --text-muted: #6E472B;       /* Warm Bronze Muted */
+  --gold-primary: #B45309;     /* Deep Temple Copper-Gold */
+  --saffron-primary: #C2410C;  /* Sacred Sindoor */
+  --border-card: rgba(180, 83, 9, 0.32);
+  --border-hover: rgba(194, 65, 12, 0.75);
+  --card-shadow: 0 12px 32px -8px rgba(120, 53, 15, 0.15);
+  --shloka-box: linear-gradient(135deg, #FFF3D1 0%, #FDE2B8 100%);
+  --input-bg: #FFFFFF;
+}
+
+/* NIGHT MODE: Deep Obsidian Garbhagriha & 24K Radiant Gold/Ivory Text */
+html[data-theme="dark"] {
+  --bg-page: #060811;          /* Deep Temple Sanctum Obsidian */
+  --bg-header: rgba(6, 8, 17, 0.90);
+  --bg-secondary: #0C1021;
+  --bg-card: #11162B;          /* Rich Royal Midnight Card */
+  --bg-card-inner: rgba(255, 255, 255, 0.05);
+  --text-main: #FFFDF7;        /* Pure Sacred Ivory White */
+  --text-body: #E2E8F0;        /* Crisp Silver White */
+  --text-muted: #94A3B8;       /* Soft Slate */
+  --gold-primary: #FBBF24;     /* 24K Suvarna Gold */
+  --saffron-primary: #FB923C;  /* Glowing Agni Saffron */
+  --border-card: rgba(251, 191, 36, 0.28);
+  --border-hover: rgba(251, 191, 36, 0.80);
+  --card-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.85), 0 0 25px -5px rgba(245, 158, 11, 0.18);
+  --shloka-box: linear-gradient(135deg, rgba(69, 39, 10, 0.75) 0%, rgba(17, 22, 43, 0.95) 100%);
+  --input-bg: #0A0D1A;
+}
+
+/* Strict Global Background & Text Enforcement */
+html, body {
+  background-color: var(--bg-page) !important;
+  color: var(--text-main) !important;
+  transition: background-color 0.4s ease, color 0.3s ease;
+  overflow-x: hidden;
+}
+
+.sacred-bg-mesh {
+  background-color: var(--bg-page) !important;
+  background-image: 
+    radial-gradient(circle at 12% 8%, rgba(245, 158, 11, 0.16) 0%, transparent 35%),
+    radial-gradient(circle at 88% 12%, rgba(234, 88, 12, 0.14) 0%, transparent 35%),
+    radial-gradient(circle at 50% 50%, rgba(217, 119, 6, 0.08) 0%, transparent 55%),
+    radial-gradient(circle at 50% 95%, rgba(234, 88, 12, 0.14) 0%, transparent 40%) !important;
+}
+
+/* Universal Typography Classes (Guaranteed Readability in Both Modes) */
+.t-heading { color: var(--text-main) !important; }
+.t-body    { color: var(--text-body) !important; }
+.t-muted   { color: var(--text-muted) !important; }
+.t-gold    { color: var(--gold-primary) !important; }
+.t-saffron { color: var(--saffron-primary) !important; }
+
+/* Sticky Header & Footer Surface */
+.sacred-header-surface {
+  background-color: var(--bg-header) !important;
+  border-bottom: 1px solid var(--border-card) !important;
+  backdrop-filter: blur(16px);
+}
+
+.sacred-footer-surface {
+  background-color: var(--bg-secondary) !important;
+  border-top: 1px solid var(--border-card) !important;
+}
+
+/* Sacred Card with 3D Hover & Mouse Diya Spotlight */
+.sacred-card {
+  position: relative;
+  background-color: var(--bg-card) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-card) !important;
+  box-shadow: var(--card-shadow) !important;
+  transition: transform 0.25s ease-out, border-color 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;
+  overflow: hidden;
+}
+
+.sacred-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+    400px circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(245, 158, 11, 0.15),
+    transparent 45%
+  );
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.sacred-card:hover::after {
+  opacity: 1;
+}
+
+.sacred-card > * {
+  position: relative;
+  z-index: 1;
+}
+
+.sacred-card:hover {
+  border-color: var(--border-hover) !important;
+}
+
+.sacred-inner-box {
+  background-color: var(--bg-card-inner) !important;
+  border: 1px solid var(--border-card) !important;
+}
+
+.shloka-plaque {
+  background: var(--shloka-box) !important;
+  border: 2px solid var(--border-hover) !important;
+}
+
+.sacred-input {
+  background-color: var(--input-bg) !important;
+  color: var(--text-main) !important;
+  border: 1px solid var(--border-card) !important;
+}
+.sacred-input:focus {
+  border-color: var(--border-hover) !important;
+}
+.sacred-input::placeholder {
+  color: var(--text-muted) !important;
+}
+
+/* Temple Shikhar Crown Top Glow */
+.temple-shikhar-border::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 5%;
+  right: 5%;
+  height: 5px;
+  background: linear-gradient(90deg, transparent, #F59E0B, #EA580C, #FDE047, #EA580C, #F59E0B, transparent);
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 2px 20px rgba(245, 158, 11, 0.75);
+  z-index: 5;
+}
+
+/* Shimmering Gold Highlight Text */
+.suvarna-text {
+  background: linear-gradient(90deg, #D97706 0%, #EA580C 35%, #B45309 70%, #D97706 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: goldShine 4s linear infinite;
+}
+
+html[data-theme="dark"] .suvarna-text {
+  background: linear-gradient(90deg, #FDE68A 0%, #F59E0B 30%, #FFFFFF 50%, #FB923C 75%, #FDE68A 100%);
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+@keyframes goldShine {
+  to { background-position: 200% center; }
+}
+
+/* Live Animations */
+@keyframes spinSlowCW { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes spinSlowCCW { from { transform: rotate(360deg); } to { transform: rotate(0deg); } }
+.chakra-spin { animation: spinSlowCW 50s linear infinite; }
+.chakra-spin-reverse { animation: spinSlowCCW 35s linear infinite; }
+
+@keyframes bellSwing {
+  0%, 100% { transform: rotate(-10deg); }
+  50% { transform: rotate(10deg); }
+}
+@keyframes bellRingActive {
+  0% { transform: rotate(0deg) scale(1.1); }
+  20% { transform: rotate(24deg) scale(1.15); }
+  40% { transform: rotate(-20deg) scale(1.15); }
+  60% { transform: rotate(14deg) scale(1.1); }
+  80% { transform: rotate(-10deg); }
+  100% { transform: rotate(0deg) scale(1); }
+}
+.temple-bell {
+  transform-origin: top center;
+  animation: bellSwing 3.2s ease-in-out infinite;
+  cursor: pointer;
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); filter: drop-shadow(0 0 8px #F59E0B); }
+  50% { transform: scale(1.15); filter: drop-shadow(0 0 18px #EA580C); }
+}
+.sacred-pulse { animation: pulseGlow 2.2s ease-in-out infinite; }
+
+@keyframes floatSacred {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-7px); }
+}
+.kalash-float { animation: floatSacred 3.6s ease-in-out infinite; }
+
+.devanagari-leading { line-height: 1.78; }
+
+/* Polished, layered surfaces */
+html {
+  scroll-padding-top: 6rem;
+  scrollbar-color: rgba(245, 158, 11, 0.55) var(--bg-secondary);
+}
+
+body {
+  background-attachment: fixed !important;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sacred-bg-mesh {
+  background-image:
+    radial-gradient(ellipse at 50% -15%, rgba(251, 191, 36, 0.14), transparent 48%),
+    radial-gradient(ellipse at 0% 45%, rgba(234, 88, 12, 0.08), transparent 34%),
+    radial-gradient(ellipse at 100% 72%, rgba(245, 158, 11, 0.08), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.012), transparent 24%, rgba(0, 0, 0, 0.08)) !important;
+}
+
+html[data-theme="light"] .sacred-bg-mesh {
+  background-image:
+    radial-gradient(ellipse at 50% -15%, rgba(217, 119, 6, 0.12), transparent 48%),
+    radial-gradient(ellipse at 0% 45%, rgba(234, 88, 12, 0.06), transparent 34%),
+    radial-gradient(ellipse at 100% 72%, rgba(245, 158, 11, 0.07), transparent 32%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.35), transparent 30%, rgba(120, 53, 15, 0.025)) !important;
+}
+
+.sacred-header-surface {
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.22), inset 0 1px rgba(255, 255, 255, 0.07);
+}
+
+.sacred-card {
+  min-width: 0;
+  border-radius: 1.25rem;
+  background-image:
+    linear-gradient(145deg, rgba(255, 255, 255, 0.055), transparent 42%),
+    linear-gradient(315deg, rgba(245, 158, 11, 0.035), transparent 52%);
+  box-shadow:
+    var(--card-shadow),
+    inset 0 1px rgba(255, 255, 255, 0.075),
+    inset 0 -1px rgba(0, 0, 0, 0.12) !important;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.sacred-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(255, 236, 179, 0.34), transparent);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.sacred-inner-box {
+  box-shadow:
+    inset 0 1px rgba(255, 255, 255, 0.06),
+    0 8px 24px rgba(0, 0, 0, 0.09);
+}
+
+.shloka-plaque {
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.14),
+    inset 0 1px rgba(255, 255, 255, 0.3) !important;
+}
+
+.temple-shikhar-border {
+  isolation: isolate;
+}
+
+.temple-shikhar-border::before {
+  height: 3px;
+  filter: drop-shadow(0 0 8px rgba(245, 158, 11, 0.6));
+}
+
+button {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:focus-visible,
+[onclick]:focus-visible,
+input:focus-visible {
+  outline: 3px solid var(--gold-primary);
+  outline-offset: 3px;
+}
+
+.sacred-input {
+  min-width: 0;
+  max-width: 100%;
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .sacred-card {
+    transition:
+      transform 280ms cubic-bezier(0.2, 0.75, 0.25, 1),
+      border-color 280ms ease,
+      box-shadow 280ms ease,
+      background-color 280ms ease;
+  }
+
+  .sacred-card:hover {
+    transform: translateY(-4px) perspective(900px) rotateX(0.35deg);
+    box-shadow:
+      var(--card-shadow),
+      0 18px 34px rgba(0, 0, 0, 0.16),
+      inset 0 1px rgba(255, 255, 255, 0.12) !important;
+  }
+
+  header button,
+  main button,
+  section button,
+  footer button {
+    transition: transform 180ms ease, box-shadow 180ms ease, filter 180ms ease;
+  }
+
+  header button:hover,
+  main button:hover,
+  section button:hover,
+  footer button:hover {
+    filter: brightness(1.07);
+  }
+}
+
+@media (max-width: 767px) {
+  main#view-home {
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+    gap: 3.5rem;
+  }
+
+  #view-guru-stambh,
+  #view-gaurav-stambh {
+    padding-top: 1.5rem;
+    padding-bottom: 2.5rem;
+  }
+
+  .temple-shikhar-border.rounded-3xl {
+    border-radius: 1.4rem;
+  }
+}
+
+@media (min-width: 640px) {
+  header > .max-w-7xl {
+    height: auto;
+    min-height: 5rem;
+    padding-top: 0.4rem;
+    padding-bottom: 0.4rem;
+  }
+
+  header [data-i18n="header_badge"] {
+    font-size: 9px;
+    letter-spacing: 0.06em;
+    white-space: nowrap;
+  }
+}
+
+@media (min-width: 640px) and (max-width: 1279px) {
+  header > .max-w-7xl {
+    flex-wrap: wrap;
+    row-gap: 0.65rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+  }
+
+  header > .max-w-7xl > .flex:first-child,
+  header > .max-w-7xl > .flex:nth-child(2) {
+    flex: 1 1 100%;
+  }
+
+  header > .max-w-7xl > .flex:nth-child(2) {
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 639px) {
+  header > .max-w-7xl {
+    height: auto;
+    min-height: 5rem;
+    padding-top: 0.7rem;
+    padding-bottom: 0.7rem;
+    flex-wrap: wrap;
+    row-gap: 0.7rem;
+  }
+
+  header > .max-w-7xl > .flex:first-child {
+    flex: 1 1 100%;
+    min-width: 0;
+  }
+
+  header > .max-w-7xl > .flex:first-child > button {
+    min-width: 0;
+    gap: 0.65rem;
+  }
+
+  header > .max-w-7xl > .flex:first-child > button > div:last-child {
+    min-width: 0;
+  }
+
+  header [data-i18n="header_badge"] {
+    display: inline-block;
+    max-width: 100%;
+    line-height: 1.45;
+    white-space: normal;
+  }
+
+  header h1 {
+    font-size: clamp(0.82rem, 4vw, 1rem);
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  header > .max-w-7xl > .flex:nth-child(2) {
+    display: grid;
+    flex: 1 1 100%;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+  }
+
+  #nav-btn-home,
+  #nav-btn-gaurav {
+    justify-content: center;
+    min-width: 0;
+    padding-inline: 0.5rem;
+  }
+
+  #nav-btn-guru {
+    grid-column: span 2;
+    justify-content: center;
+    min-width: 0;
+    padding-inline: 0.5rem;
+    text-align: center;
+  }
+
+  #lang-toggle-btn,
+  #theme-toggle-btn {
+    grid-column: span 1;
+    justify-content: center;
+    min-width: 0;
+    padding-inline: 0.4rem;
+    white-space: nowrap;
+  }
+
+  #lang-toggle-btn span {
+    white-space: nowrap;
+  }
+
+  #lang-toggle-btn {
+    font-size: 0.625rem;
+  }
+
+  main#view-home > section:first-child {
+    padding: 1.25rem;
+  }
+
+  .shloka-plaque {
+    padding: 1rem;
+  }
+
+  .shloka-plaque > div {
+    align-items: flex-start;
+    line-height: 1.7;
+  }
+
+  footer .pt-6.border-t {
+    align-items: flex-start;
+    text-align: center;
+  }
+}
+
+@media (max-width: 359px) {
+  header > .max-w-7xl {
+    padding-inline: 0.75rem;
+  }
+
+  #nav-btn-guru {
+    font-size: 0.68rem;
+  }
+
+  main#view-home > section:first-child {
+    padding: 1rem;
+  }
+
+  .sacred-card.rounded-2xl,
+  .sacred-card.rounded-3xl {
+    border-radius: 1rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
