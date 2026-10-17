@@ -82,8 +82,8 @@ window.SCHOOL_MASTER_CONFIG = {
 
     // 6. [EDIT_HERE_CREATOR_CREDIT] -> Sab hone ke baad apna naam yahan dalein
     creatorCredit: {
-        name: "[YOUR_NAME_HERE]",
-        batchYear: "[YOUR_BATCH_YEAR]",
+        name: "PIYUSH PODDAR",
+        batchYear: "batch-2025 SCIENCE",
         roleHi: "पूर्व छात्र एवं प्रमुख आर्किटेक्ट (Alma Mater Tribute)",
         roleEn: "Proud Alumnus & Principal Full-Stack Architect"
     }
