@@ -627,152 +627,302 @@ window.addEventListener('backend-ready', syncWithBackend);
 // 🔐 SECRET ADMIN COMMAND CENTER CONTROLLER (APPEND TO END OF app.js)
 // ============================================================================
 
-window.openSecretAdminModal = function () {
-    const modal = document.getElementById('secret-admin-modal');
-    if (modal) modal.classList.remove('hidden');
-    refreshAdminModalUI();
+// ============================================================================
+// 🏛️ GURU STAMBH LIVE RENDERER + SECRET ADMIN COMMAND CENTER (FINAL BLOCK)
+// ============================================================================
+
+let cachedApprovedFaculty = [];
+let currentFacultyWingFilter = 'all';
+
+// Render Approved Teachers on Guru Stambh Page
+function renderVerifiedFacultyWall() {
+  const grid = document.getElementById('verified-faculty-grid');
+  if (!grid) return;
+
+  const filtered = currentFacultyWingFilter === 'all'
+    ? cachedApprovedFaculty
+    : cachedApprovedFaculty.filter(f => f.wing === currentFacultyWingFilter);
+
+  // Principal Permanent Leadership Card + Approved Teachers
+  const principalCard = (currentFacultyWingFilter === 'all' || currentFacultyWingFilter === '11-12') ? `
+    <div class="sacred-card temple-shikhar-border rounded-3xl p-6 space-y-5 border-2 border-amber-500/50">
+      <div class="flex items-center justify-between gap-2">
+        <span class="px-3 py-1 rounded-full text-[11px] font-mono font-extrabold bg-amber-500 text-stone-950">
+          HEAD OF INSTITUTION
+        </span>
+        <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+          <i data-lucide="shield-check" class="w-4 h-4"></i> Verified Leadership
+        </span>
+      </div>
+      <div class="flex items-center gap-4">
+        <img src="https://api.dicebear.com/7.x/initials/svg?seed=Anupa+Pushpa+Tirkey&backgroundColor=b45309" alt="Principal" class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500 shadow-lg shrink-0" />
+        <div class="space-y-1">
+          <h3 class="font-hindi text-xl font-extrabold theme-heading">${currentLang === 'hi' ? 'श्रीमती अनुपा पुष्पा तिर्की' : 'Smt. Anupa Pushpa Tirkey'}</h3>
+          <p class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">${currentLang === 'hi' ? 'प्रधानाचार्य (Principal)' : 'Principal'}</p>
+          <p class="text-xs theme-subtext font-semibold">S.S. +2 High School, Gola</p>
+        </div>
+      </div>
+      <div class="p-4 rounded-2xl border border-amber-500/35 bg-[var(--shloka-bg)] space-y-1">
+        <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 dark:text-amber-300 font-extrabold block">
+          💬 ${currentLang === 'hi' ? 'विद्यार्थियों के नाम संदेश:' : 'Message for Students:'}
+        </span>
+        <p class="font-hindi text-xs sm:text-sm italic theme-heading devanagari-leading">
+          "${currentLang === 'hi' ? 'हमारा विद्यालय केवल ईंट और पत्थर का भवन नहीं, बल्कि ज्ञान और संस्कार का पावन मंदिर है।' : 'Our school is not merely a building of bricks and mortar, but a sacred temple of knowledge and character.'}"
+        </p>
+      </div>
+    </div>
+  ` : '';
+
+  const teacherCards = filtered.map(f => {
+    const wingLabelMap = {
+      '1-5': 'CLASS 1–5 (प्राथमिक)',
+      '6-8': 'CLASS 6–8 (उच्च प्राथमिक)',
+      '9-10': 'CLASS 9–10 (माध्यमिक)',
+      '11-12': `CLASS 11–12 (+2) • ${escapeHTML((f.stream || '').split(' ')[0])}`
+    };
+    const badgeText = wingLabelMap[f.wing] || `CLASS ${escapeHTML(f.wing)}`;
+
+    return `
+      <div class="sacred-card temple-shikhar-border rounded-3xl p-6 space-y-5 border-2 border-amber-500/40 flex flex-col justify-between">
+        <div class="space-y-4">
+          <div class="flex items-center justify-between gap-2">
+            <span class="px-3 py-1 rounded-full text-[11px] font-mono font-extrabold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40">
+              ${badgeText}
+            </span>
+            <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <i data-lucide="badge-check" class="w-4 h-4"></i> गुरु स्तंभ
+            </span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <img src="${f.photoDataUrl || 'https://api.dicebear.com/7.x/initials/svg?seed=Guru&backgroundColor=b45309'}" alt="${escapeHTML(f.fullName)}" class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500 shadow-lg shrink-0" />
+            <div class="space-y-1">
+              <h3 class="font-hindi text-xl font-extrabold theme-heading">${escapeHTML(f.fullName)}</h3>
+              <p class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">${escapeHTML(f.designation)}</p>
+              <p class="text-xs theme-subtext font-semibold">${escapeHTML(f.qualification)}</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs">
+            <div>
+              <span class="text-[10px] font-mono theme-muted block">मुख्य विषय (Subject)</span>
+              <strong class="theme-heading">${escapeHTML(f.subject)}</strong>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono theme-muted block">सेवा अनुभव (Experience)</span>
+              <strong class="theme-heading">${escapeHTML(f.experience || 'गौरवशाली सेवा')}</strong>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-4 rounded-2xl border border-amber-500/35 bg-[var(--shloka-bg)] space-y-1">
+          <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 dark:text-amber-300 font-extrabold block">
+            💬 ${currentLang === 'hi' ? 'विद्यार्थियों के नाम संदेश:' : 'Message for Students:'}
+          </span>
+          <p class="font-hindi text-xs sm:text-sm italic theme-heading devanagari-leading">
+            "${escapeHTML(f.thoughtForStudents)}"
+          </p>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  grid.innerHTML = principalCard + teacherCards;
+  if (window.lucide) lucide.createIcons();
+  init3DTiltCards();
+}
+
+window.filterFacultyByWing = function(wing) {
+  currentFacultyWingFilter = wing;
+  document.querySelectorAll('.faculty-filter-btn').forEach(btn => {
+    const isActive = btn.getAttribute('data-faculty-filter') === wing;
+    btn.className = isActive
+      ? 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-extrabold bg-amber-500 text-stone-950 transition-all'
+      : 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all';
+  });
+  renderVerifiedFacultyWall();
 };
 
-window.closeSecretAdminModal = function () {
-    const modal = document.getElementById('secret-admin-modal');
-    if (modal) modal.classList.add('hidden');
+// Hook into Backend Sync so Faculty loads automatically
+const originalSyncWithBackend = syncWithBackend;
+syncWithBackend = async function() {
+  await originalSyncWithBackend();
+  if (window.BackendService && window.BackendService.fetchApprovedFaculty) {
+    cachedApprovedFaculty = await window.BackendService.fetchApprovedFaculty();
+    renderVerifiedFacultyWall();
+  }
 };
 
-// Keyboard Shortcut: Ctrl + Shift + A opens Secret Admin Modal
+// Secret Admin Modal Controls
+window.openSecretAdminModal = function() {
+  const modal = document.getElementById('secret-admin-modal');
+  if (modal) modal.classList.remove('hidden');
+  refreshAdminModalUI();
+};
+
+window.closeSecretAdminModal = function() {
+  const modal = document.getElementById('secret-admin-modal');
+  if (modal) modal.classList.add('hidden');
+};
+
 document.addEventListener('keydown', (e) => {
-    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-        e.preventDefault();
-        window.openSecretAdminModal();
-    }
+  if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+    e.preventDefault();
+    window.openSecretAdminModal();
+  }
 });
 
 async function refreshAdminModalUI() {
-    if (!window.BackendService) return;
-    const user = window.BackendService.getAdminUser();
-    const loginView = document.getElementById('admin-login-view');
-    const dashView = document.getElementById('admin-dashboard-view');
-    const emailLbl = document.getElementById('admin-email-label');
+  if (!window.BackendService) return;
+  const user = window.BackendService.getAdminUser();
+  const loginView = document.getElementById('admin-login-view');
+  const dashView  = document.getElementById('admin-dashboard-view');
+  const emailLbl  = document.getElementById('admin-email-label');
 
-    if (!user) {
-        loginView.classList.remove('hidden');
-        dashView.classList.add('hidden');
-        return;
-    }
+  if (!user) {
+    loginView.classList.remove('hidden');
+    dashView.classList.add('hidden');
+    return;
+  }
 
-    loginView.classList.add('hidden');
-    dashView.classList.remove('hidden');
-    if (emailLbl) emailLbl.textContent = user.email;
+  loginView.classList.add('hidden');
+  dashView.classList.remove('hidden');
+  if (emailLbl) emailLbl.textContent = user.email;
 
-    // 1. Render Cloud Notices for Admin Delete
-    const noticesListEl = document.getElementById('admin-notices-list');
-    const notices = await window.BackendService.fetchNotices();
-    noticesListEl.innerHTML = notices.map(n => `
+  // 1. Notices List
+  const noticesListEl = document.getElementById('admin-notices-list');
+  const notices = await window.BackendService.fetchNotices();
+  noticesListEl.innerHTML = notices.map(n => `
     <div class="p-3 rounded-xl bg-black/30 border border-amber-500/30 flex items-center justify-between gap-2 text-xs">
-      <div>
-        <strong class="text-amber-300">[${escapeHTML(n.date)}]</strong> ${escapeHTML(n.titleHi)}
-      </div>
-      <button onclick="handleDeleteNotice('${escapeHTML(n.id)}')" class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono text-[11px] font-bold shrink-0">
-        Delete
-      </button>
+      <div><strong class="text-amber-300">[${escapeHTML(n.date)}]</strong> ${escapeHTML(n.titleHi)}</div>
+      <button onclick="handleDeleteNotice('${escapeHTML(n.id)}')" class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono text-[11px] font-bold shrink-0">Delete</button>
     </div>
   `).join('');
 
-    // 2. Render Pending & Approved Alumni for 1-Click Approval
-    const alumniListEl = document.getElementById('admin-alumni-list');
-    const allAlumni = await window.BackendService.fetchAllAlumniForAdmin();
-    if (allAlumni.length === 0) {
-        alumniListEl.innerHTML = `<p class="text-xs theme-muted">कोई पूर्व छात्र आवेदन अभी कतार में नहीं है।</p>`;
-    } else {
-        alumniListEl.innerHTML = allAlumni.map(a => `
+  // 2. Alumni List
+  const alumniListEl = document.getElementById('admin-alumni-list');
+  const allAlumni = await window.BackendService.fetchAllAlumniForAdmin();
+  alumniListEl.innerHTML = allAlumni.length === 0
+    ? `<p class="text-xs theme-muted">कोई पूर्व छात्र आवेदन अभी कतार में नहीं है।</p>`
+    : allAlumni.map(a => `
       <div class="p-3.5 rounded-xl bg-black/30 border ${a.status === 'approved' ? 'border-emerald-500/40' : 'border-amber-500/50'} flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="space-y-0.5">
-          <div class="font-bold text-sm text-white">
-            ${escapeHTML(a.fullName)} <span class="text-amber-400 font-mono text-xs">(Batch: ${escapeHTML(a.batchYear)} • ${escapeHTML(a.stream || 'N/A')})</span>
-          </div>
+          <div class="font-bold text-sm text-white">${escapeHTML(a.fullName)} <span class="text-amber-400 font-mono text-xs">(Batch: ${escapeHTML(a.batchYear)})</span></div>
           <div class="text-slate-300">${escapeHTML(a.achievement || '')}</div>
-          <div class="font-mono text-[11px] text-amber-300">📞 Contact: ${escapeHTML(a.contact || 'Not provided')} • Status: <strong>${escapeHTML(a.status)}</strong></div>
+          <div class="font-mono text-[11px] text-amber-300">📞 ${escapeHTML(a.contact || 'N/A')} • Status: <strong>${escapeHTML(a.status)}</strong></div>
         </div>
         <div class="flex items-center gap-2">
-          ${a.status !== 'approved' ? `
-            <button onclick="handleApproveAlumni('${escapeHTML(a.id)}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-mono font-extrabold">
-              ✓ Approve
-            </button>
-          ` : `<span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Approved</span>`}
-          <button onclick="handleDeleteAlumni('${escapeHTML(a.id)}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono font-bold">
-            Delete
-          </button>
+          ${a.status !== 'approved' ? `<button onclick="handleApproveAlumni('${escapeHTML(a.id)}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-mono font-extrabold">✓ Approve</button>` : `<span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Approved</span>`}
+          <button onclick="handleDeleteAlumni('${escapeHTML(a.id)}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono font-bold">Delete</button>
         </div>
       </div>
     `).join('');
-    }
-    if (window.lucide) lucide.createIcons();
+
+  // 3. Faculty (Guru Stambh) List
+  const facultyListEl = document.getElementById('admin-faculty-list');
+  if (facultyListEl && window.BackendService.fetchAllFacultyForAdmin) {
+    const allFaculty = await window.BackendService.fetchAllFacultyForAdmin();
+    facultyListEl.innerHTML = allFaculty.length === 0
+      ? `<p class="text-xs theme-muted">कोई शिक्षक प्रोफाइल अभी कतार में नहीं है।</p>`
+      : allFaculty.map(f => `
+        <div class="p-3.5 rounded-xl bg-black/30 border ${f.status === 'approved' ? 'border-emerald-500/40' : 'border-amber-500/50'} flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <img src="${f.photoDataUrl || 'https://api.dicebear.com/7.x/initials/svg?seed=Guru'}" class="w-12 h-12 rounded-xl object-cover border border-amber-500 shrink-0" />
+            <div class="space-y-0.5">
+              <div class="font-bold text-sm text-white">${escapeHTML(f.fullName)} <span class="text-amber-400 font-mono text-xs">(Class ${escapeHTML(f.wing)} • ${escapeHTML(f.subject)})</span></div>
+              <div class="text-slate-300">${escapeHTML(f.designation)} | ${escapeHTML(f.qualification)} | ${escapeHTML(f.experience)}</div>
+              <div class="font-mono text-[11px] text-amber-300">📞 ${escapeHTML(f.contact)} • Status: <strong>${escapeHTML(f.status)}</strong></div>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            ${f.status !== 'approved' ? `<button onclick="handleApproveFaculty('${escapeHTML(f.id)}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-mono font-extrabold">✓ Approve</button>` : `<span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Approved</span>`}
+            <button onclick="handleDeleteFaculty('${escapeHTML(f.id)}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono font-bold">Delete</button>
+          </div>
+        </div>
+      `).join('');
+  }
+
+  if (window.lucide) lucide.createIcons();
 }
 
 window.addEventListener('admin-auth-changed', refreshAdminModalUI);
 
-window.handleAdminLogin = async function (e) {
-    e.preventDefault();
-    const errBox = document.getElementById('admin-login-error');
-    errBox.classList.add('hidden');
-    const form = e.target;
-    try {
-        await window.BackendService.loginAdmin(form.email.value, form.password.value);
-        form.reset();
-        await refreshAdminModalUI();
-    } catch (err) {
-        errBox.textContent = "⚠️ लॉगिन विफल: ईमेल या पासवर्ड गलत है (" + err.message + ")";
-        errBox.classList.remove('hidden');
-    }
-};
-
-window.handleAdminLogout = async function () {
-    await window.BackendService.logoutAdmin();
+window.handleAdminLogin = async function(e) {
+  e.preventDefault();
+  const errBox = document.getElementById('admin-login-error');
+  errBox.classList.add('hidden');
+  const form = e.target;
+  try {
+    await window.BackendService.loginAdmin(form.email.value, form.password.value);
+    form.reset();
     await refreshAdminModalUI();
+  } catch (err) {
+    errBox.textContent = "⚠️ लॉगिन विफल: " + err.message;
+    errBox.classList.remove('hidden');
+  }
 };
 
-window.handlePublishNotice = async function (e) {
-    e.preventDefault();
-    const form = e.target;
-    try {
-        await window.BackendService.publishNotice({
-            date: form.date.value,
-            tagHi: form.tagHi.value,
-            tagEn: form.tagEn.value,
-            titleHi: form.titleHi.value,
-            titleEn: form.titleEn.value,
-            descHi: form.descHi.value,
-            descEn: form.descEn.value,
-            isNew: form.isNew.checked
-        });
-        form.reset();
-        await syncWithBackend();
-        await refreshAdminModalUI();
-        alert("✅ नया नोटिस सफलतापूर्वक लाइव प्रकाशित हो गया!");
-    } catch (err) {
-        alert("⚠️ त्रुटि: " + err.message);
-    }
+window.handleAdminLogout = async function() {
+  await window.BackendService.logoutAdmin();
+  await refreshAdminModalUI();
 };
 
-window.handleDeleteNotice = async function (id) {
-    if (!confirm("क्या आप वाकई इस नोटिस को हटाना चाहते हैं?")) return;
-    try {
-        await window.BackendService.deleteNotice(id);
-        await syncWithBackend();
-        await refreshAdminModalUI();
-    } catch (err) {
-        alert("यह डिफ़ॉल्ट नोटिस है। जब आप कम से कम 1 क्लाउड नोटिस जोड़ देंगे तो क्लाउड नोटिस यहाँ से डिलीट हो सकेंगे।");
-    }
-};
-
-window.handleApproveAlumni = async function (docId) {
-    await window.BackendService.approveAlumni(docId);
+window.handlePublishNotice = async function(e) {
+  e.preventDefault();
+  const form = e.target;
+  try {
+    await window.BackendService.publishNotice({
+      date: form.date.value,
+      tagHi: form.tagHi.value,
+      tagEn: form.tagEn.value,
+      titleHi: form.titleHi.value,
+      titleEn: form.titleEn.value,
+      descHi: form.descHi.value,
+      descEn: form.descEn.value,
+      isNew: form.isNew.checked
+    });
+    form.reset();
     await syncWithBackend();
     await refreshAdminModalUI();
+    alert("✅ नया नोटिस सफलतापूर्वक लाइव प्रकाशित हो गया!");
+  } catch (err) {
+    alert("⚠️ त्रुटि: " + err.message);
+  }
 };
 
-window.handleDeleteAlumni = async function (docId) {
-    if (!confirm("क्या आप इस प्रविष्टि को हटाना चाहते हैं?")) return;
-    await window.BackendService.deleteAlumni(docId);
+window.handleDeleteNotice = async function(id) {
+  if (!confirm("क्या आप वाकई इस नोटिस को हटाना चाहते हैं?")) return;
+  try {
+    await window.BackendService.deleteNotice(id);
     await syncWithBackend();
     await refreshAdminModalUI();
+  } catch (err) {
+    alert("यह डिफ़ॉल्ट नोटिस है।");
+  }
+};
+
+window.handleApproveAlumni = async function(docId) {
+  await window.BackendService.approveAlumni(docId);
+  await syncWithBackend();
+  await refreshAdminModalUI();
+};
+
+window.handleDeleteAlumni = async function(docId) {
+  if (!confirm("क्या आप इस प्रविष्टि को हटाना चाहते हैं?")) return;
+  await window.BackendService.deleteAlumni(docId);
+  await syncWithBackend();
+  await refreshAdminModalUI();
+};
+
+window.handleApproveFaculty = async function(docId) {
+  await window.BackendService.approveFaculty(docId);
+  await syncWithBackend();
+  await refreshAdminModalUI();
+};
+
+window.handleDeleteFaculty = async function(docId) {
+  if (!confirm("क्या आप इस शिक्षक प्रोफाइल को हटाना चाहते हैं?")) return;
+  await window.BackendService.deleteFaculty(docId);
+  await syncWithBackend();
+  await refreshAdminModalUI();
 };
