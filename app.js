@@ -1,11 +1,13 @@
 // ============================================================================
-// FILE 3: app.js — FINAL PRO CONTROLLER (100% BILINGUAL HI/EN + TRUE THEME LOCK)
+// FILE 3: app.js — FINAL PRO CONTROLLER (100% BILINGUAL HI/EN + GURU STAMBH + ADMIN)
 // ============================================================================
 
 let currentLang = 'hi';
 let currentSchemeFilter = 'all';
 let cachedNotices = window.SCHOOL_MASTER_CONFIG.defaultNotices;
 let cachedApprovedAlumni = [];
+let cachedApprovedFaculty = [];
+let currentFacultyWingFilter = 'all';
 
 // 1. COMPLETE BILINGUAL DICTIONARY (Translates Every Single Section on Click!)
 const I18N_DICTIONARY = {
@@ -62,13 +64,9 @@ const I18N_DICTIONARY = {
         f_post: "कक्षा 11–12 व उच्च शिक्षा (+2)",
         f_girls: "बालिका विशेष (Girls)",
         guru_heading: "गुरु ब्रह्मा गुरुर्विष्णुः • आचार्य एवं शिक्षक गौरव स्तंभ",
-        guru_sub: "राज्य संपोषित +2 उच्च विद्यालय, गोला (1940) के श्रद्धेय प्रधानाचार्यों एवं शिक्षकों का समर्पित पोर्टल। विद्यालय से सभी शिक्षकों का विस्तृत डेटा संकलित होते ही यहाँ प्रत्येक गुरुजन का गौरवशाली प्रोफाइल कार्ड प्रदर्शित किया जाएगा।",
+        guru_sub: "राज्य संपोषित +2 उच्च विद्यालय, गोला (1940) के श्रद्धेय प्रधानाचार्यों एवं शिक्षकों का समर्पित पोर्टल।",
         guru_p_name: "श्रीमती अनुपा पुष्पा तिर्की",
         guru_p_desc: "विद्यालय के शैक्षणिक अनुशासन, प्रशासन एवं समग्र विकास की प्रमुख मार्गदर्शक।",
-        guru_pgt_title: "[PGT शिक्षक डेटा संकलन प्रतीक्षित]",
-        guru_pgt_desc: "डेटा कलेक्ट होते ही यहाँ विषय, योग्यता एवं अनुभव के साथ पूर्ण कार्ड जोड़े जाएंगे।",
-        guru_tgt_title: "[TGT एवं प्राथमिक शिक्षक स्लॉट]",
-        guru_tgt_desc: "हमारे सभी शिक्षकों के सम्मान में यह विशेष सेक्शन अंतिम चरण में लाइव डेटा से भरा जाएगा।",
         gaurav_heading: "गौरव स्तंभ — हमारे टॉपर्स एवं प्रतिष्ठित पूर्व छात्र",
         gaurav_sub: "क्या आप राज्य संपोषित +2 उच्च विद्यालय, गोला के पूर्व छात्र (Alumni) या बोर्ड टॉपर रहे हैं? अपना विवरण फॉर्म में दर्ज करें। एडमिन द्वारा Firebase Console में स्टेटस approved करते ही आपका नाम नीचे सत्यापित गौरव दीवार पर चमकने लगेगा!",
         form_title: "पूर्व छात्र (Alumni) पंजीकरण फॉर्म",
@@ -130,13 +128,9 @@ const I18N_DICTIONARY = {
         f_post: "Class 11–12 & Higher Ed (+2)",
         f_girls: "Girls Special Welfare",
         guru_heading: "Guru Stambh — Revered Faculty & Legacy Pillar",
-        guru_sub: "Dedicated portal honoring the Principals and Teachers of S.S. +2 High School, Gola (1940). Complete profile cards will be unlocked once official faculty data collection is finalized.",
+        guru_sub: "Dedicated portal honoring the Principals and Teachers of S.S. +2 High School, Gola (1940).",
         guru_p_name: "Smt. Anupa Pushpa Tirkey",
         guru_p_desc: "Leading academic discipline, administration, and holistic student development.",
-        guru_pgt_title: "[PGT +2 Faculty Data Collection Scheduled]",
-        guru_pgt_desc: "Full faculty cards with subject specialization and qualifications will be rendered here.",
-        guru_tgt_title: "[TGT & Primary Wing Faculty Slot]",
-        guru_tgt_desc: "Honoring our Class 1 to 10 educators—scheduled for final phase data integration.",
         gaurav_heading: "Gaurav Stambh — Board Toppers & Notable Alumni",
         gaurav_sub: "Are you an Alumnus or Board Topper of S.S. +2 High School, Gola? Submit your details in the form. Once approved by the Admin in Firebase Console, your card will automatically shine on the Verified Alumni Wall below!",
         form_title: "Alumni & Topper Registration Form",
@@ -147,7 +141,7 @@ const I18N_DICTIONARY = {
     }
 };
 
-// 2. BILINGUAL SCHEMES DATA (Renders in Hindi or English seamlessly)
+// 2. BILINGUAL SCHEMES DATA
 const SCHEMES_DATA = [
     {
         cats: "pre-matric post-matric",
@@ -246,7 +240,6 @@ function renderMasterConfig() {
     const cfg = window.SCHOOL_MASTER_CONFIG;
     const dict = I18N_DICTIONARY[currentLang];
 
-    // 1. Translate all elements with [data-i18n]
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (dict[key]) {
@@ -254,13 +247,11 @@ function renderMasterConfig() {
         }
     });
 
-    // Update Language Button Label
     const langBtn = document.getElementById('lang-btn-label');
     if (langBtn) {
         langBtn.textContent = currentLang === 'hi' ? 'Switch to EN' : 'हिंदी में देखें';
     }
 
-    // Update Form Placeholders Bilingually
     const inpName = document.getElementById('inp-name');
     const inpBatch = document.getElementById('inp-batch');
     const inpStream = document.getElementById('inp-stream');
@@ -272,19 +263,16 @@ function renderMasterConfig() {
     if (inpRole) inpRole.placeholder = currentLang === 'hi' ? "वर्तमान पद / उपलब्धि (Achievement)" : "Current Role / Profession / Achievement";
     if (inpContact) inpContact.placeholder = currentLang === 'hi' ? "मोबाइल या ईमेल (केवल एडमिन सत्यापन हेतु)" : "Mobile or Email (Private for Admin Verification)";
 
-    // 2. Student Strength & Principal Name in Matrix
     const countEl = document.getElementById('metric-student-count');
     if (countEl) countEl.textContent = escapeHTML(cfg.metrics.studentStrength);
     const matPrin = document.getElementById('matrix-principal-name');
     if (matPrin) matPrin.textContent = currentLang === 'hi' ? cfg.principal.nameHi : cfg.principal.nameEn;
 
-    // 3. Shloka Meaning
     const shlokaEl = document.getElementById('hero-shloka-meaning');
     if (shlokaEl) {
         shlokaEl.textContent = currentLang === 'hi' ? cfg.identity.shlokaMeaningHi : cfg.identity.shlokaMeaningEn;
     }
 
-    // 4. Principal Desk
     const pName = document.getElementById('principal-name-display');
     const pRole = document.getElementById('principal-role-display');
     const pMsg = document.getElementById('principal-message-display');
@@ -292,7 +280,6 @@ function renderMasterConfig() {
     if (pRole) pRole.textContent = currentLang === 'hi' ? cfg.principal.designationHi : cfg.principal.designationEn;
     if (pMsg) pMsg.textContent = currentLang === 'hi' ? cfg.principal.messageHi : cfg.principal.messageEn;
 
-    // 5. Render Live Notices Bilingually
     const noticesContainer = document.getElementById('notices-container');
     if (noticesContainer) {
         noticesContainer.innerHTML = cachedNotices.map(notice => {
@@ -321,13 +308,12 @@ function renderMasterConfig() {
         }).join('');
     }
 
-    // 6. Render Bilingual Schemes Grid
     renderSchemesGrid();
-
-    // 7. Render Approved Alumni Wall
     renderVerifiedAlumniWall();
+    if (typeof renderVerifiedFacultyWall === 'function') {
+        renderVerifiedFacultyWall();
+    }
 
-    // 8. Creator Credit Slot
     const cName = document.getElementById('creator-name-slot');
     const cBatch = document.getElementById('creator-batch-slot');
     if (cName) cName.textContent = cfg.creatorCredit.name;
@@ -418,9 +404,7 @@ function renderVerifiedAlumniWall() {
   `).join('');
 }
 
-// ============================================================================
-// BULLETPROOF DAY / NIGHT THEME ENGINE
-// ============================================================================
+// Theme Engine
 function applyTheme(theme) {
     const html = document.documentElement;
     html.setAttribute('data-theme', theme);
@@ -452,9 +436,7 @@ function updateThemeIcons(theme) {
     }
 }
 
-// ============================================================================
-// 3D TILT & DIYA SPOTLIGHT ENGINE
-// ============================================================================
+// 3D Tilt Cards
 function init3DTiltCards() {
     document.querySelectorAll('.sacred-card').forEach(card => {
         if (card.dataset.tiltBound) return;
@@ -478,9 +460,7 @@ function init3DTiltCards() {
     });
 }
 
-// ============================================================================
-// LIVE SACRED AARTI SPARKS CANVAS
-// ============================================================================
+// Sacred Aarti Particles Canvas
 function initSacredParticles() {
     const canvas = document.getElementById('sacred-particles-canvas');
     if (!canvas) return;
@@ -532,6 +512,7 @@ window.ringTempleBell = function (el) {
     el.style.animation = 'bellRingActive 0.8s ease-in-out 2';
 };
 
+// Robust Sync with Backend (Fixed Refresh Bug)
 async function syncWithBackend() {
     if (!window.BackendService) return;
 
@@ -543,10 +524,19 @@ async function syncWithBackend() {
     }
 
     cachedNotices = await window.BackendService.fetchNotices();
+    
     if (window.BackendService.fetchApprovedAlumni) {
         cachedApprovedAlumni = await window.BackendService.fetchApprovedAlumni();
     }
+
+    if (window.BackendService.fetchApprovedFaculty) {
+        cachedApprovedFaculty = await window.BackendService.fetchApprovedFaculty();
+    }
+
     renderMasterConfig();
+    if (typeof renderVerifiedFacultyWall === 'function') {
+        renderVerifiedFacultyWall();
+    }
 
     const deepCount = await window.BackendService.getVidyaDeepCount();
     const deepEl = document.getElementById('vidya-deep-count');
@@ -620,21 +610,17 @@ document.addEventListener('DOMContentLoaded', () => {
     applyTheme(savedTheme);
     renderMasterConfig();
     initSacredParticles();
+    if (window.BackendService) {
+        syncWithBackend();
+    }
 });
 
 window.addEventListener('backend-ready', syncWithBackend);
-// ============================================================================
-// 🔐 SECRET ADMIN COMMAND CENTER CONTROLLER (APPEND TO END OF app.js)
-// ============================================================================
 
 // ============================================================================
 // 🏛️ GURU STAMBH LIVE RENDERER + SECRET ADMIN COMMAND CENTER (FINAL BLOCK)
 // ============================================================================
 
-let cachedApprovedFaculty = [];
-let currentFacultyWingFilter = 'all';
-
-// Render Approved Teachers on Guru Stambh Page
 function renderVerifiedFacultyWall() {
   const grid = document.getElementById('verified-faculty-grid');
   if (!grid) return;
@@ -643,7 +629,6 @@ function renderVerifiedFacultyWall() {
     ? cachedApprovedFaculty
     : cachedApprovedFaculty.filter(f => f.wing === currentFacultyWingFilter);
 
-  // Principal Permanent Leadership Card + Approved Teachers
   const principalCard = (currentFacultyWingFilter === 'all' || currentFacultyWingFilter === '11-12') ? `
     <div class="sacred-card temple-shikhar-border rounded-3xl p-6 space-y-5 border-2 border-amber-500/50">
       <div class="flex items-center justify-between gap-2">
@@ -741,16 +726,6 @@ window.filterFacultyByWing = function(wing) {
       : 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all';
   });
   renderVerifiedFacultyWall();
-};
-
-// Hook into Backend Sync so Faculty loads automatically
-const originalSyncWithBackend = syncWithBackend;
-syncWithBackend = async function() {
-  await originalSyncWithBackend();
-  if (window.BackendService && window.BackendService.fetchApprovedFaculty) {
-    cachedApprovedFaculty = await window.BackendService.fetchApprovedFaculty();
-    renderVerifiedFacultyWall();
-  }
 };
 
 // Secret Admin Modal Controls
