@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="hi" class="scroll-smooth dark" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>गुरु स्तंभ संकलन पोर्टल | Faculty Onboarding — S.S. +2 High School, Gola</title>
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700;800&family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Tiro+Devanagari+Hindi:ital@0;1&display=swap" rel="stylesheet">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            display: ['Cinzel', 'Tiro Devanagari Hindi', 'serif'],
+            hindi: ['Tiro Devanagari Hindi', 'Plus Jakarta Sans', 'sans-serif'],
+            sans: ['Plus Jakarta Sans', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Uses your existing styles.css -->
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body class="sacred-bg-mesh min-h-screen antialiased selection:bg-amber-500 selection:text-black pb-16">
+
+  <!-- TOP SACRED STRIP -->
+  <div class="border-b border-amber-500/30 bg-gradient-to-r from-amber-500/15 via-orange-500/20 to-amber-500/15 backdrop-blur-md">
+    <div class="max-w-5xl mx-auto px-4 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+      <span class="font-hindi font-bold text-amber-700 dark:text-amber-300">
+        🕉️ ॥ गुरुर्ब्रह्मा गुरुर्विष्णुः गुरुर्देवो महेश्वरः • विद्यालय एक पावन मंदिर ॥
+      </span>
+      <span class="font-mono text-[11px] font-bold px-2.5 py-0.5 rounded bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40">
+        UDISE: 20240701206 • ESTD: 1940
+      </span>
+    </div>
+  </div>
+
+  <!-- HEADER WITH OFFICIAL MAIN WEBSITE LINK -->
+  <header class="border-b border-amber-500/25 bg-[var(--bg-primary)]/90 backdrop-blur-xl sticky top-0 z-40">
+    <div class="max-w-5xl mx-auto px-4 h-20 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-400 via-orange-600 to-red-700 p-[2px] shadow-lg">
+          <div class="w-full h-full rounded-[14px] bg-stone-950 flex items-center justify-center text-amber-400">
+            <i data-lucide="award" class="w-5 h-5"></i>
+          </div>
+        </div>
+        <div>
+          <span class="text-[10px] font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 font-extrabold block">
+            Official Faculty Onboarding Portal
+          </span>
+          <h1 class="font-hindi text-base sm:text-xl font-extrabold theme-heading">
+            राज्य संपोषित +2 उच्च विद्यालय, गोला
+          </h1>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <!-- Direct Link to Main Website -->
+        <a href="https://poddarpiyush6-pk.github.io/ss-high-school-gola/" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs flex items-center gap-1.5 shadow-md transition-all">
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+          <span class="hidden sm:inline">मुख्य विद्यालय पोर्टल देखें</span>
+        </a>
+        <button onclick="toggleTheme()" class="p-2.5 rounded-xl border border-amber-500/40 bg-amber-500/15 text-amber-800 dark:text-amber-300 text-xs font-mono font-bold" title="Toggle Theme">
+          <i data-lucide="sun" id="theme-icon-sun" class="w-4 h-4 hidden"></i>
+          <i data-lucide="moon" id="theme-icon-moon" class="w-4 h-4"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="max-w-5xl mx-auto px-4 pt-8 space-y-8">
+
+    <!-- Welcome Banner & Live Trust Ticker -->
+    <div class="sacred-card temple-shikhar-border rounded-3xl p-6 sm:p-8 text-center space-y-3">
+      <span class="px-3.5 py-1 rounded-full text-xs font-mono font-extrabold bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/40">
+        आदरणीय शिक्षकगण समर्पित पोर्टल • GURU STAMBH
+      </span>
+      <h2 class="font-hindi text-2xl sm:text-4xl font-extrabold theme-heading">
+        श्रद्धेय गुरुजन प्रोफाइल एवं संदेश संकलन फॉर्म
+      </h2>
+      <p class="text-xs sm:text-sm theme-subtext max-w-2xl mx-auto devanagari-leading">
+        विद्यालय के आधिकारिक डिजिटल पोर्टल <strong>"OUR SCHOOL AS A TEMPLE"</strong> के <strong>'गुरु स्तंभ'</strong> अनुभाग में आपके गौरवशाली प्रोफाइल कार्ड को प्रदर्शित करने हेतु कृपया अपना विवरण नीचे दर्ज करें।
+      </p>
+      
+      <!-- Live Social Proof / Verified Teachers Ticker -->
+      <div id="verified-trust-ticker" class="pt-2 text-xs font-mono text-emerald-600 dark:text-emerald-400 flex items-center justify-center gap-2">
+        <span class="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span id="ticker-text">Loading verified faculty network...</span>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+
+      <!-- LEFT 7 COLS: THE 5-STEP PROFESSIONAL FORM -->
+      <form id="faculty-onboarding-form" onsubmit="handleFacultySubmit(event)" class="lg:col-span-7 sacred-card rounded-3xl p-6 sm:p-8 space-y-6">
+
+        <!-- STEP 1: ACADEMIC WING -->
+        <div class="space-y-3">
+          <label class="block font-hindi text-base font-extrabold text-amber-600 dark:text-amber-400">
+            1. अपना शैक्षणिक प्रभाग चुनें (Select Academic Wing) *
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            
+            <label class="cursor-pointer rounded-2xl p-3.5 border-2 border-amber-500/30 hover:border-amber-500 transition-all flex items-start gap-3 bg-amber-500/5">
+              <input type="radio" name="wing" value="1-5" onchange="handleWingChange(this.value)" class="mt-1 accent-amber-500 w-4 h-4" required />
+              <div>
+                <span class="font-mono text-[11px] font-extrabold text-amber-600 dark:text-amber-400 block">PRIMARY WING</span>
+                <strong class="font-hindi text-sm theme-heading block">प्राथमिक प्रभाग (कक्षा 1 से 5)</strong>
+              </div>
+            </label>
+
+            <label class="cursor-pointer rounded-2xl p-3.5 border-2 border-amber-500/30 hover:border-amber-500 transition-all flex items-start gap-3 bg-amber-500/5">
+              <input type="radio" name="wing" value="6-8" onchange="handleWingChange(this.value)" class="mt-1 accent-amber-500 w-4 h-4" />
+              <div>
+                <span class="font-mono text-[11px] font-extrabold text-orange-600 dark:text-orange-400 block">UPPER PRIMARY</span>
+                <strong class="font-hindi text-sm theme-heading block">उच्च प्राथमिक (कक्षा 6 से 8)</strong>
+              </div>
+            </label>
+
+            <label class="cursor-pointer rounded-2xl p-3.5 border-2 border-amber-500/30 hover:border-amber-500 transition-all flex items-start gap-3 bg-amber-500/5">
+              <input type="radio" name="wing" value="9-10" onchange="handleWingChange(this.value)" class="mt-1 accent-amber-500 w-4 h-4" />
+              <div>
+                <span class="font-mono text-[11px] font-extrabold text-emerald-600 dark:text-emerald-400 block">SECONDARY WING</span>
+                <strong class="font-hindi text-sm theme-heading block">माध्यमिक प्रभाग (कक्षा 9 से 10)</strong>
+              </div>
+            </label>
+
+            <label class="cursor-pointer rounded-2xl p-3.5 border-2 border-amber-500/50 hover:border-amber-500 transition-all flex items-start gap-3 bg-amber-500/10">
+              <input type="radio" name="wing" value="11-12" onchange="handleWingChange(this.value)" class="mt-1 accent-amber-500 w-4 h-4" checked />
+              <div>
+                <span class="font-mono text-[11px] font-extrabold text-amber-600 dark:text-amber-300 block">+2 INTERMEDIATE</span>
+                <strong class="font-hindi text-sm theme-heading block">+2 इंटरमीडिएट (कक्षा 11 से 12)</strong>
+              </div>
+            </label>
+
+          </div>
+        </div>
+
+        <!-- CONDITIONAL STREAM SELECTOR -->
+        <div id="conditional-stream-box" class="p-4 rounded-2xl border-2 border-amber-500/50 bg-amber-500/10 space-y-2">
+          <label class="block font-hindi text-sm font-extrabold text-amber-700 dark:text-amber-300">
+            ✨ +2 इंटरमीडिएट संकाय चुनें (Select Stream) *
+          </label>
+          <select id="inp-stream" name="stream" onchange="updateLivePreview()" class="sacred-input w-full px-4 py-3 rounded-xl text-xs sm:text-sm font-bold focus:outline-none">
+            <option value="Science (विज्ञान संकाय)">🔬 Science (विज्ञान संकाय — PCM / PCB)</option>
+            <option value="Arts (कला संकाय)">📚 Arts / Humanities (कला संकाय)</option>
+            <option value="Commerce (वाणिज्य संकाय)">📊 Commerce (वाणिज्य संकाय)</option>
+            <option value="Vocational / IT & Languages">💻 Vocational / IT / साहित्य एवं भाषा</option>
+          </select>
+        </div>
+
+        <!-- STEP 2: FREE-TEXT ACADEMIC PROFILE -->
+        <div class="space-y-4">
+          <label class="block font-hindi text-base font-extrabold text-amber-600 dark:text-amber-400">
+            2. सम्मानजनक परिचय एवं शैक्षणिक विवरण (Free-Text Inputs) *
+          </label>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 text-xs sm:text-sm">
+            <div class="sm:col-span-2">
+              <label class="text-xs font-bold theme-subtext block mb-1">पूरा नाम (Full Name) *</label>
+              <input id="f-name" name="fullName" required oninput="updateLivePreview()" placeholder="e.g. डॉ. राजेश कुमार शर्मा / Dr. Rajesh Sharma" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none font-bold" />
+            </div>
+
+            <div>
+              <label class="text-xs font-bold theme-subtext block mb-1">पदनाम (Designation — अपने अनुसार लिखें) *</label>
+              <input id="f-desig" name="designation" required oninput="updateLivePreview()" placeholder="e.g. PGT (+2 Teacher) / TGT / Principal" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+            </div>
+
+            <div>
+              <label class="text-xs font-bold theme-subtext block mb-1">मुख्य विषय (Primary Subject Taught) *</label>
+              <input id="f-subject" name="subject" required oninput="updateLivePreview()" placeholder="e.g. भौतिकी (Physics) / Mathematics / Hindi" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="text-xs font-bold theme-subtext block mb-1">शैक्षणिक योग्यता (Qualifications) *</label>
+              <input id="f-qual" name="qualification" required oninput="updateLivePreview()" placeholder="e.g. M.Sc. (Physics), B.Ed., NET, Ph.D." class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 3: HUMBLE SERVICE DURATION & EXPERIENCE CALCULATOR -->
+        <div class="space-y-3 p-4 rounded-2xl sacred-inner-box">
+          <label class="block font-hindi text-base font-extrabold text-amber-600 dark:text-amber-400">
+            3. विद्यालय सेवा काल (Service Duration & Experience) *
+          </label>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+            <div>
+              <label class="text-xs font-bold theme-subtext block mb-1">विद्यालय में योगदान वर्ष (Joining Year) *</label>
+              <input id="f-join" name="joiningYear" required type="number" min="1950" max="2026" oninput="updateLivePreview()" placeholder="e.g. 2014" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none font-mono font-bold" />
+            </div>
+
+            <div class="flex flex-col justify-end">
+              <label class="flex items-center gap-2.5 text-xs font-extrabold theme-heading cursor-pointer p-3 rounded-xl sacred-card">
+                <input type="checkbox" id="f-serving" name="isCurrentlyServing" checked onchange="updateLivePreview()" class="accent-amber-500 w-4 h-4" />
+                <span>वर्तमान में विद्यालय में सेवारत हैं (Currently Serving)</span>
+              </label>
+            </div>
+          </div>
+
+          <div id="leaving-year-box" class="hidden pt-2">
+            <label class="text-xs font-bold theme-subtext block mb-1">सेवा पूर्ण / स्थानांतरण वर्ष (Completion / Leaving Year)</label>
+            <input id="f-leave" name="leavingYear" type="number" min="1950" max="2026" oninput="updateLivePreview()" placeholder="e.g. 2023" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none font-mono" />
+          </div>
+        </div>
+
+        <!-- STEP 4: 2ND LAST STEP — TRUST-FIRST PHOTO UPLOAD -->
+        <div class="space-y-2">
+          <label class="block font-hindi text-base font-extrabold text-amber-600 dark:text-amber-400">
+            4. प्रोफाइल फोटो अपलोड करें (Profile Photo)
+          </label>
+          <div class="flex flex-col sm:flex-row items-center gap-4 p-4 rounded-2xl border border-dashed border-amber-500/50 bg-amber-500/5">
+            <img id="photo-preview-thumb" src="https://api.dicebear.com/7.x/initials/svg?seed=Guru&backgroundColor=b45309" alt="Preview" class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500 shadow-md shrink-0" />
+            <div class="space-y-1.5 text-center sm:text-left w-full">
+              <input type="file" id="inp-photo" accept="image/*" onchange="handlePhotoUpload(event)" class="text-xs file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-extrabold file:bg-amber-500 file:text-stone-950 hover:file:bg-amber-400 cursor-pointer w-full" />
+              <p class="text-[11px] theme-muted">
+                अपने मोबाइल कैमरा या गैलरी से साफ फोटो चुनें (स्वचालित रूप से HD स्क्वायर में संपीड़ित)।
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- STEP 5: FINAL STEP — INSPIRATIONAL THOUGHT & CONTACT -->
+        <div class="space-y-4">
+          <label class="block font-hindi text-base font-extrabold text-amber-600 dark:text-amber-400">
+            5. विद्यार्थियों के लिए प्रेरणादायक संदेश एवं संपर्क *
+          </label>
+          <textarea id="f-thought" name="thoughtForStudents" required rows="3" oninput="updateLivePreview()" placeholder="विद्यार्थियों के मार्गदर्शन हेतु 1-2 पंक्तियों में अपना संदेश या प्रिय विचार लिखें (यह आपके कार्ड पर स्वर्ण अक्षरों में दिखेगा)..." class="sacred-input w-full px-4 py-3 rounded-xl text-xs sm:text-sm focus:outline-none"></textarea>
+          
+          <div>
+            <label class="text-xs font-bold theme-subtext block mb-1">मोबाइल नंबर (केवल कार्यालय सत्यापन हेतु — पूरी तरह गोपनीय) *</label>
+            <input id="f-contact" name="contact" required placeholder="10-Digit Mobile Number" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+          </div>
+        </div>
+
+        <div id="faculty-submit-status" class="hidden"></div>
+
+        <button type="submit" id="btn-submit-faculty" class="w-full py-4 rounded-2xl bg-gradient-to-r from-amber-400 via-orange-500 to-amber-500 text-stone-950 font-extrabold text-sm sm:text-base shadow-xl shadow-orange-500/25 hover:scale-[1.01] transition-all flex items-center justify-center gap-2">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+          <span>गुरु स्तंभ हेतु अपना प्रोफाइल कार्ड सबमिट करें</span>
+        </button>
+
+      </form>
+
+      <!-- RIGHT 5 COLS: REAL-TIME LIVE CARD PREVIEW -->
+      <div class="lg:col-span-5 lg:sticky lg:top-28 space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono uppercase tracking-widest text-amber-600 dark:text-amber-400 font-extrabold">
+            ✨ Live Guru Stambh Card Preview
+          </span>
+          <span class="text-[11px] font-mono theme-muted">Real-Time Preview</span>
+        </div>
+
+        <!-- THE ROYAL FACULTY CARD PREVIEW -->
+        <div class="sacred-card temple-shikhar-border rounded-3xl p-6 space-y-5 border-2 border-amber-500/50">
+          <div class="flex items-center justify-between gap-2">
+            <span id="prev-wing-badge" class="px-3 py-1 rounded-full text-[11px] font-mono font-extrabold bg-amber-500 text-stone-950">
+              CLASS 11–12 (+2) • Science
+            </span>
+            <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
+              <i data-lucide="shield-check" class="w-4 h-4"></i> गुरु स्तंभ
+            </span>
+          </div>
+
+          <div class="flex items-center gap-4">
+            <img id="prev-photo" src="https://api.dicebear.com/7.x/initials/svg?seed=Guru&backgroundColor=b45309" alt="Faculty" class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500 shadow-lg shrink-0" />
+            <div class="space-y-1">
+              <h3 id="prev-name" class="font-hindi text-xl font-extrabold theme-heading">आदरणीय शिक्षक का नाम</h3>
+              <p id="prev-desig" class="text-xs font-mono font-bold text-amber-600 dark:text-amber-400">PGT (+2 स्नातकोत्तर शिक्षक)</p>
+              <p id="prev-qual" class="text-xs theme-subtext font-semibold">M.Sc., B.Ed.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2.5 p-3 rounded-xl sacred-inner-box text-xs">
+            <div>
+              <span class="text-[10px] font-mono theme-muted block">मुख्य विषय (Subject)</span>
+              <strong id="prev-subject" class="theme-heading">भौतिकी (Physics)</strong>
+            </div>
+            <div>
+              <span class="text-[10px] font-mono theme-muted block">सेवा अनुभव (Experience)</span>
+              <strong id="prev-exp" class="theme-heading">10+ वर्ष (Since 2015)</strong>
+            </div>
+          </div>
+
+          <!-- Student Thought Quote Box -->
+          <div class="p-4 rounded-2xl border border-amber-500/35 bg-[var(--shloka-bg)] space-y-1">
+            <span class="text-[10px] font-mono uppercase tracking-wider text-amber-700 dark:text-amber-300 font-extrabold block">
+              💬 विद्यार्थियों के नाम संदेश:
+            </span>
+            <p id="prev-thought" class="font-hindi text-xs sm:text-sm italic theme-heading devanagari-leading">
+              "कठिन परिश्रम और अनुशासन ही सफलता की सच्ची कुंजी है। अपने लक्ष्य के प्रति सदैव समर्पित रहें।"
+            </p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script src="./config.js"></script>
+  <script type="module" src="./firebase-backend.js"></script>
+  <script>
+    let compressedPhotoDataUrl = "";
+    let selectedWing = "11-12";
+
+    window.handleWingChange = function(wingVal) {
+      selectedWing = wingVal;
+      const streamBox = document.getElementById('conditional-stream-box');
+      if (wingVal === '11-12') {
+        streamBox.classList.remove('hidden');
+      } else {
+        streamBox.classList.add('hidden');
+      }
+      updateLivePreview();
+    };
+
+    // Auto-Compress Photo
+    window.handlePhotoUpload = function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(ev) {
+        const img = new Image();
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const SIZE = 300;
+          canvas.width = SIZE;
+          canvas.height = SIZE;
+          const ctx = canvas.getContext('2d');
+
+          const minSide = Math.min(img.width, img.height);
+          const sx = (img.width - minSide) / 2;
+          const sy = (img.height - minSide) / 2;
+          ctx.drawImage(img, sx, sy, minSide, minSide, 0, 0, SIZE, SIZE);
+
+          compressedPhotoDataUrl = canvas.toDataURL('image/jpeg', 0.80);
+          document.getElementById('photo-preview-thumb').src = compressedPhotoDataUrl;
+          document.getElementById('prev-photo').src = compressedPhotoDataUrl;
+        };
+        img.src = ev.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    // Experience Calculator & Live Preview
+    window.updateLivePreview = function() {
+      const name = document.getElementById('f-name').value.trim() || "आदरणीय शिक्षक का नाम";
+      const desig = document.getElementById('f-desig').value.trim() || "पदनाम";
+      const subj = document.getElementById('f-subject').value.trim() || "मुख्य विषय";
+      const qual = document.getElementById('f-qual').value.trim() || "शैक्षणिक योग्यता";
+      const joinYear = parseInt(document.getElementById('f-join').value) || new Date().getFullYear();
+      const isServing = document.getElementById('f-serving').checked;
+      const leaveYearInput = document.getElementById('f-leave');
+      const leavingBox = document.getElementById('leaving-year-box');
+
+      if (!isServing) {
+        leavingBox.classList.remove('hidden');
+      } else {
+        leavingBox.classList.add('hidden');
+      }
+
+      const endYear = isServing ? new Date().getFullYear() : (parseInt(leavingYearInput.value) || new Date().getFullYear());
+      let diff = endYear - joinYear;
+      if (diff < 0) diff = 0;
+      const expText = isServing ? `${diff}+ वर्ष (Since ${joinYear})` : `${diff}+ वर्ष (${joinYear}–${endYear})`;
+
+      const thought = document.getElementById('f-thought').value.trim() || "कठिन परिश्रम और अनुशासन ही सफलता की सच्ची कुंजी है।";
+      const stream = document.getElementById('inp-stream').value;
+
+      const wingLabels = {
+        '1-5': 'CLASS 1–5 (प्राथमिक प्रभाग)',
+        '6-8': 'CLASS 6–8 (उच्च प्राथमिक)',
+        '9-10': 'CLASS 9–10 (माध्यमिक हाई स्कूल)',
+        '11-12': `CLASS 11–12 (+2) • ${stream.split(' ')[0]}`
+      };
+
+      document.getElementById('prev-wing-badge').textContent = wingLabels[selectedWing];
+      document.getElementById('prev-name').textContent = name;
+      document.getElementById('prev-desig').textContent = desig;
+      document.getElementById('prev-subject').textContent = subj;
+      document.getElementById('prev-qual').textContent = qual;
+      document.getElementById('prev-exp').textContent = expText;
+      document.getElementById('prev-thought').textContent = `"${thought}"`;
+
+      if (!compressedPhotoDataUrl) {
+        const avatarUrl = `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(name)}&backgroundColor=b45309`;
+        document.getElementById('prev-photo').src = avatarUrl;
+      }
+    };
+
+    // Load Trusted Ticker from Firebase
+    async function loadTrustTicker() {
+      const tickerEl = document.getElementById('ticker-text');
+      if (!window.BackendService || !window.BackendService.isLive()) {
+        tickerEl.textContent = "✅ Trusted Network: Smt. Anupa Pushpa Tirkey (Principal) & revered faculty members.";
+        return;
+      }
+      try {
+        const approved = await window.BackendService.fetchApprovedFaculty();
+        if (approved.length === 0) {
+          tickerEl.textContent = "✅ Trusted Network: Smt. Anupa Pushpa Tirkey (Principal) & Guru Stambh faculty network.";
+        } else {
+          const names = approved.slice(0, 3).map(f => f.fullName).join(', ');
+          tickerEl.textContent = `✅ Trusted & Verified: ${names} and ${approved.length} other revered faculty members.`;
+        }
+      } catch (e) {
+        tickerEl.textContent = "✅ Official S.S. +2 High School Gola Faculty Portal.";
+      }
+    }
+
+    // Submit Faculty Onboarding
+    window.handleFacultySubmit = async function(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit-faculty');
+      const statusBox = document.getElementById('faculty-submit-status');
+      const form = e.target;
+
+      btn.disabled = true;
+      btn.textContent = "⏳ सुरक्षित रूप से क्लाउड में सेव हो रहा है...";
+
+      try {
+        const joinYear = form.joiningYear.value;
+        const isServing = form.isCurrentlyServing.checked;
+        const leaveYear = form.leavingYear ? form.leavingYear.value : '';
+        const endYear = isServing ? new Date().getFullYear() : (leaveYear || new Date().getFullYear());
+        let diff = endYear - parseInt(joinYear);
+        if (diff < 0) diff = 0;
+        const calculatedExp = isServing ? `${diff}+ वर्ष (Since ${joinYear})` : `${diff}+ वर्ष (${joinYear}–${endYear})`;
+
+        const payload = {
+          wing: selectedWing,
+          stream: selectedWing === '11-12' ? form.stream.value : `Class ${selectedWing} Wing`,
+          fullName: form.fullName.value,
+          designation: form.designation.value,
+          subject: form.subject.value,
+          qualification: form.qualification.value,
+          experience: calculatedExp,
+          contact: form.contact.value,
+          thoughtForStudents: form.thoughtForStudents.value,
+          photoDataUrl: compressedPhotoDataUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(form.fullName.value)}&backgroundColor=b45309`
+        };
+
+        const res = await window.BackendService.submitFacultyOnboarding(payload);
+        statusBox.className = "p-4 rounded-2xl bg-emerald-500/20 border-2 border-emerald-500/50 text-emerald-700 dark:text-emerald-300 text-xs sm:text-sm font-extrabold block text-center";
+        statusBox.innerHTML = `✅ ${res.message}<br><span class="text-xs font-normal">प्रधानाचार्य/एडमिन सत्यापन के तुरंत बाद आपका कार्ड मुख्य वेबसाइट के 'गुरु स्तंभ' पर लाइव हो जाएगा!</span>`;
+        form.reset();
+        compressedPhotoDataUrl = "";
+      } catch (err) {
+        statusBox.className = "p-4 rounded-2xl bg-red-500/20 border-2 border-red-500/50 text-red-600 dark:text-red-300 text-xs sm:text-sm font-extrabold block text-center";
+        statusBox.textContent = "⚠️ त्रुटि: " + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="sparkles" class="w-5 h-5"></i> <span>गुरु स्तंभ हेतु अपना प्रोफाइल कार्ड सबमिट करें</span>`;
+        if (window.lucide) lucide.createIcons();
+      }
+    };
+
+    window.toggleTheme = function() {
+      const html = document.documentElement;
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      html.classList.toggle('dark', next === 'dark');
+      localStorage.setItem('gola_school_theme', next);
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedTheme = localStorage.getItem('gola_school_theme') || 'dark';
+      htmlTheme = savedTheme;
+      document.documentElement.setAttribute('data-theme', savedTheme);
+      document.documentElement.classList.toggle('dark', savedTheme === 'dark');
+      if (window.lucide) lucide.createIcons();
+      loadTrustTicker();
+    });
+
+    window.addEventListener('backend-ready', loadTrustTicker);
+  </script>
+</body>
+</html>
