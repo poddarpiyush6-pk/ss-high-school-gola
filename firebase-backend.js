@@ -174,7 +174,73 @@ window.BackendService = {
     async deleteAlumni(docId) {
         if (!currentAdminUser) throw new Error("Unauthorized");
         await deleteDoc(doc(db, "alumni_submissions", docId));
+    },
+    // --- 4. GURU STAMBH (FACULTY ONBOARDING & ADMIN APPROVAL) ---
+  async submitFacultyOnboarding(payload) {
+    const clean = {
+      wing: String(payload.wing || "11-12").trim(),
+      stream: String(payload.stream || "").trim().slice(0, 60),
+      fullName: String(payload.fullName || "").trim().slice(0, 80),
+      designation: String(payload.designation || "").trim().slice(0, 80),
+      subject: String(payload.subject || "").trim().slice(0, 80),
+      qualification: String(payload.qualification || "").trim().slice(0, 120),
+      experience: String(payload.experience || "").trim().slice(0, 60),
+      contact: String(payload.contact || "").trim().slice(0, 40),
+      thoughtForStudents: String(payload.thoughtForStudents || "").trim().slice(0, 350),
+      photoDataUrl: String(payload.photoDataUrl || ""),
+      status: "pending_verification",
+      submittedAt: isFirebaseLive ? serverTimestamp() : new Date().toISOString()
+    };
+
+    if (!clean.fullName || !clean.subject) {
+      throw new Error("कृपया अपना नाम और मुख्य विषय अवश्य भरें।");
     }
+
+    if (isFirebaseLive) {
+      await addDoc(collection(db, "faculty_submissions"), clean);
+      return { mode: "cloud", message: "आदरणीय गुरुजन, आपका प्रोफाइल विवरण सफलतापूर्वक क्लाउड में दर्ज हो गया है!" };
+    } else {
+      return { mode: "local", message: "डेमो मोड: प्रोफाइल दर्ज हो गया!" };
+    }
+  },
+
+  async fetchApprovedFaculty() {
+    if (!isFirebaseLive) return [];
+    try {
+      const q = query(collection(db, "faculty_submissions"), where("status", "==", "approved"));
+      const snap = await getDocs(q);
+      return snap.docs.map(d => ({
+        id: d.id,
+        wing: d.data().wing,
+        stream: d.data().stream,
+        fullName: d.data().fullName,
+        designation: d.data().designation,
+        subject: d.data().subject,
+        qualification: d.data().qualification,
+        experience: d.data().experience,
+        thoughtForStudents: d.data().thoughtForStudents,
+        photoDataUrl: d.data().photoDataUrl
+      }));
+    } catch (e) {
+      return [];
+    }
+  },
+
+  async fetchAllFacultyForAdmin() {
+    if (!isFirebaseLive || !currentAdminUser) return [];
+    const snap = await getDocs(collection(db, "faculty_submissions"));
+    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  },
+
+  async approveFaculty(docId) {
+    if (!currentAdminUser) throw new Error("Unauthorized");
+    await updateDoc(doc(db, "faculty_submissions", docId), { status: "approved" });
+  },
+
+  async deleteFaculty(docId) {
+    if (!currentAdminUser) throw new Error("Unauthorized");
+    await deleteDoc(doc(db, "faculty_submissions", docId));
+  }
 };
 
 window.dispatchEvent(new CustomEvent("backend-ready"));
