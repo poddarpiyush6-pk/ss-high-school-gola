@@ -583,72 +583,54 @@
     <!-- ============================================================================
        VIEW 2: SPECIAL ROUTE — "GURU STAMBH" (`#view-guru-stambh`)
        ============================================================================ -->
-    <section id="view-guru-stambh" class="hidden relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
-        <div class="sacred-card temple-shikhar-border rounded-3xl p-8 sm:p-12 text-center space-y-5">
-            <div
-                class="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto t-gold">
-                <i data-lucide="award" class="w-8 h-8"></i>
-            </div>
-            <span
-                class="px-3.5 py-1 rounded-full text-xs font-mono font-extrabold bg-amber-500/20 t-gold border border-amber-500/40">
-                SPECIAL ROUTE READY • GURU STAMBH
-            </span>
-            <h2 class="font-hindi text-3xl sm:text-5xl font-extrabold t-heading" data-i18n="guru_heading">
-                गुरु ब्रह्मा गुरुर्विष्णुः • आचार्य एवं शिक्षक गौरव स्तंभ
-            </h2>
-            <p class="max-w-2xl mx-auto text-sm sm:text-base t-body devanagari-leading" data-i18n="guru_sub">
-                राज्य संपोषित +2 उच्च विद्यालय, गोला (1940) के श्रद्धेय प्रधानाचार्यों एवं शिक्षकों का समर्पित पोर्टल।
-                विद्यालय से सभी शिक्षकों का विस्तृत डेटा संकलित होते ही यहाँ प्रत्येक गुरुजन का गौरवशाली प्रोफाइल कार्ड
-                प्रदर्शित किया जाएगा।
-            </p>
-            <div class="pt-2">
-                <button onclick="switchView('home')"
-                    class="px-5 py-2.5 rounded-xl bg-amber-500 text-stone-950 font-extrabold text-xs sm:text-sm inline-flex items-center gap-2">
-                    <i data-lucide="arrow-left" class="w-4 h-4"></i>
-                    <span data-i18n="btn_back_home">मुख्य विद्या मंदिर पटल पर लौटें</span>
-                </button>
-            </div>
-        </div>
+  <!-- ============================================================================
+       VIEW 2: SPECIAL ROUTE — "GURU STAMBH" (`#view-guru-stambh`)
+       ============================================================================ -->
+  <section id="view-guru-stambh" class="hidden relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-10">
+    <div class="sacred-card temple-shikhar-border rounded-3xl p-8 sm:p-12 text-center space-y-5">
+      <div class="w-16 h-16 rounded-2xl bg-amber-500/20 border-2 border-amber-500/50 flex items-center justify-center mx-auto text-amber-600 dark:text-amber-400">
+        <i data-lucide="award" class="w-8 h-8"></i>
+      </div>
+      <span class="px-3.5 py-1 rounded-full text-xs font-mono font-extrabold bg-amber-500/20 text-amber-800 dark:text-amber-300 border border-amber-500/40">
+        LIVE CLOUD SYNCED • GURU STAMBH (गुरु स्तंभ)
+      </span>
+      <h2 class="font-hindi text-3xl sm:text-5xl font-extrabold theme-heading" data-i18n="guru_heading">
+        गुरु ब्रह्मा गुरुर्विष्णुः • आचार्य एवं शिक्षक गौरव स्तंभ
+      </h2>
+      <p class="max-w-2xl mx-auto text-sm sm:text-base theme-subtext devanagari-leading" data-i18n="guru_sub">
+        राज्य संपोषित +2 उच्च विद्यालय, गोला (1940) के श्रद्धेय प्रधानाचार्यों एवं शिक्षकों का समर्पित पोर्टल।
+      </p>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="sacred-card rounded-2xl p-6 border-t-4 border-t-amber-500 space-y-3">
-                <span
-                    class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 border border-emerald-500/40">
-                    VERIFIED LEADERSHIP
-                </span>
-                <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="guru_p_name">श्रीमती अनुपा पुष्पा
-                    तिर्की</h3>
-                <p class="text-xs font-mono font-bold t-gold">Principal • S.S. +2 High School, Gola</p>
-                <p class="text-xs t-body" data-i18n="guru_p_desc">
-                    विद्यालय के शैक्षणिक अनुशासन, प्रशासन एवं समग्र विकास की प्रमुख मार्गदर्शक।
-                </p>
-            </div>
+      <!-- Wing Filter Buttons for Guru Stambh -->
+      <div class="flex flex-wrap items-center justify-center gap-2 pt-2">
+        <button onclick="filterFacultyByWing('all')" data-faculty-filter="all" class="faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-extrabold bg-amber-500 text-stone-950 transition-all">
+          सभी गुरुजन (All Wings)
+        </button>
+        <button onclick="filterFacultyByWing('11-12')" data-faculty-filter="11-12" class="faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all">
+          +2 इंटरमीडिएट (Class 11–12)
+        </button>
+        <button onclick="filterFacultyByWing('9-10')" data-faculty-filter="9-10" class="faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all">
+          माध्यमिक (Class 9–10)
+        </button>
+        <button onclick="filterFacultyByWing('6-8')" data-faculty-filter="6-8" class="faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all">
+          उच्च प्राथमिक (Class 6–8)
+        </button>
+        <button onclick="filterFacultyByWing('1-5')" data-faculty-filter="1-5" class="faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all">
+          प्राथमिक (Class 1–5)
+        </button>
+      </div>
 
-            <div class="sacred-card rounded-2xl p-6 border border-dashed border-amber-500/50 space-y-3">
-                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 t-gold">
-                    SLOT READY • PGT (+2 INTER WING)
-                </span>
-                <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="guru_pgt_title">[PGT शिक्षक डेटा
-                    संकलन प्रतीक्षित]</h3>
-                <p class="text-xs font-mono t-muted">Science • Arts • Commerce</p>
-                <p class="text-xs t-body" data-i18n="guru_pgt_desc">
-                    डेटा कलेक्ट होते ही यहाँ विषय, योग्यता एवं अनुभव के साथ पूर्ण कार्ड जोड़े जाएंगे।
-                </p>
-            </div>
+      <div class="pt-2">
+        <button onclick="switchView('home')" class="px-5 py-2.5 rounded-xl border border-amber-500/40 hover:bg-amber-500/15 theme-heading font-extrabold text-xs sm:text-sm inline-flex items-center gap-2">
+          <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          <span data-i18n="btn_back_home">मुख्य विद्या मंदिर पटल पर लौटें</span>
+        </button>
+      </div>
+    </div>
 
-            <div class="sacred-card rounded-2xl p-6 border border-dashed border-amber-500/50 space-y-3">
-                <span class="px-2.5 py-0.5 rounded text-[10px] font-mono font-bold bg-orange-500/20 t-saffron">
-                    SLOT READY • TGT & PRIMARY WING
-                </span>
-                <h3 class="font-hindi text-xl font-extrabold t-heading" data-i18n="guru_tgt_title">[TGT एवं प्राथमिक
-                    शिक्षक स्लॉट]</h3>
-                <p class="text-xs font-mono t-muted">Class 1 to 10 Wings</p>
-                <p class="text-xs t-body" data-i18n="guru_tgt_desc">
-                    हमारे सभी शिक्षकों के सम्मान में यह विशेष सेक्शन अंतिम चरण में लाइव डेटा से भरा जाएगा।
-                </p>
-            </div>
-        </div>
-    </section>
+    <!-- LIVE VERIFIED FACULTY GRID (Auto-populated from Firebase) -->
+    <div id="verified-faculty-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+  </section>
 
     <!-- ============================================================================
        VIEW 3: SPECIAL ROUTE — "GAURAV STAMBH" (`#view-gaurav-stambh`)
@@ -782,119 +764,104 @@
        🔐 SECRET ADMIN COMMAND CENTER MODAL (HIDDEN FROM PUBLIC)
        Opens via clicking Footer "॥ विद्यालय एक पावन मंदिर ॥" or pressing Ctrl+Shift+A
        ============================================================================ -->
-    <div id="secret-admin-modal"
-        class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
-        <div
-            class="sacred-card temple-shikhar-border rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto border-2 border-amber-500/50">
-
-            <!-- Modal Header -->
-            <div class="flex items-center justify-between border-b border-amber-500/30 pb-4">
-                <div class="flex items-center gap-2.5">
-                    <div
-                        class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500">
-                        <i data-lucide="shield-alert" class="w-5 h-5"></i>
-                    </div>
-                    <div>
-                        <span
-                            class="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-extrabold block">Zero-Trust
-                            Firebase Auth</span>
-                        <h3 class="font-hindi text-xl font-extrabold theme-heading">सीक्रेट एडमिन कंट्रोल पैनल (S.S. +2
-                            High School, Gola)</h3>
-                    </div>
-                </div>
-                <button onclick="closeSecretAdminModal()"
-                    class="p-2 rounded-xl border border-amber-500/30 hover:bg-red-500/20 text-red-400 font-mono text-xs font-bold">
-                    ✕ Close
-                </button>
-            </div>
-
-            <!-- STATE 1: ADMIN LOGIN FORM (Shown when not logged in) -->
-            <div id="admin-login-view" class="space-y-4">
-                <p class="text-xs theme-subtext">
-                    यह पैनल केवल विद्यालय के अधिकृत डेवलपर/एडमिन के लिए है। अपने Firebase Authentication ईमेल और पासवर्ड
-                    से लॉगिन करें:
-                </p>
-                <form onsubmit="handleAdminLogin(event)" class="space-y-3.5 text-xs sm:text-sm">
-                    <input name="email" type="email" required placeholder="Admin Email (e.g. admin@golaschool.com)"
-                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
-                    <input name="password" type="password" required placeholder="Secret Admin Password"
-                        class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
-                    <div id="admin-login-error"
-                        class="hidden p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-bold">
-                    </div>
-                    <button type="submit"
-                        class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 font-extrabold shadow-lg">
-                        🔐 अनलॉक एडमिन कमांड सेंटर (Login)
-                    </button>
-                </form>
-            </div>
-
-            <!-- STATE 2: LOGGED-IN ADMIN DASHBOARD (Notice Publisher + 1-Click Alumni Approver) -->
-            <div id="admin-dashboard-view" class="hidden space-y-8">
-                <div
-                    class="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-xs">
-                    <span class="font-mono font-bold text-emerald-400">✅ Logged in as: <strong
-                            id="admin-email-label"></strong></span>
-                    <button onclick="handleAdminLogout()"
-                        class="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 font-mono font-bold">
-                        Logout
-                    </button>
-                </div>
-
-                <!-- MODULE A: PUBLISH NEW LIVE NOTICE -->
-                <div class="space-y-3">
-                    <h4 class="font-hindi text-lg font-extrabold text-amber-500 flex items-center gap-2">
-                        <i data-lucide="megaphone" class="w-5 h-5"></i>
-                        <span>1. नया लाइव नोटिस प्रकाशित करें (Publish Instant Notice)</span>
-                    </h4>
-                    <form onsubmit="handlePublishNotice(event)" class="space-y-3 text-xs">
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <input name="date" placeholder="तारीख (e.g. 18 Oct 2026)"
-                                class="sacred-input px-3.5 py-2.5 rounded-xl" />
-                            <input name="tagHi" placeholder="हिंदी टैग (e.g. अति महत्वपूर्ण)"
-                                class="sacred-input px-3.5 py-2.5 rounded-xl" />
-                            <input name="tagEn" placeholder="English Tag (e.g. URGENT)"
-                                class="sacred-input px-3.5 py-2.5 rounded-xl" />
-                        </div>
-                        <input name="titleHi" required placeholder="नोटिस का हिंदी शीर्षक (Hindi Title) *"
-                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl" />
-                        <input name="titleEn" placeholder="English Title (Optional - खाली छोड़ने पर हिंदी ही दिखेगा)"
-                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl" />
-                        <textarea name="descHi" required rows="2"
-                            placeholder="नोटिस का पूरा विवरण हिंदी में (Hindi Description) *"
-                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
-                        <textarea name="descEn" rows="2" placeholder="English Description (Optional)"
-                            class="sacred-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
-                        <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
-                            <input type="checkbox" name="isNew" checked class="accent-amber-500 w-4 h-4" />
-                            <span>Highlight as New/Urgent Notice (नारंगी बॉर्डर के साथ चमकाएं)</span>
-                        </label>
-                        <button type="submit"
-                            class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold">
-                            🚀 लाइव नोटिस बोर्ड पर पब्लिश करें
-                        </button>
-                    </form>
-
-                    <!-- Existing Cloud Notices List with 1-Click Delete -->
-                    <div class="pt-3 space-y-2">
-                        <span class="text-[11px] font-mono uppercase text-amber-400 font-bold block">Manage Live Cloud
-                            Notices:</span>
-                        <div id="admin-notices-list" class="space-y-2 max-h-44 overflow-y-auto"></div>
-                    </div>
-                </div>
-
-                <!-- MODULE B: 1-CLICK ALUMNI VERIFICATION & APPROVAL -->
-                <div class="space-y-3 border-t border-amber-500/30 pt-6">
-                    <h4 class="font-hindi text-lg font-extrabold text-emerald-400 flex items-center gap-2">
-                        <i data-lucide="user-check" class="w-5 h-5"></i>
-                        <span>2. पूर्व छात्र (Alumni) सत्यापन कतार (1-Click Approve / Delete)</span>
-                    </h4>
-                    <div id="admin-alumni-list" class="space-y-2.5 max-h-60 overflow-y-auto"></div>
-                </div>
-
-            </div>
+ <!-- ============================================================================
+       🔐 SECRET ADMIN COMMAND CENTER MODAL (COMPLETE WITH MODULE 1, 2 & 3)
+       ============================================================================ -->
+  <div id="secret-admin-modal" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4 overflow-y-auto">
+    <div class="sacred-card temple-shikhar-border rounded-3xl max-w-3xl w-full p-6 sm:p-8 space-y-6 max-h-[90vh] overflow-y-auto border-2 border-amber-500/50">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-amber-500/30 pb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-amber-500">
+            <i data-lucide="shield-alert" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[10px] font-mono uppercase tracking-widest text-amber-500 font-extrabold block">Zero-Trust Firebase Auth</span>
+            <h3 class="font-hindi text-xl font-extrabold theme-heading">सीक्रेट एडमिन कंट्रोल पैनल (S.S. +2 High School, Gola)</h3>
+          </div>
         </div>
+        <button onclick="closeSecretAdminModal()" class="p-2 rounded-xl border border-amber-500/30 hover:bg-red-500/20 text-red-400 font-mono text-xs font-bold">
+          ✕ Close
+        </button>
+      </div>
+
+      <!-- STATE 1: ADMIN LOGIN FORM -->
+      <div id="admin-login-view" class="space-y-4">
+        <p class="text-xs theme-subtext">
+          यह पैनल केवल विद्यालय के अधिकृत डेवलपर/एडमिन के लिए है। अपने Firebase Authentication ईमेल और पासवर्ड से लॉगिन करें:
+        </p>
+        <form onsubmit="handleAdminLogin(event)" class="space-y-3.5 text-xs sm:text-sm">
+          <input name="email" type="email" required placeholder="Admin Email (e.g. admin@golaschool.com)" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+          <input name="password" type="password" required placeholder="Secret Admin Password" class="sacred-input w-full px-4 py-3 rounded-xl focus:outline-none" />
+          <div id="admin-login-error" class="hidden p-3 rounded-xl bg-red-500/20 border border-red-500/40 text-red-400 text-xs font-bold"></div>
+          <button type="submit" class="w-full py-3.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 text-stone-950 font-extrabold shadow-lg">
+            🔐 अनलॉक एडमिन कमांड सेंटर (Login)
+          </button>
+        </form>
+      </div>
+
+      <!-- STATE 2: LOGGED-IN ADMIN DASHBOARD -->
+      <div id="admin-dashboard-view" class="hidden space-y-8">
+        <div class="flex flex-wrap items-center justify-between gap-2 p-3.5 rounded-xl bg-emerald-500/15 border border-emerald-500/40 text-xs">
+          <span class="font-mono font-bold text-emerald-400">✅ Logged in as: <strong id="admin-email-label"></strong></span>
+          <button onclick="handleAdminLogout()" class="px-3 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/40 text-red-300 font-mono font-bold">
+            Logout
+          </button>
+        </div>
+
+        <!-- MODULE A (1): PUBLISH NEW LIVE NOTICE -->
+        <div class="space-y-3">
+          <h4 class="font-hindi text-lg font-extrabold text-amber-500 flex items-center gap-2">
+            <i data-lucide="megaphone" class="w-5 h-5"></i>
+            <span>1. नया लाइव नोटिस प्रकाशित करें (Publish Instant Notice)</span>
+          </h4>
+          <form onsubmit="handlePublishNotice(event)" class="space-y-3 text-xs">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <input name="date" placeholder="तारीख (e.g. 18 Oct 2026)" class="sacred-input px-3.5 py-2.5 rounded-xl" />
+              <input name="tagHi" placeholder="हिंदी टैग (e.g. अति महत्वपूर्ण)" class="sacred-input px-3.5 py-2.5 rounded-xl" />
+              <input name="tagEn" placeholder="English Tag (e.g. URGENT)" class="sacred-input px-3.5 py-2.5 rounded-xl" />
+            </div>
+            <input name="titleHi" required placeholder="नोटिस का हिंदी शीर्षक (Hindi Title) *" class="sacred-input w-full px-3.5 py-2.5 rounded-xl" />
+            <input name="titleEn" placeholder="English Title (Optional)" class="sacred-input w-full px-3.5 py-2.5 rounded-xl" />
+            <textarea name="descHi" required rows="2" placeholder="नोटिस का पूरा विवरण हिंदी में (Hindi Description) *" class="sacred-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
+            <textarea name="descEn" rows="2" placeholder="English Description (Optional)" class="sacred-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
+            <label class="flex items-center gap-2 text-xs font-bold cursor-pointer">
+              <input type="checkbox" name="isNew" checked class="accent-amber-500 w-4 h-4" />
+              <span>Highlight as New/Urgent Notice (नारंगी बॉर्डर के साथ चमकाएं)</span>
+            </label>
+            <button type="submit" class="w-full py-3 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold">
+              🚀 लाइव नोटिस बोर्ड पर पब्लिश करें
+            </button>
+          </form>
+
+          <div class="pt-3 space-y-2">
+            <span class="text-[11px] font-mono uppercase text-amber-400 font-bold block">Manage Live Cloud Notices:</span>
+            <div id="admin-notices-list" class="space-y-2 max-h-44 overflow-y-auto"></div>
+          </div>
+        </div>
+
+        <!-- MODULE B (2): 1-CLICK ALUMNI VERIFICATION & APPROVAL -->
+        <div class="space-y-3 border-t border-amber-500/30 pt-6">
+          <h4 class="font-hindi text-lg font-extrabold text-emerald-400 flex items-center gap-2">
+            <i data-lucide="user-check" class="w-5 h-5"></i>
+            <span>2. पूर्व छात्र (Alumni) सत्यापन कतार (1-Click Approve / Delete)</span>
+          </h4>
+          <div id="admin-alumni-list" class="space-y-2.5 max-h-60 overflow-y-auto"></div>
+        </div>
+
+        <!-- MODULE C (3): 1-CLICK FACULTY (GURU STAMBH) VERIFICATION & APPROVAL (Yahi Step 1B tha!) -->
+        <div class="space-y-3 border-t border-amber-500/30 pt-6">
+          <h4 class="font-hindi text-lg font-extrabold text-amber-400 flex items-center gap-2">
+            <i data-lucide="award" class="w-5 h-5"></i>
+            <span>3. गुरु स्तंभ — शिक्षक प्रोफाइल सत्यापन कतार (1-Click Approve / Delete)</span>
+          </h4>
+          <div id="admin-faculty-list" class="space-y-2.5 max-h-72 overflow-y-auto"></div>
+        </div>
+
+      </div>
     </div>
+  </div>
 
     <script src="./config.js"></script>
     <script type="module" src="./firebase-backend.js"></script>
