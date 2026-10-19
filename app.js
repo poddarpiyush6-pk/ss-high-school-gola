@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE 3: app.js — APEX MASTER CONTROLLER (BILINGUAL + GURU STAMBH + ADMIN)
+// FILE: app.js — STABLE MASTER CONTROLLER (BILINGUAL + GURU STAMBH + ADMIN)
 // ============================================================================
 
 let currentLang = 'hi';
@@ -16,7 +16,7 @@ function escapeHTML(str) {
 }
 
 // ============================================================================
-// 1. COMPLETE BILINGUAL DICTIONARY (Translates Every Single Section on Click!)
+// 1. COMPLETE BILINGUAL DICTIONARY
 // ============================================================================
 const I18N_DICTIONARY = {
     hi: {
@@ -150,7 +150,7 @@ const I18N_DICTIONARY = {
 };
 
 // ============================================================================
-// 2. BILINGUAL SCHEMES DATA
+// 2. SCHEMES DATA
 // ============================================================================
 const SCHEMES_DATA = [
     {
@@ -410,7 +410,7 @@ function renderVerifiedAlumniWall() {
 }
 
 // ============================================================================
-// 4. BULLETPROOF DAY / NIGHT THEME ENGINE
+// 4. THEME ENGINE
 // ============================================================================
 function applyTheme(theme) {
     const html = document.documentElement;
@@ -444,7 +444,7 @@ function updateThemeIcons(theme) {
 }
 
 // ============================================================================
-// 5. 3D TILT & SACRED AARTI SPARKS ENGINE
+// 5. 3D TILT & PARTICLES
 // ============================================================================
 function init3DTiltCards() {
     document.querySelectorAll('.sacred-card').forEach(card => {
@@ -521,7 +521,7 @@ window.ringTempleBell = function (el) {
 };
 
 // ============================================================================
-// 6. PARALLEL CLOUD SYNC ENGINE (100% REFRESH-PROOF)
+// 6. CLOUD SYNC & VIDYA DEEP (Reset base count to 0 as requested)
 // ============================================================================
 async function syncWithBackend() {
     if (!window.BackendService) return;
@@ -537,7 +537,7 @@ async function syncWithBackend() {
         window.BackendService.fetchNotices ? window.BackendService.fetchNotices() : Promise.resolve(cachedNotices),
         window.BackendService.fetchApprovedAlumni ? window.BackendService.fetchApprovedAlumni() : Promise.resolve([]),
         window.BackendService.fetchApprovedFaculty ? window.BackendService.fetchApprovedFaculty() : Promise.resolve([]),
-        window.BackendService.getVidyaDeepCount ? window.BackendService.getVidyaDeepCount() : Promise.resolve(11408)
+        window.BackendService.getVidyaDeepCount ? window.BackendService.getVidyaDeepCount() : Promise.resolve(0)
     ]);
 
     if (noticesRes.status === 'fulfilled' && Array.isArray(noticesRes.value)) {
@@ -554,7 +554,7 @@ async function syncWithBackend() {
 
     const deepEl = document.getElementById('vidya-deep-count');
     if (deepEl && deepRes.status === 'fulfilled') {
-        deepEl.textContent = Number(deepRes.value || 11408).toLocaleString('en-IN');
+        deepEl.textContent = Number(deepRes.value || 0).toLocaleString('en-IN');
     }
 }
 
@@ -571,7 +571,7 @@ window.handleLightVidyaDeep = async function () {
 };
 
 // ============================================================================
-// 7. ALUMNI SUBMISSION (Telegram alerts handled via firebase-backend.js)
+// 7. ALUMNI SUBMISSION
 // ============================================================================
 window.handleAlumniSubmit = async function (e) {
     e.preventDefault();
@@ -631,7 +631,7 @@ window.toggleLanguage = function () {
 };
 
 // ============================================================================
-// 8. GURU STAMBH LIVE RENDERER (100% BILINGUAL & WING-FILTERABLE)
+// 8. GURU STAMBH RENDERER
 // ============================================================================
 function renderVerifiedFacultyWall() {
     const grid = document.getElementById('verified-faculty-grid');
@@ -741,7 +741,7 @@ window.filterFacultyByWing = function (wing) {
 };
 
 // ============================================================================
-// 9. SECRET ADMIN COMMAND CENTER CONTROLLER (MODULE 1, 2 & 3)
+// 9. SECRET ADMIN MODAL CONTROLLER
 // ============================================================================
 window.openSecretAdminModal = function () {
     const modal = document.getElementById('secret-admin-modal');
@@ -780,7 +780,6 @@ async function refreshAdminModalUI() {
     dashView.classList.remove('hidden');
     if (emailLbl) emailLbl.textContent = user.email;
 
-    // 1. Notices List
     const noticesListEl = document.getElementById('admin-notices-list');
     if (noticesListEl) {
         const notices = await window.BackendService.fetchNotices();
@@ -792,7 +791,6 @@ async function refreshAdminModalUI() {
     `).join('');
     }
 
-    // 2. Alumni List
     const alumniListEl = document.getElementById('admin-alumni-list');
     if (alumniListEl && window.BackendService.fetchAllAlumniForAdmin) {
         const allAlumni = await window.BackendService.fetchAllAlumniForAdmin();
@@ -813,7 +811,6 @@ async function refreshAdminModalUI() {
       `).join('');
     }
 
-    // 3. Faculty (Guru Stambh) List
     const facultyListEl = document.getElementById('admin-faculty-list');
     if (facultyListEl && window.BackendService.fetchAllFacultyForAdmin) {
         const allFaculty = await window.BackendService.fetchAllFacultyForAdmin();
@@ -925,7 +922,7 @@ window.handleDeleteFaculty = async function (docId) {
 };
 
 // ============================================================================
-// 10. INITIALIZATION & RACE-CONDITION-SAFE BOOTSTRAP
+// 10. INITIALIZATION
 // ============================================================================
 document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('gola_school_theme') || 'dark';
