@@ -1,5 +1,5 @@
 // ============================================================================
-// FILE 3: app.js — APEX MASTER CONTROLLER (BILINGUAL + GURU STAMBH + ADMIN + TELEGRAM)
+// FILE 3: app.js — APEX MASTER CONTROLLER (BILINGUAL + GURU STAMBH + ADMIN)
 // ============================================================================
 
 let currentLang = 'hi';
@@ -9,53 +9,11 @@ let cachedApprovedAlumni = [];
 let cachedApprovedFaculty = [];
 let currentFacultyWingFilter = 'all';
 
-// ============================================================================
-// 📱 0. TELEGRAM INSTANT NOTIFICATION ENGINE (PRE-CONFIGURED & HTML-SAFE)
-// ============================================================================
-const TELEGRAM_CONFIG = {
-    botToken: "8919728416:AAHzgSlbVDfKymmrX4QEr56qFzh7t3uS2Jo",
-    chatId: "5883701722"
-};
-
 function escapeHTML(str) {
     const div = document.createElement('div');
     div.textContent = str == null ? '' : String(str);
     return div.innerHTML;
 }
-
-window.sendTelegramAlert = async function (portalTitle, detailsObj) {
-    if (!TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) return;
-
-    const lines = [
-        `🔔 <b>नया फॉर्म सबमिशन प्राप्त हुआ! (New Submission)</b>`,
-        `🏛️ <b>पोर्टल:</b> ${escapeHTML(portalTitle)}`,
-        `━━━━━━━━━━━━━━━━━━━━`
-    ];
-
-    Object.entries(detailsObj || {}).forEach(([label, val]) => {
-        if (val !== undefined && val !== null && String(val).trim() !== '') {
-            lines.push(`• <b>${escapeHTML(label)}:</b> ${escapeHTML(val)}`);
-        }
-    });
-
-    lines.push(`━━━━━━━━━━━━━━━━━━━━`);
-    lines.push(`🔐 <i>Admin Panel (Ctrl+Shift+A) खोलकर 1-Click Approve करें।</i>`);
-
-    try {
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                chat_id: TELEGRAM_CONFIG.chatId,
-                text: lines.join('\n'),
-                parse_mode: 'HTML',
-                disable_web_page_preview: true
-            })
-        });
-    } catch (err) {
-        console.warn("[Telegram Alert Non-Blocking Warning]:", err);
-    }
-};
 
 // ============================================================================
 // 1. COMPLETE BILINGUAL DICTIONARY (Translates Every Single Section on Click!)
@@ -613,7 +571,7 @@ window.handleLightVidyaDeep = async function () {
 };
 
 // ============================================================================
-// 7. ALUMNI SUBMISSION + AUTOMATIC TELEGRAM ALERT
+// 7. ALUMNI SUBMISSION (Telegram alerts handled via firebase-backend.js)
 // ============================================================================
 window.handleAlumniSubmit = async function (e) {
     e.preventDefault();
@@ -633,16 +591,6 @@ window.handleAlumniSubmit = async function (e) {
 
     try {
         const res = await window.BackendService.submitAlumniRegistration(payload);
-
-        // Send Instant Telegram Alert to Admin
-        await window.sendTelegramAlert("गौरव स्तंभ (Alumni Form)", {
-            "पूर्व छात्र का नाम": payload.fullName,
-            "बैच वर्ष (Batch)": payload.batchYear,
-            "संकाय (Stream)": payload.stream || "N/A",
-            "वर्तमान पद/उपलब्धि": payload.achievement || "N/A",
-            "संपर्क (Contact)": payload.contact || "N/A"
-        });
-
         statusBox.className = "p-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold block";
         statusBox.textContent = "✅ " + res.message;
         form.reset();
