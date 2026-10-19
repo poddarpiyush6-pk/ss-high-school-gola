@@ -866,6 +866,157 @@
     <script src="./config.js"></script>
     <script type="module" src="./firebase-backend.js"></script>
     <script src="./app.js"></script>
+    <!-- ============================================================================
+       🤖 VIDYA MITRA AI — OFFICIAL GEMINI 2.5 FLASH + SCHOOL & JAC STUDY ASSISTANT
+       ============================================================================ -->
+  <script>
+    (function initVidyaMitraAI() {
+      const widgetHTML = `
+        <div id="vidya-ai-root" class="fixed bottom-5 right-5 z-40 font-sans">
+          <!-- Floating Launcher Button -->
+          <button onclick="toggleVidyaAI()" id="vidya-ai-fab" class="group flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-stone-950 font-extrabold shadow-2xl border-2 border-amber-200/80 hover:scale-105 transition-all">
+            <span class="text-lg">🙏</span>
+            <div class="text-left leading-tight">
+              <span class="block text-[10px] font-mono uppercase tracking-wider opacity-85">Gemini AI • 24×7</span>
+              <span class="font-hindi text-xs sm:text-sm font-extrabold">विद्या मित्र AI सहायक</span>
+            </div>
+          </button>
+
+          <!-- Chat Window -->
+          <div id="vidya-ai-panel" class="hidden fixed bottom-20 right-4 sm:right-6 w-[92vw] max-w-md rounded-3xl sacred-card border-2 border-amber-500/60 shadow-2xl overflow-hidden flex flex-col max-h-[78vh]">
+            <!-- Header -->
+            <div class="p-4 bg-gradient-to-r from-amber-500/25 via-orange-500/20 to-transparent border-b border-amber-500/30 flex items-center justify-between">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-amber-500 text-stone-950 flex items-center justify-center font-extrabold text-lg shadow">✨</div>
+                <div>
+                  <h4 class="font-hindi text-sm font-extrabold t-heading">विद्या मित्र AI (School & Study Guru)</h4>
+                  <p class="text-[10px] font-mono t-gold font-bold">S.S. +2 High School, Gola • Gemini Live</p>
+                </div>
+              </div>
+              <button onclick="toggleVidyaAI()" class="px-2.5 py-1 rounded-lg bg-red-500/20 text-red-400 font-mono text-xs font-bold hover:bg-red-500 hover:text-white">✕</button>
+            </div>
+
+            <!-- Quick Suggestion Chips -->
+            <div class="px-3.5 py-2 border-b border-amber-500/20 flex gap-1.5 overflow-x-auto text-[11px] font-hindi">
+              <button onclick="askVidyaPreset('विद्यालय के प्रधानाचार्य, UDISE कोड और संकायों की जानकारी दें')" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 t-gold font-bold shrink-0 hover:bg-amber-500 hover:text-stone-950">🏫 विद्यालय परिचय</button>
+              <button onclick="askVidyaPreset('ई-कल्याण और सावित्रीबाई फुले छात्रवृत्ति योजना क्या है?')" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 t-gold font-bold shrink-0 hover:bg-amber-500 hover:text-stone-950">🎓 छात्रवृत्ति</button>
+              <button onclick="askVidyaPreset('गुरु स्तंभ पर हमारे विद्यालय के कौन-कौन से शिक्षक पंजीकृत हैं?')" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 t-gold font-bold shrink-0 hover:bg-amber-500 hover:text-stone-950">🙏 हमारे गुरुजन</button>
+              <button onclick="askVidyaPreset('JAC बोर्ड परीक्षा में 90%+ अंक लाने की रणनीति बताएं')" class="px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 t-gold font-bold shrink-0 hover:bg-amber-500 hover:text-stone-950">📚 JAC Study Tips</button>
+            </div>
+
+            <!-- Messages Stream -->
+            <div id="vidya-ai-messages" class="p-4 space-y-3 overflow-y-auto flex-1 text-xs leading-relaxed" style="min-height: 250px; max-height: 360px;">
+              <div class="p-3 rounded-2xl sacred-inner-box t-heading font-hindi">
+                🙏 <strong>प्रणाम! मैं 'विद्या मित्र AI' हूँ।</strong><br>
+                आप मुझसे <strong>राज्य संपोषित +2 उच्च विद्यालय, गोला (1940)</strong> के नोटिस, शिक्षकों, छात्रवृत्ति योजनाओं या <strong>कक्षा 1 से 12 (Science, Arts, Commerce)</strong> की पढ़ाई से जुड़ा कोई भी प्रश्न हिंदी या English में पूछ सकते हैं!
+              </div>
+            </div>
+
+            <!-- Input Form -->
+            <form onsubmit="handleVidyaAISubmit(event)" class="p-3 border-t border-amber-500/30 flex items-center gap-2 bg-black/20">
+              <input id="vidya-ai-input" type="text" required placeholder="यहाँ अपना प्रश्न लिखें (Ask anything)..." class="sacred-input flex-1 px-3.5 py-2.5 rounded-xl text-xs focus:outline-none" />
+              <button type="submit" id="vidya-ai-send" class="px-4 py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs shrink-0">
+                पूछें 🚀
+              </button>
+            </form>
+          </div>
+        </div>
+      `;
+
+      document.addEventListener('DOMContentLoaded', () => {
+        document.body.insertAdjacentHTML('beforeend', widgetHTML);
+      });
+
+      window.toggleVidyaAI = function() {
+        const panel = document.getElementById('vidya-ai-panel');
+        if (panel) panel.classList.toggle('hidden');
+      };
+
+      window.askVidyaPreset = function(q) {
+        const inp = document.getElementById('vidya-ai-input');
+        if (inp) {
+          inp.value = q;
+          document.getElementById('vidya-ai-send').click();
+        }
+      };
+
+      window.handleVidyaAISubmit = async function(e) {
+        e.preventDefault();
+        const inp = document.getElementById('vidya-ai-input');
+        const box = document.getElementById('vidya-ai-messages');
+        const btn = document.getElementById('vidya-ai-send');
+        const question = inp.value.trim();
+        if (!question) return;
+
+        inp.value = '';
+        btn.disabled = true;
+
+        // Append User Bubble
+        const userDiv = document.createElement('div');
+        userDiv.className = "p-3 rounded-2xl bg-amber-500 text-stone-950 font-bold ml-8 text-right font-hindi";
+        userDiv.textContent = question;
+        box.appendChild(userDiv);
+
+        // Append Loading Bubble
+        const loadDiv = document.createElement('div');
+        loadDiv.className = "p-3 rounded-2xl sacred-inner-box t-gold font-mono text-[11px] mr-6";
+        loadDiv.textContent = "⏳ विद्या मित्र AI विचार कर रहा है...";
+        box.appendChild(loadDiv);
+        box.scrollTop = box.scrollHeight;
+
+        // Build Live School Context from Firebase + Config
+        const noticesSummary = (typeof cachedNotices !== 'undefined' ? cachedNotices : [])
+          .slice(0, 4).map(n => `[${n.date}] ${n.titleHi}: ${n.descHi}`).join(' | ');
+        const facultySummary = (typeof cachedApprovedFaculty !== 'undefined' ? cachedApprovedFaculty : [])
+          .map(f => `${f.fullName} (${f.designation}, Class ${f.wing}, Subject: ${f.subject})`).join('; ');
+        const alumniSummary = (typeof cachedApprovedAlumni !== 'undefined' ? cachedApprovedAlumni : [])
+          .map(a => `${a.fullName} (Batch ${a.batchYear}, ${a.achievement})`).join('; ');
+
+        const systemPrompt = `You are "Vidya Mitra AI", the official respectful AI Guru & Helpdesk of "State Subsidized +2 High School, Gola (Ramgarh, Jharkhand)" (राज्य संपोषित +2 उच्च विद्यालय, गोला).
+School Facts:
+- Established: 1940 (86+ years legacy)
+- UDISE Code: 20240206805
+- Classes: Class 1 to 12 (4 Wings: Primary 1-5, Upper Primary 6-8, Secondary 9-10, +2 Intermediate 11-12 Science/Arts/Commerce)
+- Student Strength: 951+ students
+- Principal: Smt. Anupa Pushpa Tirkey (श्रीमती अनुपा पुष्पा तिर्की)
+- Facilities: ICT Lab, IT Lab, Smart Classrooms, Physics/Chemistry/Biology Labs, Active NCC Unit & Grand Playground.
+- Scholarships: e-Kalyan (ST/SC/OBC), Savitribai Phule Kishori Samriddhi Yojana (Rs 40,000 for girls), Guruji Student Credit Card (up to Rs 15 Lakh at 4%), CMMSS Merit Scholarship (Rs 12,000/yr), Free Cycle Scheme (Class 8).
+- Live Notices: ${noticesSummary || 'Standard academic session active'}
+- Approved Faculty on Guru Stambh: Smt. Anupa Pushpa Tirkey (Principal); ${facultySummary || 'Faculty onboarding live'}
+- Verified Alumni: ${alumniSummary || 'Alumni registration open'}
+Instructions: Answer concisely, warmly, and accurately in the language the user used (Hindi or English). If the student asks an academic/study question (Physics, Maths, History, JAC Board exams), explain it clearly like an inspiring teacher.`;
+
+        try {
+          const apiKey = window.SCHOOL_MASTER_CONFIG && window.SCHOOL_MASTER_CONFIG.firebase && window.SCHOOL_MASTER_CONFIG.firebase.apiKey;
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\nStudent/Visitor Question: " + question }] }],
+              generationConfig: { temperature: 0.5, maxOutputTokens: 450 }
+            })
+          });
+
+          const data = await res.json();
+          const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+          if (reply) {
+            loadDiv.className = "p-3 rounded-2xl sacred-inner-box t-heading mr-4 font-hindi whitespace-pre-line";
+            loadDiv.textContent = reply.trim();
+          } else {
+            throw new Error("Fallback to local brain");
+          }
+        } catch (err) {
+          // Instant Offline/Fallback School Brain (Never fails!)
+          loadDiv.className = "p-3 rounded-2xl sacred-inner-box t-heading mr-4 font-hindi whitespace-pre-line";
+          loadDiv.textContent = `🙏 राज्य संपोषित +2 उच्च विद्यालय, गोला (स्थापना: 1940, UDISE: 20240206805)\n• प्रधानाचार्य: श्रीमती अनुपा पुष्पा तिर्की\n• कुल विद्यार्थी: 951+ (कक्षा 1 से 12 — विज्ञान, कला एवं वाणिज्य)\n• पंजीकृत शिक्षक: ${facultySummary || 'श्रीमती अनुपा पुष्पा तिर्की (प्रधानाचार्य)'}\n• ताज़ा सूचना: ${noticesSummary || 'विद्यालय के नोटिस बोर्ड का अवलोकन करें।'}`;
+        } finally {
+          btn.disabled = false;
+          box.scrollTop = box.scrollHeight;
+        }
+      };
+    })();
+  </script>
 </body>
 
 </html>
