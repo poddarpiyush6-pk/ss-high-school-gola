@@ -1,10 +1,10 @@
 // ============================================================================
-// FILE: firebase-backend.js — STABLE FIREBASE CLOUD ENGINE
+// FILE 2: firebase-backend.js — COMPLETE CLOUD ENGINE + ADMIN + GURU STAMBH
 // ============================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
-  getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, query, where 
+  getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, query, orderBy, where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { 
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged 
@@ -28,7 +28,7 @@ try {
       window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: { user } }));
     });
 
-    console.log("✅ [S.S. +2 High School Gola] Firebase Cloud Connected Successfully.");
+    console.log("✅ [S.S. +2 High School Gola] Firebase Cloud + Auth + Guru Stambh Connected.");
   }
 } catch (err) {
   console.warn("⚠️ Firebase fallback mode active:", err);
@@ -38,6 +38,9 @@ window.BackendService = {
   isLive: () => isFirebaseLive,
   getAdminUser: () => currentAdminUser,
 
+  // --------------------------------------------------------------------------
+  // 1. ADMIN AUTHENTICATION (Email / Password)
+  // --------------------------------------------------------------------------
   async loginAdmin(email, password) {
     if (!auth) throw new Error("Firebase Auth सक्रिय नहीं है।");
     const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
@@ -48,21 +51,29 @@ window.BackendService = {
     if (auth) await signOut(auth);
   },
 
+  // --------------------------------------------------------------------------
+  // 2. LIVE NOTICES (Read + Admin Publish + Admin Delete)
+  // --------------------------------------------------------------------------
   async fetchNotices() {
-    if (!isFirebaseLive || !db) return cfg.defaultNotices || [];
+    if (!isFirebaseLive || !db) return cfg.defaultNotices;
     try {
-      const snap = await getDocs(collection(db, "notices"));
-      if (snap.empty) return cfg.defaultNotices || [];
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      list.sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
-      return list;
+      const q = query(collection(db, "notices"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      if (snap.empty) return cfg.defaultNotices;
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (e) {
-      return cfg.defaultNotices || [];
+      try {
+        const snap = await getDocs(collection(db, "notices"));
+        if (snap.empty) return cfg.defaultNotices;
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        return cfg.defaultNotices;
+      }
     }
   },
 
   async publishNotice(noticeData) {
-    if (!currentAdminUser) throw new Error("Unauthorized");
+    if (!currentAdminUser) throw new Error("केवल लॉगिन किए हुए एडमिन नोटिस पब्लिश कर सकते हैं।");
     const payload = {
       date: noticeData.date || new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
       tagHi: noticeData.tagHi || "आधिकारिक सूचना",
@@ -84,15 +95,17 @@ window.BackendService = {
     return true;
   },
 
-  // Vidya Deep counter with base 0 reset as requested
+  // --------------------------------------------------------------------------
+  // 3. SACRED VIDYA DEEP COUNTER
+  // --------------------------------------------------------------------------
   async getVidyaDeepCount() {
-    const localSaved = parseInt(localStorage.getItem("gola_vidya_deep_count") || "0", 10);
+    const localSaved = parseInt(localStorage.getItem("gola_vidya_deep_count") || "11408", 10);
     if (!isFirebaseLive || !db) return localSaved;
     try {
       const ref = doc(db, "school_metrics", "vidya_deep");
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        const count = snap.data().count !== undefined ? snap.data().count : localSaved;
+        const count = snap.data().count || localSaved;
         localStorage.setItem("gola_vidya_deep_count", count);
         return count;
       } else {
@@ -105,7 +118,7 @@ window.BackendService = {
   },
 
   async lightVidyaDeep() {
-    let current = parseInt(localStorage.getItem("gola_vidya_deep_count") || "0", 10) + 1;
+    let current = parseInt(localStorage.getItem("gola_vidya_deep_count") || "11408", 10) + 1;
     localStorage.setItem("gola_vidya_deep_count", current);
     if (isFirebaseLive && db) {
       try {
@@ -116,6 +129,9 @@ window.BackendService = {
     return current;
   },
 
+  // --------------------------------------------------------------------------
+  // 4. ALUMNI (GAURAV STAMBH) — Submit + Fetch Approved + Admin Moderation
+  // --------------------------------------------------------------------------
   async submitAlumniRegistration(data) {
     const payload = {
       fullName: String(data.fullName || '').trim(),
@@ -133,12 +149,9 @@ window.BackendService = {
 
     if (isFirebaseLive && db) {
       await addDoc(collection(db, "alumni_submissions"), payload);
+      return { mode: "firebase", message: "आपका विवरण सफलतापूर्वक दर्ज हो गया है! एडमिन अप्रूवल के तुरंत बाद यह गौरव स्तंभ पर लाइव चमकेगा।" };
     }
-
-    return {
-      mode: isFirebaseLive ? "firebase" : "local",
-      message: "आपका विवरण सफलतापूर्वक दर्ज हो गया है! एडमिन अप्रूवल के तुरंत बाद यह गौरव स्तंभ पर लाइव चमकेगा।"
-    };
+    return { mode: "local", message: "आपका विवरण सुरक्षित कर लिया गया है!" };
   },
 
   async fetchApprovedAlumni() {
@@ -150,6 +163,7 @@ window.BackendService = {
       list.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
       return list;
     } catch (e) {
+      console.warn("fetchApprovedAlumni error:", e);
       return [];
     }
   },
@@ -178,6 +192,9 @@ window.BackendService = {
     return true;
   },
 
+  // --------------------------------------------------------------------------
+  // 5. FACULTY (GURU STAMBH) — Teacher Onboarding + Live Approved + Admin
+  // --------------------------------------------------------------------------
   async submitFacultyOnboarding(data) {
     const payload = {
       wing: String(data.wing || '').trim(),
@@ -196,18 +213,18 @@ window.BackendService = {
       submittedAt: new Date().toISOString()
     };
 
-    if (!payload.fullName || !payload.wing || !payload.subject || !payload.thoughtForSchools && !payload.thoughtForStudents) {
+    if (!payload.fullName || !payload.wing || !payload.subject || !payload.thoughtForStudents) {
       throw new Error("कृपया सभी अनिवार्य विवरण (नाम, वर्ग, विषय एवं संदेश) भरें।");
     }
 
     if (isFirebaseLive && db) {
       await addDoc(collection(db, "faculty_submissions"), payload);
+      return {
+        mode: "firebase",
+        message: "आदरणीय गुरुजी, आपका विवरण सफलतापूर्वक दर्ज हो गया है! प्रधानाचार्य/एडमिन सत्यापन के तुरंत बाद आपका प्रोफाइल 'गुरु स्तंभ' पर लाइव दिखेगा।"
+      };
     }
-
-    return {
-      mode: isFirebaseLive ? "firebase" : "local",
-      message: "आदरणीय गुरुजी, आपका विवरण सफलतापूर्वक दर्ज हो गया है! प्रधानाचार्य/एडमिन सत्यापन के तुरंत बाद आपका प्रोफाइल 'गुरु स्तंभ' पर लाइव दिखेगा।"
-    };
+    return { mode: "local", message: "प्रोफाइल सुरक्षित कर लिया गया है!" };
   },
 
   async fetchApprovedFaculty() {
@@ -219,6 +236,7 @@ window.BackendService = {
       list.sort((a, b) => String(a.wing || '').localeCompare(String(b.wing || '')));
       return list;
     } catch (e) {
+      console.warn("fetchApprovedFaculty error:", e);
       return [];
     }
   },
