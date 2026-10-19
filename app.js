@@ -1,15 +1,65 @@
 // ============================================================================
-// FILE 3: app.js — FINAL PRO CONTROLLER (100% BILINGUAL HI/EN + GURU STAMBH + ADMIN)
+// FILE 3: app.js — APEX MASTER CONTROLLER (BILINGUAL + GURU STAMBH + ADMIN + TELEGRAM)
 // ============================================================================
 
 let currentLang = 'hi';
 let currentSchemeFilter = 'all';
-let cachedNotices = window.SCHOOL_MASTER_CONFIG.defaultNotices;
+let cachedNotices = (window.SCHOOL_MASTER_CONFIG && window.SCHOOL_MASTER_CONFIG.defaultNotices) || [];
 let cachedApprovedAlumni = [];
 let cachedApprovedFaculty = [];
 let currentFacultyWingFilter = 'all';
 
+// ============================================================================
+// 📱 0. TELEGRAM INSTANT NOTIFICATION ENGINE (PRE-CONFIGURED & HTML-SAFE)
+// ============================================================================
+const TELEGRAM_CONFIG = {
+    botToken: "8919728416:AAHzgSlbVDfKymmrX4QEr56qFzh7t3uS2Jo",
+    chatId: "5883701722"
+};
+
+function escapeHTML(str) {
+    const div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+}
+
+window.sendTelegramAlert = async function (portalTitle, detailsObj) {
+    if (!TELEGRAM_CONFIG.botToken || !TELEGRAM_CONFIG.chatId) return;
+
+    const lines = [
+        `🔔 <b>नया फॉर्म सबमिशन प्राप्त हुआ! (New Submission)</b>`,
+        `🏛️ <b>पोर्टल:</b> ${escapeHTML(portalTitle)}`,
+        `━━━━━━━━━━━━━━━━━━━━`
+    ];
+
+    Object.entries(detailsObj || {}).forEach(([label, val]) => {
+        if (val !== undefined && val !== null && String(val).trim() !== '') {
+            lines.push(`• <b>${escapeHTML(label)}:</b> ${escapeHTML(val)}`);
+        }
+    });
+
+    lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+    lines.push(`🔐 <i>Admin Panel (Ctrl+Shift+A) खोलकर 1-Click Approve करें।</i>`);
+
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.botToken}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id: TELEGRAM_CONFIG.chatId,
+                text: lines.join('\n'),
+                parse_mode: 'HTML',
+                disable_web_page_preview: true
+            })
+        });
+    } catch (err) {
+        console.warn("[Telegram Alert Non-Blocking Warning]:", err);
+    }
+};
+
+// ============================================================================
 // 1. COMPLETE BILINGUAL DICTIONARY (Translates Every Single Section on Click!)
+// ============================================================================
 const I18N_DICTIONARY = {
     hi: {
         header_badge: "झारखंड सरकार • विद्या मंदिर (कक्षा 1–12)",
@@ -68,7 +118,7 @@ const I18N_DICTIONARY = {
         guru_p_name: "श्रीमती अनुपा पुष्पा तिर्की",
         guru_p_desc: "विद्यालय के शैक्षणिक अनुशासन, प्रशासन एवं समग्र विकास की प्रमुख मार्गदर्शक।",
         gaurav_heading: "गौरव स्तंभ — हमारे टॉपर्स एवं प्रतिष्ठित पूर्व छात्र",
-        gaurav_sub: "क्या आप राज्य संपोषित +2 उच्च विद्यालय, गोला के पूर्व छात्र (Alumni) या बोर्ड टॉपर रहे हैं? अपना विवरण फॉर्म में दर्ज करें। एडमिन द्वारा Firebase Console में स्टेटस approved करते ही आपका नाम नीचे सत्यापित गौरव दीवार पर चमकने लगेगा!",
+        gaurav_sub: "क्या आप राज्य संपोषित +2 उच्च विद्यालय, गोला के पूर्व छात्र (Alumni) या बोर्ड टॉपर रहे हैं? अपना विवरण फॉर्म में दर्ज करें। एडमिन द्वारा सत्यापित करते ही आपका नाम नीचे गौरव दीवार पर चमकने लगेगा!",
         form_title: "पूर्व छात्र (Alumni) पंजीकरण फॉर्म",
         btn_submit_alumni: "गौरव स्तंभ हेतु विवरण भेजें (Submit for Verification)",
         wall_heading: "सत्यापित गौरव स्तंभ (Verified Alumni & Toppers Wall)",
@@ -132,7 +182,7 @@ const I18N_DICTIONARY = {
         guru_p_name: "Smt. Anupa Pushpa Tirkey",
         guru_p_desc: "Leading academic discipline, administration, and holistic student development.",
         gaurav_heading: "Gaurav Stambh — Board Toppers & Notable Alumni",
-        gaurav_sub: "Are you an Alumnus or Board Topper of S.S. +2 High School, Gola? Submit your details in the form. Once approved by the Admin in Firebase Console, your card will automatically shine on the Verified Alumni Wall below!",
+        gaurav_sub: "Are you an Alumnus or Board Topper of S.S. +2 High School, Gola? Submit your details in the form. Once approved by the Admin, your card will automatically shine on the Verified Alumni Wall below!",
         form_title: "Alumni & Topper Registration Form",
         btn_submit_alumni: "Submit Details for Gaurav Stambh (Firebase Cloud)",
         wall_heading: "Verified Alumni & Toppers Wall (Live Cloud Synced)",
@@ -141,7 +191,9 @@ const I18N_DICTIONARY = {
     }
 };
 
+// ============================================================================
 // 2. BILINGUAL SCHEMES DATA
+// ============================================================================
 const SCHEMES_DATA = [
     {
         cats: "pre-matric post-matric",
@@ -229,15 +281,12 @@ const SCHEMES_DATA = [
     }
 ];
 
-function escapeHTML(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-}
-
-// Render Master Config & Complete Bilingual Dictionary
+// ============================================================================
+// 3. MASTER UI RENDERER
+// ============================================================================
 function renderMasterConfig() {
     const cfg = window.SCHOOL_MASTER_CONFIG;
+    if (!cfg) return;
     const dict = I18N_DICTIONARY[currentLang];
 
     document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -310,9 +359,7 @@ function renderMasterConfig() {
 
     renderSchemesGrid();
     renderVerifiedAlumniWall();
-    if (typeof renderVerifiedFacultyWall === 'function') {
-        renderVerifiedFacultyWall();
-    }
+    renderVerifiedFacultyWall();
 
     const cName = document.getElementById('creator-name-slot');
     const cBatch = document.getElementById('creator-batch-slot');
@@ -378,8 +425,8 @@ function renderVerifiedAlumniWall() {
         </p>
         <p class="text-xs t-body">
           ${currentLang === 'hi'
-                ? 'ऊपर दिए गए फॉर्म से पंजीकरण करें और Firebase Console के alumni_submissions में जाकर status को "approved" करें — वह कार्ड तुरंत यहाँ दिखाई देगा!'
-                : 'Register using the form above and change status to "approved" inside Firebase Console (alumni_submissions) to display the card live!'}
+                ? 'ऊपर दिए गए फॉर्म से पंजीकरण करें और एडमिन पैनल (Ctrl+Shift+A) से Approve करें — वह कार्ड तुरंत यहाँ दिखाई देगा!'
+                : 'Register using the form above and Approve from the Secret Admin Panel (Ctrl+Shift+A) to display the card live!'}
         </p>
       </div>
     `;
@@ -404,7 +451,9 @@ function renderVerifiedAlumniWall() {
   `).join('');
 }
 
-// Theme Engine
+// ============================================================================
+// 4. BULLETPROOF DAY / NIGHT THEME ENGINE
+// ============================================================================
 function applyTheme(theme) {
     const html = document.documentElement;
     html.setAttribute('data-theme', theme);
@@ -436,7 +485,9 @@ function updateThemeIcons(theme) {
     }
 }
 
-// 3D Tilt Cards
+// ============================================================================
+// 5. 3D TILT & SACRED AARTI SPARKS ENGINE
+// ============================================================================
 function init3DTiltCards() {
     document.querySelectorAll('.sacred-card').forEach(card => {
         if (card.dataset.tiltBound) return;
@@ -460,7 +511,6 @@ function init3DTiltCards() {
     });
 }
 
-// Sacred Aarti Particles Canvas
 function initSacredParticles() {
     const canvas = document.getElementById('sacred-particles-canvas');
     if (!canvas) return;
@@ -512,7 +562,9 @@ window.ringTempleBell = function (el) {
     el.style.animation = 'bellRingActive 0.8s ease-in-out 2';
 };
 
-// Robust Sync with Backend (Fixed Refresh Bug)
+// ============================================================================
+// 6. PARALLEL CLOUD SYNC ENGINE (100% REFRESH-PROOF)
+// ============================================================================
 async function syncWithBackend() {
     if (!window.BackendService) return;
 
@@ -523,30 +575,35 @@ async function syncWithBackend() {
             : "Static Config Mode";
     }
 
-    cachedNotices = await window.BackendService.fetchNotices();
-    
-    if (window.BackendService.fetchApprovedAlumni) {
-        cachedApprovedAlumni = await window.BackendService.fetchApprovedAlumni();
-    }
+    const [noticesRes, alumniRes, facultyRes, deepRes] = await Promise.allSettled([
+        window.BackendService.fetchNotices ? window.BackendService.fetchNotices() : Promise.resolve(cachedNotices),
+        window.BackendService.fetchApprovedAlumni ? window.BackendService.fetchApprovedAlumni() : Promise.resolve([]),
+        window.BackendService.fetchApprovedFaculty ? window.BackendService.fetchApprovedFaculty() : Promise.resolve([]),
+        window.BackendService.getVidyaDeepCount ? window.BackendService.getVidyaDeepCount() : Promise.resolve(11408)
+    ]);
 
-    if (window.BackendService.fetchApprovedFaculty) {
-        cachedApprovedFaculty = await window.BackendService.fetchApprovedFaculty();
+    if (noticesRes.status === 'fulfilled' && Array.isArray(noticesRes.value)) {
+        cachedNotices = noticesRes.value;
+    }
+    if (alumniRes.status === 'fulfilled' && Array.isArray(alumniRes.value)) {
+        cachedApprovedAlumni = alumniRes.value;
+    }
+    if (facultyRes.status === 'fulfilled' && Array.isArray(facultyRes.value)) {
+        cachedApprovedFaculty = facultyRes.value;
     }
 
     renderMasterConfig();
-    if (typeof renderVerifiedFacultyWall === 'function') {
-        renderVerifiedFacultyWall();
-    }
 
-    const deepCount = await window.BackendService.getVidyaDeepCount();
     const deepEl = document.getElementById('vidya-deep-count');
-    if (deepEl) deepEl.textContent = deepCount.toLocaleString('en-IN');
+    if (deepEl && deepRes.status === 'fulfilled') {
+        deepEl.textContent = Number(deepRes.value || 11408).toLocaleString('en-IN');
+    }
 }
 
 window.handleLightVidyaDeep = async function () {
     const btn = document.getElementById('btn-light-deep');
     const countEl = document.getElementById('vidya-deep-count');
-    if (!window.BackendService) return;
+    if (!window.BackendService || !btn) return;
 
     btn.disabled = true;
     const newCount = await window.BackendService.lightVidyaDeep();
@@ -555,25 +612,45 @@ window.handleLightVidyaDeep = async function () {
     if (window.lucide) lucide.createIcons();
 };
 
+// ============================================================================
+// 7. ALUMNI SUBMISSION + AUTOMATIC TELEGRAM ALERT
+// ============================================================================
 window.handleAlumniSubmit = async function (e) {
     e.preventDefault();
     const statusBox = document.getElementById('alumni-form-status');
     const form = e.target;
+    const submitBtn = form.querySelector('button[type="submit"]');
+
+    const payload = {
+        fullName: form.fullName.value.trim(),
+        batchYear: form.batchYear.value.trim(),
+        stream: form.stream.value.trim(),
+        achievement: form.achievement.value.trim(),
+        contact: form.contact.value.trim()
+    };
+
+    if (submitBtn) submitBtn.disabled = true;
 
     try {
-        const res = await window.BackendService.submitAlumniRegistration({
-            fullName: form.fullName.value,
-            batchYear: form.batchYear.value,
-            stream: form.stream.value,
-            achievement: form.achievement.value,
-            contact: form.contact.value
+        const res = await window.BackendService.submitAlumniRegistration(payload);
+
+        // Send Instant Telegram Alert to Admin
+        await window.sendTelegramAlert("गौरव स्तंभ (Alumni Form)", {
+            "पूर्व छात्र का नाम": payload.fullName,
+            "बैच वर्ष (Batch)": payload.batchYear,
+            "संकाय (Stream)": payload.stream || "N/A",
+            "वर्तमान पद/उपलब्धि": payload.achievement || "N/A",
+            "संपर्क (Contact)": payload.contact || "N/A"
         });
+
         statusBox.className = "p-3.5 rounded-xl bg-emerald-500/20 border border-emerald-500/50 text-emerald-700 dark:text-emerald-300 text-xs font-extrabold block";
         statusBox.textContent = "✅ " + res.message;
         form.reset();
     } catch (err) {
         statusBox.className = "p-3.5 rounded-xl bg-red-500/20 border border-red-500/50 text-red-700 dark:text-red-300 text-xs font-extrabold block";
         statusBox.textContent = "⚠️ " + err.message;
+    } finally {
+        if (submitBtn) submitBtn.disabled = false;
     }
 };
 
@@ -605,31 +682,18 @@ window.toggleLanguage = function () {
     renderMasterConfig();
 };
 
-document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('gola_school_theme') || 'dark';
-    applyTheme(savedTheme);
-    renderMasterConfig();
-    initSacredParticles();
-    if (window.BackendService) {
-        syncWithBackend();
-    }
-});
-
-window.addEventListener('backend-ready', syncWithBackend);
-
 // ============================================================================
-// 🏛️ GURU STAMBH LIVE RENDERER + SECRET ADMIN COMMAND CENTER (FINAL BLOCK)
+// 8. GURU STAMBH LIVE RENDERER (100% BILINGUAL & WING-FILTERABLE)
 // ============================================================================
-
 function renderVerifiedFacultyWall() {
-  const grid = document.getElementById('verified-faculty-grid');
-  if (!grid) return;
+    const grid = document.getElementById('verified-faculty-grid');
+    if (!grid) return;
 
-  const filtered = currentFacultyWingFilter === 'all'
-    ? cachedApprovedFaculty
-    : cachedApprovedFaculty.filter(f => f.wing === currentFacultyWingFilter);
+    const filtered = currentFacultyWingFilter === 'all'
+        ? cachedApprovedFaculty
+        : cachedApprovedFaculty.filter(f => f.wing === currentFacultyWingFilter);
 
-  const principalCard = (currentFacultyWingFilter === 'all' || currentFacultyWingFilter === '11-12') ? `
+    const principalCard = (currentFacultyWingFilter === 'all' || currentFacultyWingFilter === '11-12') ? `
     <div class="sacred-card temple-shikhar-border rounded-3xl p-6 space-y-5 border-2 border-amber-500/50">
       <div class="flex items-center justify-between gap-2">
         <span class="px-3 py-1 rounded-full text-[11px] font-mono font-extrabold bg-amber-500 text-stone-950">
@@ -658,16 +722,16 @@ function renderVerifiedFacultyWall() {
     </div>
   ` : '';
 
-  const teacherCards = filtered.map(f => {
-    const wingLabelMap = {
-      '1-5': 'CLASS 1–5 (प्राथमिक)',
-      '6-8': 'CLASS 6–8 (उच्च प्राथमिक)',
-      '9-10': 'CLASS 9–10 (माध्यमिक)',
-      '11-12': `CLASS 11–12 (+2) • ${escapeHTML((f.stream || '').split(' ')[0])}`
-    };
-    const badgeText = wingLabelMap[f.wing] || `CLASS ${escapeHTML(f.wing)}`;
+    const teacherCards = filtered.map(f => {
+        const wingLabelMap = {
+            '1-5': currentLang === 'hi' ? 'CLASS 1–5 (प्राथमिक)' : 'CLASS 1–5 (Primary)',
+            '6-8': currentLang === 'hi' ? 'CLASS 6–8 (उच्च प्राथमिक)' : 'CLASS 6–8 (Upper Primary)',
+            '9-10': currentLang === 'hi' ? 'CLASS 9–10 (माध्यमिक)' : 'CLASS 9–10 (Secondary)',
+            '11-12': `CLASS 11–12 (+2) ${f.stream ? '• ' + escapeHTML(f.stream.split(' ')[0]) : ''}`
+        };
+        const badgeText = wingLabelMap[f.wing] || `CLASS ${escapeHTML(f.wing)}`;
 
-    return `
+        return `
       <div class="sacred-card temple-shikhar-border rounded-3xl p-6 space-y-5 border-2 border-amber-500/40 flex flex-col justify-between">
         <div class="space-y-4">
           <div class="flex items-center justify-between gap-2">
@@ -675,7 +739,7 @@ function renderVerifiedFacultyWall() {
               ${badgeText}
             </span>
             <span class="text-[11px] font-mono font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-              <i data-lucide="badge-check" class="w-4 h-4"></i> गुरु स्तंभ
+              <i data-lucide="badge-check" class="w-4 h-4"></i> ${currentLang === 'hi' ? 'गुरु स्तंभ' : 'Verified Faculty'}
             </span>
           </div>
 
@@ -690,12 +754,12 @@ function renderVerifiedFacultyWall() {
 
           <div class="grid grid-cols-2 gap-2.5 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs">
             <div>
-              <span class="text-[10px] font-mono theme-muted block">मुख्य विषय (Subject)</span>
+              <span class="text-[10px] font-mono theme-muted block">${currentLang === 'hi' ? 'मुख्य विषय (Subject)' : 'Core Subject'}</span>
               <strong class="theme-heading">${escapeHTML(f.subject)}</strong>
             </div>
             <div>
-              <span class="text-[10px] font-mono theme-muted block">सेवा अनुभव (Experience)</span>
-              <strong class="theme-heading">${escapeHTML(f.experience || 'गौरवशाली सेवा')}</strong>
+              <span class="text-[10px] font-mono theme-muted block">${currentLang === 'hi' ? 'सेवा अनुभव (Experience)' : 'Experience'}</span>
+              <strong class="theme-heading">${escapeHTML(f.experience || (currentLang === 'hi' ? 'गौरवशाली सेवा' : 'Dedicated Service'))}</strong>
             </div>
           </div>
         </div>
@@ -710,96 +774,104 @@ function renderVerifiedFacultyWall() {
         </div>
       </div>
     `;
-  }).join('');
+    }).join('');
 
-  grid.innerHTML = principalCard + teacherCards;
-  if (window.lucide) lucide.createIcons();
-  init3DTiltCards();
+    grid.innerHTML = principalCard + teacherCards;
+    if (window.lucide) lucide.createIcons();
+    init3DTiltCards();
 }
 
-window.filterFacultyByWing = function(wing) {
-  currentFacultyWingFilter = wing;
-  document.querySelectorAll('.faculty-filter-btn').forEach(btn => {
-    const isActive = btn.getAttribute('data-faculty-filter') === wing;
-    btn.className = isActive
-      ? 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-extrabold bg-amber-500 text-stone-950 transition-all'
-      : 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all';
-  });
-  renderVerifiedFacultyWall();
+window.filterFacultyByWing = function (wing) {
+    currentFacultyWingFilter = wing;
+    document.querySelectorAll('.faculty-filter-btn').forEach(btn => {
+        const isActive = btn.getAttribute('data-faculty-filter') === wing;
+        btn.className = isActive
+            ? 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-extrabold bg-amber-500 text-stone-950 transition-all'
+            : 'faculty-filter-btn px-4 py-2 rounded-xl text-xs font-mono font-bold border border-amber-500/40 hover:bg-amber-500/15 theme-heading transition-all';
+    });
+    renderVerifiedFacultyWall();
 };
 
-// Secret Admin Modal Controls
-window.openSecretAdminModal = function() {
-  const modal = document.getElementById('secret-admin-modal');
-  if (modal) modal.classList.remove('hidden');
-  refreshAdminModalUI();
+// ============================================================================
+// 9. SECRET ADMIN COMMAND CENTER CONTROLLER (MODULE 1, 2 & 3)
+// ============================================================================
+window.openSecretAdminModal = function () {
+    const modal = document.getElementById('secret-admin-modal');
+    if (modal) modal.classList.remove('hidden');
+    refreshAdminModalUI();
 };
 
-window.closeSecretAdminModal = function() {
-  const modal = document.getElementById('secret-admin-modal');
-  if (modal) modal.classList.add('hidden');
+window.closeSecretAdminModal = function () {
+    const modal = document.getElementById('secret-admin-modal');
+    if (modal) modal.classList.add('hidden');
 };
 
 document.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
-    e.preventDefault();
-    window.openSecretAdminModal();
-  }
+    if (e.ctrlKey && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
+        e.preventDefault();
+        window.openSecretAdminModal();
+    }
 });
 
 async function refreshAdminModalUI() {
-  if (!window.BackendService) return;
-  const user = window.BackendService.getAdminUser();
-  const loginView = document.getElementById('admin-login-view');
-  const dashView  = document.getElementById('admin-dashboard-view');
-  const emailLbl  = document.getElementById('admin-email-label');
+    if (!window.BackendService) return;
+    const user = window.BackendService.getAdminUser();
+    const loginView = document.getElementById('admin-login-view');
+    const dashView = document.getElementById('admin-dashboard-view');
+    const emailLbl = document.getElementById('admin-email-label');
 
-  if (!user) {
-    loginView.classList.remove('hidden');
-    dashView.classList.add('hidden');
-    return;
-  }
+    if (!loginView || !dashView) return;
 
-  loginView.classList.add('hidden');
-  dashView.classList.remove('hidden');
-  if (emailLbl) emailLbl.textContent = user.email;
+    if (!user) {
+        loginView.classList.remove('hidden');
+        dashView.classList.add('hidden');
+        return;
+    }
 
-  // 1. Notices List
-  const noticesListEl = document.getElementById('admin-notices-list');
-  const notices = await window.BackendService.fetchNotices();
-  noticesListEl.innerHTML = notices.map(n => `
-    <div class="p-3 rounded-xl bg-black/30 border border-amber-500/30 flex items-center justify-between gap-2 text-xs">
-      <div><strong class="text-amber-300">[${escapeHTML(n.date)}]</strong> ${escapeHTML(n.titleHi)}</div>
-      <button onclick="handleDeleteNotice('${escapeHTML(n.id)}')" class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono text-[11px] font-bold shrink-0">Delete</button>
-    </div>
-  `).join('');
+    loginView.classList.add('hidden');
+    dashView.classList.remove('hidden');
+    if (emailLbl) emailLbl.textContent = user.email;
 
-  // 2. Alumni List
-  const alumniListEl = document.getElementById('admin-alumni-list');
-  const allAlumni = await window.BackendService.fetchAllAlumniForAdmin();
-  alumniListEl.innerHTML = allAlumni.length === 0
-    ? `<p class="text-xs theme-muted">कोई पूर्व छात्र आवेदन अभी कतार में नहीं है।</p>`
-    : allAlumni.map(a => `
-      <div class="p-3.5 rounded-xl bg-black/30 border ${a.status === 'approved' ? 'border-emerald-500/40' : 'border-amber-500/50'} flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="space-y-0.5">
-          <div class="font-bold text-sm text-white">${escapeHTML(a.fullName)} <span class="text-amber-400 font-mono text-xs">(Batch: ${escapeHTML(a.batchYear)})</span></div>
-          <div class="text-slate-300">${escapeHTML(a.achievement || '')}</div>
-          <div class="font-mono text-[11px] text-amber-300">📞 ${escapeHTML(a.contact || 'N/A')} • Status: <strong>${escapeHTML(a.status)}</strong></div>
-        </div>
-        <div class="flex items-center gap-2">
-          ${a.status !== 'approved' ? `<button onclick="handleApproveAlumni('${escapeHTML(a.id)}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-mono font-extrabold">✓ Approve</button>` : `<span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Approved</span>`}
-          <button onclick="handleDeleteAlumni('${escapeHTML(a.id)}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono font-bold">Delete</button>
-        </div>
+    // 1. Notices List
+    const noticesListEl = document.getElementById('admin-notices-list');
+    if (noticesListEl) {
+        const notices = await window.BackendService.fetchNotices();
+        noticesListEl.innerHTML = notices.map(n => `
+      <div class="p-3 rounded-xl bg-black/30 border border-amber-500/30 flex items-center justify-between gap-2 text-xs">
+        <div><strong class="text-amber-300">[${escapeHTML(n.date)}]</strong> ${escapeHTML(n.titleHi)}</div>
+        <button onclick="handleDeleteNotice('${escapeHTML(n.id)}')" class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono text-[11px] font-bold shrink-0">Delete</button>
       </div>
     `).join('');
+    }
 
-  // 3. Faculty (Guru Stambh) List
-  const facultyListEl = document.getElementById('admin-faculty-list');
-  if (facultyListEl && window.BackendService.fetchAllFacultyForAdmin) {
-    const allFaculty = await window.BackendService.fetchAllFacultyForAdmin();
-    facultyListEl.innerHTML = allFaculty.length === 0
-      ? `<p class="text-xs theme-muted">कोई शिक्षक प्रोफाइल अभी कतार में नहीं है।</p>`
-      : allFaculty.map(f => `
+    // 2. Alumni List
+    const alumniListEl = document.getElementById('admin-alumni-list');
+    if (alumniListEl && window.BackendService.fetchAllAlumniForAdmin) {
+        const allAlumni = await window.BackendService.fetchAllAlumniForAdmin();
+        alumniListEl.innerHTML = allAlumni.length === 0
+            ? `<p class="text-xs theme-muted">कोई पूर्व छात्र आवेदन अभी कतार में नहीं है।</p>`
+            : allAlumni.map(a => `
+        <div class="p-3.5 rounded-xl bg-black/30 border ${a.status === 'approved' ? 'border-emerald-500/40' : 'border-amber-500/50'} flex flex-wrap items-center justify-between gap-3 text-xs">
+          <div class="space-y-0.5">
+            <div class="font-bold text-sm text-white">${escapeHTML(a.fullName)} <span class="text-amber-400 font-mono text-xs">(Batch: ${escapeHTML(a.batchYear)})</span></div>
+            <div class="text-slate-300">${escapeHTML(a.achievement || '')}</div>
+            <div class="font-mono text-[11px] text-amber-300">📞 ${escapeHTML(a.contact || 'N/A')} • Status: <strong>${escapeHTML(a.status)}</strong></div>
+          </div>
+          <div class="flex items-center gap-2">
+            ${a.status !== 'approved' ? `<button onclick="handleApproveAlumni('${escapeHTML(a.id)}')" class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-mono font-extrabold">✓ Approve</button>` : `<span class="px-2.5 py-1 rounded bg-emerald-500/20 text-emerald-300 font-mono font-bold">Approved</span>`}
+            <button onclick="handleDeleteAlumni('${escapeHTML(a.id)}')" class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono font-bold">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    // 3. Faculty (Guru Stambh) List
+    const facultyListEl = document.getElementById('admin-faculty-list');
+    if (facultyListEl && window.BackendService.fetchAllFacultyForAdmin) {
+        const allFaculty = await window.BackendService.fetchAllFacultyForAdmin();
+        facultyListEl.innerHTML = allFaculty.length === 0
+            ? `<p class="text-xs theme-muted">कोई शिक्षक प्रोफाइल अभी कतार में नहीं है।</p>`
+            : allFaculty.map(f => `
         <div class="p-3.5 rounded-xl bg-black/30 border ${f.status === 'approved' ? 'border-emerald-500/40' : 'border-amber-500/50'} flex flex-wrap items-center justify-between gap-3 text-xs">
           <div class="flex items-center gap-3">
             <img src="${f.photoDataUrl || 'https://api.dicebear.com/7.x/initials/svg?seed=Guru'}" class="w-12 h-12 rounded-xl object-cover border border-amber-500 shrink-0" />
@@ -815,89 +887,106 @@ async function refreshAdminModalUI() {
           </div>
         </div>
       `).join('');
-  }
+    }
 
-  if (window.lucide) lucide.createIcons();
+    if (window.lucide) lucide.createIcons();
 }
 
 window.addEventListener('admin-auth-changed', refreshAdminModalUI);
 
-window.handleAdminLogin = async function(e) {
-  e.preventDefault();
-  const errBox = document.getElementById('admin-login-error');
-  errBox.classList.add('hidden');
-  const form = e.target;
-  try {
-    await window.BackendService.loginAdmin(form.email.value, form.password.value);
-    form.reset();
+window.handleAdminLogin = async function (e) {
+    e.preventDefault();
+    const errBox = document.getElementById('admin-login-error');
+    if (errBox) errBox.classList.add('hidden');
+    const form = e.target;
+    try {
+        await window.BackendService.loginAdmin(form.email.value, form.password.value);
+        form.reset();
+        await refreshAdminModalUI();
+    } catch (err) {
+        if (errBox) {
+            errBox.textContent = "⚠️ लॉगिन विफल: " + err.message;
+            errBox.classList.remove('hidden');
+        }
+    }
+};
+
+window.handleAdminLogout = async function () {
+    await window.BackendService.logoutAdmin();
     await refreshAdminModalUI();
-  } catch (err) {
-    errBox.textContent = "⚠️ लॉगिन विफल: " + err.message;
-    errBox.classList.remove('hidden');
-  }
 };
 
-window.handleAdminLogout = async function() {
-  await window.BackendService.logoutAdmin();
-  await refreshAdminModalUI();
+window.handlePublishNotice = async function (e) {
+    e.preventDefault();
+    const form = e.target;
+    try {
+        await window.BackendService.publishNotice({
+            date: form.date.value,
+            tagHi: form.tagHi.value,
+            tagEn: form.tagEn.value,
+            titleHi: form.titleHi.value,
+            titleEn: form.titleEn.value,
+            descHi: form.descHi.value,
+            descEn: form.descEn.value,
+            isNew: form.isNew.checked
+        });
+        form.reset();
+        await syncWithBackend();
+        await refreshAdminModalUI();
+        alert("✅ नया नोटिस सफलतापूर्वक लाइव प्रकाशित हो गया!");
+    } catch (err) {
+        alert("⚠️ त्रुटि: " + err.message);
+    }
 };
 
-window.handlePublishNotice = async function(e) {
-  e.preventDefault();
-  const form = e.target;
-  try {
-    await window.BackendService.publishNotice({
-      date: form.date.value,
-      tagHi: form.tagHi.value,
-      tagEn: form.tagEn.value,
-      titleHi: form.titleHi.value,
-      titleEn: form.titleEn.value,
-      descHi: form.descHi.value,
-      descEn: form.descEn.value,
-      isNew: form.isNew.checked
-    });
-    form.reset();
+window.handleDeleteNotice = async function (id) {
+    if (!confirm("क्या आप वाकई इस नोटिस को हटाना चाहते हैं?")) return;
+    try {
+        await window.BackendService.deleteNotice(id);
+        await syncWithBackend();
+        await refreshAdminModalUI();
+    } catch (err) {
+        alert("यह डिफ़ॉल्ट नोटिस है।");
+    }
+};
+
+window.handleApproveAlumni = async function (docId) {
+    await window.BackendService.approveAlumni(docId);
     await syncWithBackend();
     await refreshAdminModalUI();
-    alert("✅ नया नोटिस सफलतापूर्वक लाइव प्रकाशित हो गया!");
-  } catch (err) {
-    alert("⚠️ त्रुटि: " + err.message);
-  }
 };
 
-window.handleDeleteNotice = async function(id) {
-  if (!confirm("क्या आप वाकई इस नोटिस को हटाना चाहते हैं?")) return;
-  try {
-    await window.BackendService.deleteNotice(id);
+window.handleDeleteAlumni = async function (docId) {
+    if (!confirm("क्या आप इस प्रविष्टि को हटाना चाहते हैं?")) return;
+    await window.BackendService.deleteAlumni(docId);
     await syncWithBackend();
     await refreshAdminModalUI();
-  } catch (err) {
-    alert("यह डिफ़ॉल्ट नोटिस है।");
-  }
 };
 
-window.handleApproveAlumni = async function(docId) {
-  await window.BackendService.approveAlumni(docId);
-  await syncWithBackend();
-  await refreshAdminModalUI();
+window.handleApproveFaculty = async function (docId) {
+    await window.BackendService.approveFaculty(docId);
+    await syncWithBackend();
+    await refreshAdminModalUI();
 };
 
-window.handleDeleteAlumni = async function(docId) {
-  if (!confirm("क्या आप इस प्रविष्टि को हटाना चाहते हैं?")) return;
-  await window.BackendService.deleteAlumni(docId);
-  await syncWithBackend();
-  await refreshAdminModalUI();
+window.handleDeleteFaculty = async function (docId) {
+    if (!confirm("क्या आप इस शिक्षक प्रोफाइल को हटाना चाहते हैं?")) return;
+    await window.BackendService.deleteFaculty(docId);
+    await syncWithBackend();
+    await refreshAdminModalUI();
 };
 
-window.handleApproveFaculty = async function(docId) {
-  await window.BackendService.approveFaculty(docId);
-  await syncWithBackend();
-  await refreshAdminModalUI();
-};
+// ============================================================================
+// 10. INITIALIZATION & RACE-CONDITION-SAFE BOOTSTRAP
+// ============================================================================
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('gola_school_theme') || 'dark';
+    applyTheme(savedTheme);
+    renderMasterConfig();
+    initSacredParticles();
+    if (window.BackendService) {
+        syncWithBackend();
+    }
+});
 
-window.handleDeleteFaculty = async function(docId) {
-  if (!confirm("क्या आप इस शिक्षक प्रोफाइल को हटाना चाहते हैं?")) return;
-  await window.BackendService.deleteFaculty(docId);
-  await syncWithBackend();
-  await refreshAdminModalUI();
-};
+window.addEventListener('backend-ready', syncWithBackend);
