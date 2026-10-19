@@ -866,8 +866,8 @@
     <script src="./config.js"></script>
     <script type="module" src="./firebase-backend.js"></script>
     <script src="./app.js"></script>
-    <!-- ============================================================================
-       🤖 VIDYA MITRA AI — OFFICIAL GEMINI 2.5 FLASH + SCHOOL & JAC STUDY ASSISTANT
+   <!-- ============================================================================
+       🤖 VIDYA MITRA AI — OFFICIAL GEMINI 1.5 FLASH + SCHOOL & JAC STUDY ASSISTANT
        ============================================================================ -->
   <script>
     (function initVidyaMitraAI() {
@@ -988,26 +988,31 @@ Instructions: Answer concisely, warmly, and accurately in the language the user 
 
         try {
           const apiKey = window.SCHOOL_MASTER_CONFIG && window.SCHOOL_MASTER_CONFIG.firebase && window.SCHOOL_MASTER_CONFIG.firebase.apiKey;
-          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+          
+          // Fixed to gemini-1.5-flash for stable public web responses
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
               contents: [{ role: "user", parts: [{ text: systemPrompt + "\n\nStudent/Visitor Question: " + question }] }],
-              generationConfig: { temperature: 0.5, maxOutputTokens: 450 }
+              generationConfig: { temperature: 0.7, maxOutputTokens: 600 }
             })
           });
 
           const data = await res.json();
+          console.log("Gemini API Response:", data);
+
           const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
           if (reply) {
             loadDiv.className = "p-3 rounded-2xl sacred-inner-box t-heading mr-4 font-hindi whitespace-pre-line";
             loadDiv.textContent = reply.trim();
           } else {
-            throw new Error("Fallback to local brain");
+            throw new Error(data?.error?.message || "AI response empty");
           }
         } catch (err) {
-          // Instant Offline/Fallback School Brain (Never fails!)
+          console.warn("Gemini Error:", err);
+          // Fallback message with clear explanation
           loadDiv.className = "p-3 rounded-2xl sacred-inner-box t-heading mr-4 font-hindi whitespace-pre-line";
           loadDiv.textContent = `🙏 राज्य संपोषित +2 उच्च विद्यालय, गोला (स्थापना: 1940, UDISE: 20240206805)\n• प्रधानाचार्य: श्रीमती अनुपा पुष्पा तिर्की\n• कुल विद्यार्थी: 951+ (कक्षा 1 से 12 — विज्ञान, कला एवं वाणिज्य)\n• पंजीकृत शिक्षक: ${facultySummary || 'श्रीमती अनुपा पुष्पा तिर्की (प्रधानाचार्य)'}\n• ताज़ा सूचना: ${noticesSummary || 'विद्यालय के नोटिस बोर्ड का अवलोकन करें।'}`;
         } finally {
@@ -1017,6 +1022,7 @@ Instructions: Answer concisely, warmly, and accurately in the language the user 
       };
     })();
   </script>
+
 </body>
 
 </html>
