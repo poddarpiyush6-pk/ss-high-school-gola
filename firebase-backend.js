@@ -1,14 +1,14 @@
 // ============================================================================
-// FILE: firebase-backend.js — CLOUD FIRESTORE + ZERO-TRUST ADMIN AUTH ENGINE
+// FILE 2: firebase-backend.js — APEX CLOUD ENGINE + ADMIN + TELEGRAM ALERTS
 // ============================================================================
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
-import {
-    getFirestore, collection, getDocs, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, addDoc, query, where, orderBy, serverTimestamp
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
-import {
-    getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { 
+  getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, query, where 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { 
+  getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged 
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
 const cfg = window.SCHOOL_MASTER_CONFIG;
 let db = null;
@@ -16,231 +16,328 @@ let auth = null;
 let isFirebaseLive = false;
 let currentAdminUser = null;
 
-if (cfg.firebaseConfig && cfg.firebaseConfig.enabled && cfg.firebaseConfig.apiKey !== "YOUR_FIREBASE_API_KEY") {
-    try {
-        const app = initializeApp(cfg.firebaseConfig);
-        db = getFirestore(app);
-        auth = getAuth(app);
-        isFirebaseLive = true;
+// ============================================================================
+// 📱 TELEGRAM INSTANT NOTIFICATION ENGINE (100% CENTRALIZED & HTML-SAFE)
+// ============================================================================
+const TELEGRAM_ALERT_CONFIG = {
+  botToken: "8919728416:AAHzgSlbVDfKymmrX4QEr56qFzh7t3uS2Jo",
+  chatId: "5883701722"
+};
 
-        onAuthStateChanged(auth, (user) => {
-            currentAdminUser = user || null;
-            window.dispatchEvent(new CustomEvent("admin-auth-changed", { detail: { user: currentAdminUser } }));
-        });
-
-        console.log("✅ [Apex Backend] Firebase Firestore & Admin Auth Connected!");
-    } catch (err) {
-        console.warn("⚠️ [Apex Backend] Firebase Init Fallback:", err.message);
-    }
+function escapeTgHTML(str) {
+  return String(str == null ? '' : str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
-window.BackendService = {
-    isLive: () => isFirebaseLive,
-    getAdminUser: () => currentAdminUser,
+async function sendTelegramNotification(headerTitle, fieldsObj) {
+  if (!TELEGRAM_ALERT_CONFIG.botToken || !TELEGRAM_ALERT_CONFIG.chatId) return;
 
-    // --- ADMIN AUTHENTICATION ---
-    async loginAdmin(email, password) {
-        if (!isFirebaseLive || !auth) throw new Error("Firebase is not enabled in config.js");
-        const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
-        return cred.user;
-    },
+  const lines = [
+    `🔔 <b>${escapeTgHTML(headerTitle)}</b>`,
+    `🏫 <i>S.S. +2 High School, Gola (Live Portal)</i>`,
+    `━━━━━━━━━━━━━━━━━━━━`
+  ];
 
-    async logoutAdmin() {
-        if (auth) await signOut(auth);
-    },
-
-    // --- 1. NOTICES (PUBLIC READ + ADMIN CREATE/DELETE) ---
-    async fetchNotices() {
-        if (!isFirebaseLive) return cfg.defaultNotices;
-        try {
-            const snap = await getDocs(collection(db, "notices"));
-            if (snap.empty) return cfg.defaultNotices;
-            const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-            // Sort newest first
-            return list.sort((a, b) => (b.createdAtMs || 0) - (a.createdAtMs || 0));
-        } catch (e) {
-            return cfg.defaultNotices;
-        }
-    },
-
-    async publishNotice(noticeData) {
-        if (!currentAdminUser) throw new Error("Unauthorized: कृपया पहले एडमिन लॉगिन करें।");
-        const cleanNotice = {
-            date: String(noticeData.date || "").trim() || new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }),
-            tagHi: String(noticeData.tagHi || "आवश्यक सूचना").trim(),
-            tagEn: String(noticeData.tagEn || "OFFICIAL NOTICE").trim(),
-            titleHi: String(noticeData.titleHi || "").trim(),
-            titleEn: String(noticeData.titleEn || noticeData.titleHi || "").trim(),
-            descHi: String(noticeData.descHi || "").trim(),
-            descEn: String(noticeData.descEn || noticeData.descHi || "").trim(),
-            isNew: Boolean(noticeData.isNew),
-            createdAtMs: Date.now(),
-            createdAt: serverTimestamp()
-        };
-        if (!cleanNotice.titleHi || !cleanNotice.descHi) {
-            throw new Error("कृपया नोटिस का शीर्षक और विवरण अवश्य भरें।");
-        }
-        await addDoc(collection(db, "notices"), cleanNotice);
-    },
-
-    async deleteNotice(noticeId) {
-        if (!currentAdminUser) throw new Error("Unauthorized");
-        await deleteDoc(doc(db, "notices", noticeId));
-    },
-
-    // --- 2. VIDYA DEEP COUNTER ---
-    async getVidyaDeepCount() {
-        const localCount = parseInt(localStorage.getItem("gola_vidya_deep_count") || cfg.metrics.initialVidyaDeeps, 10);
-        if (!isFirebaseLive) return localCount;
-        try {
-            const ref = doc(db, "school_metrics", "vidya_deep");
-            const snap = await getDoc(ref);
-            if (snap.exists()) return snap.data().count || localCount;
-            await setDoc(ref, { count: cfg.metrics.initialVidyaDeeps });
-            return cfg.metrics.initialVidyaDeeps;
-        } catch (e) {
-            return localCount;
-        }
-    },
-
-    async lightVidyaDeep() {
-        const current = await this.getVidyaDeepCount();
-        const next = current + 1;
-        localStorage.setItem("gola_vidya_deep_count", String(next));
-        if (isFirebaseLive) {
-            try {
-                const ref = doc(db, "school_metrics", "vidya_deep");
-                await updateDoc(ref, { count: increment(1) });
-            } catch (e) {
-                console.warn("Vidya Deep local sync:", e.message);
-            }
-        }
-        return next;
-    },
-
-    // --- 3. ALUMNI SUBMISSIONS (PUBLIC SUBMIT + ADMIN APPROVE/DELETE) ---
-    async submitAlumniRegistration(payload) {
-        const cleanPayload = {
-            fullName: String(payload.fullName || "").trim().slice(0, 80),
-            batchYear: String(payload.batchYear || "").trim().slice(0, 20),
-            stream: String(payload.stream || "").trim().slice(0, 40),
-            achievement: String(payload.achievement || "").trim().slice(0, 250),
-            contact: String(payload.contact || "").trim().slice(0, 50),
-            status: "pending_verification",
-            submittedAt: isFirebaseLive ? serverTimestamp() : new Date().toISOString()
-        };
-
-        if (!cleanPayload.fullName || !cleanPayload.batchYear) {
-            throw new Error("कृपया अपना नाम और बैच वर्ष अवश्य भरें।");
-        }
-
-        if (isFirebaseLive) {
-            await addDoc(collection(db, "alumni_submissions"), cleanPayload);
-            return { mode: "cloud", message: "आपका विवरण सुरक्षित रूप से सत्यापन (Verification) हेतु दर्ज हो गया है!" };
-        } else {
-            return { mode: "local", message: "डेमो मोड: विवरण दर्ज हो गया है!" };
-        }
-    },
-
-    async fetchApprovedAlumni() {
-        if (!isFirebaseLive) return [];
-        try {
-            const q = query(collection(db, "alumni_submissions"), where("status", "==", "approved"));
-            const snap = await getDocs(q);
-            return snap.docs.map(d => ({
-                id: d.id,
-                fullName: d.data().fullName,
-                batchYear: d.data().batchYear,
-                stream: d.data().stream,
-                achievement: d.data().achievement
-            }));
-        } catch (e) {
-            return [];
-        }
-    },
-
-    // Admin-Only: Fetch Pending & Approved Alumni for 1-Click Moderation
-    async fetchAllAlumniForAdmin() {
-        if (!isFirebaseLive || !currentAdminUser) return [];
-        const snap = await getDocs(collection(db, "alumni_submissions"));
-        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    },
-
-    async approveAlumni(docId) {
-        if (!currentAdminUser) throw new Error("Unauthorized");
-        await updateDoc(doc(db, "alumni_submissions", docId), { status: "approved" });
-    },
-
-    async deleteAlumni(docId) {
-        if (!currentAdminUser) throw new Error("Unauthorized");
-        await deleteDoc(doc(db, "alumni_submissions", docId));
-    },
-    // --- 4. GURU STAMBH (FACULTY ONBOARDING & ADMIN APPROVAL) ---
-  async submitFacultyOnboarding(payload) {
-    const clean = {
-      wing: String(payload.wing || "11-12").trim(),
-      stream: String(payload.stream || "").trim().slice(0, 60),
-      fullName: String(payload.fullName || "").trim().slice(0, 80),
-      designation: String(payload.designation || "").trim().slice(0, 80),
-      subject: String(payload.subject || "").trim().slice(0, 80),
-      qualification: String(payload.qualification || "").trim().slice(0, 120),
-      experience: String(payload.experience || "").trim().slice(0, 60),
-      contact: String(payload.contact || "").trim().slice(0, 40),
-      thoughtForStudents: String(payload.thoughtForStudents || "").trim().slice(0, 350),
-      photoDataUrl: String(payload.photoDataUrl || ""),
-      status: "pending_verification",
-      submittedAt: isFirebaseLive ? serverTimestamp() : new Date().toISOString()
-    };
-
-    if (!clean.fullName || !clean.subject) {
-      throw new Error("कृपया अपना नाम और मुख्य विषय अवश्य भरें।");
+  Object.entries(fieldsObj || {}).forEach(([key, val]) => {
+    if (val !== undefined && val !== null && String(val).trim() !== '') {
+      lines.push(`• <b>${escapeTgHTML(key)}:</b> ${escapeTgHTML(val)}`);
     }
+  });
 
-    if (isFirebaseLive) {
-      await addDoc(collection(db, "faculty_submissions"), clean);
-      return { mode: "cloud", message: "आदरणीय गुरुजन, आपका प्रोफाइल विवरण सफलतापूर्वक क्लाउड में दर्ज हो गया है!" };
-    } else {
-      return { mode: "local", message: "डेमो मोड: प्रोफाइल दर्ज हो गया!" };
+  lines.push(`━━━━━━━━━━━━━━━━━━━━`);
+  lines.push(`🔐 <i>वेबसाइट पर Ctrl+Shift+A दबाकर 1-Click Approve करें।</i>`);
+
+  try {
+    await fetch(`https://api.telegram.org/bot${TELEGRAM_ALERT_CONFIG.botToken}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: TELEGRAM_ALERT_CONFIG.chatId,
+        text: lines.join('\n'),
+        parse_mode: 'HTML',
+        disable_web_page_preview: true
+      })
+    });
+  } catch (err) {
+    console.warn("[Telegram Alert Skipped]:", err);
+  }
+}
+
+// ============================================================================
+// 🔥 FIREBASE INITIALIZATION
+// ============================================================================
+try {
+  if (cfg && cfg.firebase && cfg.firebase.enabled && cfg.firebase.apiKey !== "PASTE_YOUR_API_KEY") {
+    const app = initializeApp(cfg.firebase);
+    db = getFirestore(app);
+    auth = getAuth(app);
+    isFirebaseLive = true;
+
+    onAuthStateChanged(auth, (user) => {
+      currentAdminUser = user;
+      window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: { user } }));
+    });
+
+    console.log("✅ [S.S. +2 High School Gola] Firebase Cloud + Auth + Telegram Engine Connected.");
+  }
+} catch (err) {
+  console.warn("⚠️ Firebase fallback mode active:", err);
+}
+
+// ============================================================================
+// 🏛️ MASTER BACKEND SERVICE API
+// ============================================================================
+window.BackendService = {
+  isLive: () => isFirebaseLive,
+  getAdminUser: () => currentAdminUser,
+
+  // --------------------------------------------------------------------------
+  // 1. ADMIN AUTHENTICATION (Email / Password)
+  // --------------------------------------------------------------------------
+  async loginAdmin(email, password) {
+    if (!auth) throw new Error("Firebase Auth सक्रिय नहीं है।");
+    const cred = await signInWithEmailAndPassword(auth, email.trim(), password);
+    return cred.user;
+  },
+
+  async logoutAdmin() {
+    if (auth) await signOut(auth);
+  },
+
+  // --------------------------------------------------------------------------
+  // 2. LIVE NOTICES (Read + Admin Publish + Admin Delete)
+  // --------------------------------------------------------------------------
+  async fetchNotices() {
+    if (!isFirebaseLive || !db) return cfg.defaultNotices || [];
+    try {
+      const snap = await getDocs(collection(db, "notices"));
+      if (snap.empty) return cfg.defaultNotices || [];
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
+      return list;
+    } catch (e) {
+      console.warn("Notice fetch fallback:", e);
+      return cfg.defaultNotices || [];
     }
   },
 
-  async fetchApprovedFaculty() {
-    if (!isFirebaseLive) return [];
+  async publishNotice(noticeData) {
+    if (!currentAdminUser) throw new Error("केवल लॉगिन किए हुए एडमिन नोटिस पब्लिश कर सकते हैं।");
+    const payload = {
+      date: noticeData.date || new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }),
+      tagHi: noticeData.tagHi || "आधिकारिक सूचना",
+      tagEn: noticeData.tagEn || "OFFICIAL NOTICE",
+      titleHi: noticeData.titleHi.trim(),
+      titleEn: (noticeData.titleEn || noticeData.titleHi).trim(),
+      descHi: noticeData.descHi.trim(),
+      descEn: (noticeData.descEn || noticeData.descHi).trim(),
+      isNew: Boolean(noticeData.isNew),
+      createdAt: new Date().toISOString()
+    };
+    await addDoc(collection(db, "notices"), payload);
+    return true;
+  },
+
+  async deleteNotice(noticeId) {
+    if (!currentAdminUser) throw new Error("Unauthorized");
+    await deleteDoc(doc(db, "notices", noticeId));
+    return true;
+  },
+
+  // --------------------------------------------------------------------------
+  // 3. SACRED VIDYA DEEP COUNTER
+  // --------------------------------------------------------------------------
+  async getVidyaDeepCount() {
+    const localSaved = parseInt(localStorage.getItem("gola_vidya_deep_count") || "11408", 10);
+    if (!isFirebaseLive || !db) return localSaved;
     try {
-      const q = query(collection(db, "faculty_submissions"), where("status", "==", "approved"));
+      const ref = doc(db, "school_metrics", "vidya_deep");
+      const snap = await getDoc(ref);
+      if (snap.exists()) {
+        const count = snap.data().count || localSaved;
+        localStorage.setItem("gola_vidya_deep_count", count);
+        return count;
+      } else {
+        await setDoc(ref, { count: localSaved });
+        return localSaved;
+      }
+    } catch (e) {
+      return localSaved;
+    }
+  },
+
+  async lightVidyaDeep() {
+    let current = parseInt(localStorage.getItem("gola_vidya_deep_count") || "11408", 10) + 1;
+    localStorage.setItem("gola_vidya_deep_count", current);
+    if (isFirebaseLive && db) {
+      try {
+        const ref = doc(db, "school_metrics", "vidya_deep");
+        await updateDoc(ref, { count: increment(1) });
+      } catch (e) {}
+    }
+    return current;
+  },
+
+  // --------------------------------------------------------------------------
+  // 4. ALUMNI (GAURAV STAMBH) — Submit + Telegram Alert + Fetch + Admin
+  // --------------------------------------------------------------------------
+  async submitAlumniRegistration(data) {
+    const payload = {
+      fullName: String(data.fullName || '').trim(),
+      batchYear: String(data.batchYear || '').trim(),
+      stream: String(data.stream || '').trim(),
+      achievement: String(data.achievement || '').trim(),
+      contact: String(data.contact || '').trim(),
+      status: "pending",
+      submittedAt: new Date().toISOString()
+    };
+
+    if (!payload.fullName || !payload.batchYear) {
+      throw new Error("कृपया नाम और बैच वर्ष अवश्य भरें।");
+    }
+
+    if (isFirebaseLive && db) {
+      await addDoc(collection(db, "alumni_submissions"), payload);
+    }
+
+    // 📱 Trigger Instant Telegram Alert to Admin
+    await sendTelegramNotification("🎓 गौरव स्तंभ — नया पूर्व छात्र (Alumni) पंजीकरण!", {
+      "नाम (Full Name)": payload.fullName,
+      "बैच वर्ष (Batch)": payload.batchYear,
+      "संकाय (Stream)": payload.stream || "N/A",
+      "वर्तमान पद / उपलब्धि": payload.achievement || "N/A",
+      "मोबाइल / ईमेल": payload.contact || "N/A"
+    });
+
+    return {
+      mode: isFirebaseLive ? "firebase" : "local",
+      message: "आपका विवरण सफलतापूर्वक दर्ज हो गया है! एडमिन अप्रूवल के तुरंत बाद यह गौरव स्तंभ पर लाइव चमकेगा।"
+    };
+  },
+
+  async fetchApprovedAlumni() {
+    if (!isFirebaseLive || !db) return [];
+    try {
+      const q = query(collection(db, "alumni_submissions"), where("status", "==", "approved"));
       const snap = await getDocs(q);
-      return snap.docs.map(d => ({
-        id: d.id,
-        wing: d.data().wing,
-        stream: d.data().stream,
-        fullName: d.data().fullName,
-        designation: d.data().designation,
-        subject: d.data().subject,
-        qualification: d.data().qualification,
-        experience: d.data().experience,
-        thoughtForStudents: d.data().thoughtForStudents,
-        photoDataUrl: d.data().photoDataUrl
-      }));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+      return list;
+    } catch (e) {
+      console.warn("fetchApprovedAlumni fallback:", e);
+      return [];
+    }
+  },
+
+  async fetchAllAlumniForAdmin() {
+    if (!isFirebaseLive || !db || !currentAdminUser) return [];
+    try {
+      const snap = await getDocs(collection(db, "alumni_submissions"));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+      return list;
     } catch (e) {
       return [];
     }
   },
 
+  async approveAlumni(docId) {
+    if (!currentAdminUser) throw new Error("Unauthorized");
+    await updateDoc(doc(db, "alumni_submissions", docId), { status: "approved" });
+    return true;
+  },
+
+  async deleteAlumni(docId) {
+    if (!currentAdminUser) throw new Error("Unauthorized");
+    await deleteDoc(doc(db, "alumni_submissions", docId));
+    return true;
+  },
+
+  // --------------------------------------------------------------------------
+  // 5. FACULTY (GURU STAMBH) — Submit + Telegram Alert + Fetch + Admin
+  // --------------------------------------------------------------------------
+  async submitFacultyOnboarding(data) {
+    const payload = {
+      wing: String(data.wing || '').trim(),
+      stream: String(data.stream || '').trim(),
+      fullName: String(data.fullName || '').trim(),
+      designation: String(data.designation || '').trim(),
+      subject: String(data.subject || '').trim(),
+      qualification: String(data.qualification || '').trim(),
+      joiningYear: String(data.joiningYear || '').trim(),
+      leavingYear: String(data.leavingYear || 'Present').trim(),
+      experience: String(data.experience || '').trim(),
+      contact: String(data.contact || '').trim(),
+      thoughtForStudents: String(data.thoughtForStudents || '').trim(),
+      photoDataUrl: String(data.photoDataUrl || ''),
+      status: "pending",
+      submittedAt: new Date().toISOString()
+    };
+
+    if (!payload.fullName || !payload.wing || !payload.subject || !payload.thoughtForStudents) {
+      throw new Error("कृपया सभी अनिवार्य विवरण (नाम, वर्ग, विषय एवं संदेश) भरें।");
+    }
+
+    if (isFirebaseLive && db) {
+      await addDoc(collection(db, "faculty_submissions"), payload);
+    }
+
+    // 📱 Trigger Instant Telegram Alert to Admin
+    await sendTelegramNotification("🙏 गुरु संकलन — नया शिक्षक प्रोफाइल प्राप्त हुआ!", {
+      "शिक्षक का नाम": payload.fullName,
+      "पदनाम (Role)": `${payload.designation} (${payload.qualification})`,
+      "शैक्षणिक प्रभाग": `Class ${payload.wing}${payload.stream ? ' • ' + payload.stream : ''}`,
+      "मुख्य विषय": payload.subject,
+      "सेवा अनुभव": payload.experience,
+      "मोबाइल नंबर": payload.contact,
+      "संदेश": payload.thoughtForStudents
+    });
+
+    return {
+      mode: isFirebaseLive ? "firebase" : "local",
+      message: "आदरणीय गुरुजी, आपका विवरण सफलतापूर्वक दर्ज हो गया है! प्रधानाचार्य/एडमिन सत्यापन के तुरंत बाद आपका प्रोफाइल 'गुरु स्तंभ' पर लाइव दिखेगा।"
+    };
+  },
+
+  async fetchApprovedFaculty() {
+    if (!isFirebaseLive || !db) return [];
+    try {
+      const q = query(collection(db, "faculty_submissions"), where("status", "==", "approved"));
+      const snap = await getDocs(q);
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => String(a.wing || '').localeCompare(String(b.wing || '')));
+      return list;
+    } catch (e) {
+      console.warn("fetchApprovedFaculty fallback:", e);
+      return [];
+    }
+  },
+
   async fetchAllFacultyForAdmin() {
-    if (!isFirebaseLive || !currentAdminUser) return [];
-    const snap = await getDocs(collection(db, "faculty_submissions"));
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    if (!isFirebaseLive || !db || !currentAdminUser) return [];
+    try {
+      const snap = await getDocs(collection(db, "faculty_submissions"));
+      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
+      return list;
+    } catch (e) {
+      return [];
+    }
   },
 
   async approveFaculty(docId) {
     if (!currentAdminUser) throw new Error("Unauthorized");
     await updateDoc(doc(db, "faculty_submissions", docId), { status: "approved" });
+    return true;
   },
 
   async deleteFaculty(docId) {
     if (!currentAdminUser) throw new Error("Unauthorized");
     await deleteDoc(doc(db, "faculty_submissions", docId));
+    return true;
   }
 };
 
-window.dispatchEvent(new CustomEvent("backend-ready"));
+window.dispatchEvent(new CustomEvent('backend-ready'));
