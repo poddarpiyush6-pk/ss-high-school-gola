@@ -1,119 +1,43 @@
 // ============================================================================
-// FILE 2: firebase-backend.js — APEX CLOUD ENGINE + ADMIN + TELEGRAM ALERTS
+// FILE: firebase-backend.js — 100% MATCHED WITH YOUR config.js & FIRESTORE RULES
 // ============================================================================
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { 
-  getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, query, where 
+  getFirestore, collection, getDocs, addDoc, doc, getDoc, setDoc, updateDoc, deleteDoc, increment, query, orderBy, where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { 
   getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-const globalWindow = typeof window !== "undefined" ? window : {};
-const cfg = globalWindow.SCHOOL_MASTER_CONFIG || {};
-const firebaseCfg = cfg.firebaseConfig || {};
+const cfg = window.SCHOOL_MASTER_CONFIG;
+// FIX #1: Supports both cfg.firebaseConfig (from your config.js) and cfg.firebase
+const fbConfig = cfg ? (cfg.firebaseConfig || cfg.firebase) : null;
 
 let db = null;
 let auth = null;
 let isFirebaseLive = false;
 let currentAdminUser = null;
 
-// ============================================================================
-// 📱 TELEGRAM INSTANT NOTIFICATION ENGINE (100% CENTRALIZED & HTML-SAFE)
-// ============================================================================
-const TELEGRAM_ALERT_CONFIG = {
-  botToken: "8919728416:AAHzgSlbVDfKymmrX4QEr56qFzh7t3uS2Jo",
-  chatId: "5883701722"
-};
-
-function escapeTgHTML(str) {
-  return String(str == null ? '' : str)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
-
-async function sendTelegramNotification(headerTitle, fieldsObj) {
-  if (!TELEGRAM_ALERT_CONFIG.botToken || !TELEGRAM_ALERT_CONFIG.chatId) return;
-
-  const lines = [
-    `🔔 <b>${escapeTgHTML(headerTitle)}</b>`,
-    `🏫 <i>S.S. +2 High School, Gola (Live Portal)</i>`,
-    `━━━━━━━━━━━━━━━━━━━━`
-  ];
-
-  Object.entries(fieldsObj || {}).forEach(([key, val]) => {
-    if (val !== undefined && val !== null && String(val).trim() !== '') {
-      lines.push(`• <b>${escapeTgHTML(key)}:</b> ${escapeTgHTML(val)}`);
-    }
-  });
-
-  lines.push(`━━━━━━━━━━━━━━━━━━━━`);
-  lines.push(`🔐 <i>वेबसाइट पर Ctrl+Shift+A दबाकर 1-Click Approve करें।</i>`);
-
-  try {
-    await fetch(`https://api.telegram.org/bot${TELEGRAM_ALERT_CONFIG.botToken}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: TELEGRAM_ALERT_CONFIG.chatId,
-        text: lines.join('\n'),
-        parse_mode: 'HTML',
-        disable_web_page_preview: true
-      })
-    });
-  } catch (err) {
-    console.warn("[Telegram Alert Skipped]:", err);
-  }
-}
-
-// ============================================================================
-// 🔥 FIREBASE INITIALIZATION
-// ============================================================================
-
-// ============================================================================
-// FIREBASE INITIALIZATION
-// ============================================================================
 try {
-  if (
-    firebaseCfg?.enabled &&
-    firebaseCfg.apiKey &&
-    firebaseCfg.apiKey !== "PASTE_YOUR_API_KEY" &&
-    firebaseCfg.projectId
-  ) {
-    const app = initializeApp(firebaseCfg);
+  if (fbConfig && fbConfig.enabled && fbConfig.apiKey && fbConfig.apiKey !== "PASTE_YOUR_API_KEY") {
+    const app = initializeApp(fbConfig);
     db = getFirestore(app);
     auth = getAuth(app);
     isFirebaseLive = true;
 
     onAuthStateChanged(auth, (user) => {
       currentAdminUser = user;
-      globalWindow.dispatchEvent?.(
-        new CustomEvent("admin-auth-changed", { detail: { user } })
-      );
+      window.dispatchEvent(new CustomEvent('admin-auth-changed', { detail: { user } }));
     });
 
-    console.log(
-      "[S.S. +2 High School Gola] Firebase initialized successfully."
-    );
-  } else {
-    console.warn(
-      "[Firebase] Configuration missing or disabled. Using fallback mode."
-    );
+    console.log("✅ [S.S. +2 High School Gola] Firebase Cloud + Auth + Guru Stambh Connected.");
   }
 } catch (err) {
-  isFirebaseLive = false;
-  db = null;
-  auth = null;
-  console.error("[Firebase initialization failed]", err);
+  console.warn("⚠️ Firebase fallback mode active:", err);
 }
 
-
-// ============================================================================
-// 🏛️ MASTER BACKEND SERVICE API
-// ============================================================================
-globalWindow.BackendService = {
+window.BackendService = {
   isLive: () => isFirebaseLive,
   getAdminUser: () => currentAdminUser,
 
@@ -134,16 +58,20 @@ globalWindow.BackendService = {
   // 2. LIVE NOTICES (Read + Admin Publish + Admin Delete)
   // --------------------------------------------------------------------------
   async fetchNotices() {
-    if (!isFirebaseLive || !db) return cfg.defaultNotices || [];
+    if (!isFirebaseLive || !db) return (cfg && cfg.defaultNotices) || [];
     try {
-      const snap = await getDocs(collection(db, "notices"));
-      if (snap.empty) return cfg.defaultNotices || [];
-      const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-      list.sort((a, b) => String(b.createdAt || b.date || '').localeCompare(String(a.createdAt || a.date || '')));
-      return list;
+      const q = query(collection(db, "notices"), orderBy("createdAt", "desc"));
+      const snap = await getDocs(q);
+      if (snap.empty) return (cfg && cfg.defaultNotices) || [];
+      return snap.docs.map(d => ({ id: d.id, ...d.data() }));
     } catch (e) {
-      console.warn("Notice fetch fallback:", e);
-      return cfg.defaultNotices || [];
+      try {
+        const snap = await getDocs(collection(db, "notices"));
+        if (snap.empty) return (cfg && cfg.defaultNotices) || [];
+        return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      } catch (err) {
+        return (cfg && cfg.defaultNotices) || [];
+      }
     }
   },
 
@@ -174,13 +102,14 @@ globalWindow.BackendService = {
   // 3. SACRED VIDYA DEEP COUNTER
   // --------------------------------------------------------------------------
   async getVidyaDeepCount() {
-    const localSaved = parseInt(localStorage.getItem("gola_vidya_deep_count") || "11408", 10);
+    const initialCount = (cfg && cfg.metrics && cfg.metrics.initialVidyaDeeps) || 1940;
+    const localSaved = parseInt(localStorage.getItem("gola_vidya_deep_count") || String(initialCount), 10);
     if (!isFirebaseLive || !db) return localSaved;
     try {
       const ref = doc(db, "school_metrics", "vidya_deep");
       const snap = await getDoc(ref);
       if (snap.exists()) {
-        const count = snap.data().count || localSaved;
+        const count = snap.data().count !== undefined ? snap.data().count : localSaved;
         localStorage.setItem("gola_vidya_deep_count", count);
         return count;
       } else {
@@ -193,7 +122,8 @@ globalWindow.BackendService = {
   },
 
   async lightVidyaDeep() {
-    let current = parseInt(localStorage.getItem("gola_vidya_deep_count") || "11408", 10) + 1;
+    const initialCount = (cfg && cfg.metrics && cfg.metrics.initialVidyaDeeps) || 1940;
+    let current = parseInt(localStorage.getItem("gola_vidya_deep_count") || String(initialCount), 10) + 1;
     localStorage.setItem("gola_vidya_deep_count", current);
     if (isFirebaseLive && db) {
       try {
@@ -205,7 +135,7 @@ globalWindow.BackendService = {
   },
 
   // --------------------------------------------------------------------------
-  // 4. ALUMNI (GAURAV STAMBH) — Submit + Telegram Alert + Fetch + Admin
+  // 4. ALUMNI (GAURAV STAMBH) — FIX #2: status == "pending_verification"
   // --------------------------------------------------------------------------
   async submitAlumniRegistration(data) {
     const payload = {
@@ -214,7 +144,7 @@ globalWindow.BackendService = {
       stream: String(data.stream || '').trim(),
       achievement: String(data.achievement || '').trim(),
       contact: String(data.contact || '').trim(),
-      status: "pending",
+      status: "pending_verification", // Matches Firestore Rule: request.resource.data.status == "pending_verification"
       submittedAt: new Date().toISOString()
     };
 
@@ -224,21 +154,9 @@ globalWindow.BackendService = {
 
     if (isFirebaseLive && db) {
       await addDoc(collection(db, "alumni_submissions"), payload);
+      return { mode: "firebase", message: "आपका विवरण सफलतापूर्वक दर्ज हो गया है! एडमिन अप्रूवल के तुरंत बाद यह गौरव स्तंभ पर लाइव चमकेगा।" };
     }
-
-    // 📱 Trigger Instant Telegram Alert to Admin
-    await sendTelegramNotification("🎓 गौरव स्तंभ — नया पूर्व छात्र (Alumni) पंजीकरण!", {
-      "नाम (Full Name)": payload.fullName,
-      "बैच वर्ष (Batch)": payload.batchYear,
-      "संकाय (Stream)": payload.stream || "N/A",
-      "वर्तमान पद / उपलब्धि": payload.achievement || "N/A",
-      "मोबाइल / ईमेल": payload.contact || "N/A"
-    });
-
-    return {
-      mode: isFirebaseLive ? "firebase" : "local",
-      message: "आपका विवरण सफलतापूर्वक दर्ज हो गया है! एडमिन अप्रूवल के तुरंत बाद यह गौरव स्तंभ पर लाइव चमकेगा।"
-    };
+    return { mode: "local", message: "आपका विवरण सुरक्षित कर लिया गया है!" };
   },
 
   async fetchApprovedAlumni() {
@@ -250,7 +168,7 @@ globalWindow.BackendService = {
       list.sort((a, b) => String(b.submittedAt || '').localeCompare(String(a.submittedAt || '')));
       return list;
     } catch (e) {
-      console.warn("fetchApprovedAlumni fallback:", e);
+      console.warn("fetchApprovedAlumni error:", e);
       return [];
     }
   },
@@ -280,7 +198,7 @@ globalWindow.BackendService = {
   },
 
   // --------------------------------------------------------------------------
-  // 5. FACULTY (GURU STAMBH) — Submit + Telegram Alert + Fetch + Admin
+  // 5. FACULTY (GURU STAMBH) — FIX #2: status == "pending_verification"
   // --------------------------------------------------------------------------
   async submitFacultyOnboarding(data) {
     const payload = {
@@ -296,7 +214,7 @@ globalWindow.BackendService = {
       contact: String(data.contact || '').trim(),
       thoughtForStudents: String(data.thoughtForStudents || '').trim(),
       photoDataUrl: String(data.photoDataUrl || ''),
-      status: "pending",
+      status: "pending_verification", // Matches Firestore Rule: request.resource.data.status == "pending_verification"
       submittedAt: new Date().toISOString()
     };
 
@@ -306,23 +224,12 @@ globalWindow.BackendService = {
 
     if (isFirebaseLive && db) {
       await addDoc(collection(db, "faculty_submissions"), payload);
+      return {
+        mode: "firebase",
+        message: "आदरणीय गुरुजी, आपका विवरण सफलतापूर्वक दर्ज हो गया है! प्रधानाचार्य/एडमिन सत्यापन के तुरंत बाद आपका प्रोफाइल 'गुरु स्तंभ' पर लाइव दिखेगा।"
+      };
     }
-
-    // 📱 Trigger Instant Telegram Alert to Admin
-    await sendTelegramNotification("🙏 गुरु संकलन — नया शिक्षक प्रोफाइल प्राप्त हुआ!", {
-      "शिक्षक का नाम": payload.fullName,
-      "पदनाम (Role)": `${payload.designation} (${payload.qualification})`,
-      "शैक्षणिक प्रभाग": `Class ${payload.wing}${payload.stream ? ' • ' + payload.stream : ''}`,
-      "मुख्य विषय": payload.subject,
-      "सेवा अनुभव": payload.experience,
-      "मोबाइल नंबर": payload.contact,
-      "संदेश": payload.thoughtForStudents
-    });
-
-    return {
-      mode: isFirebaseLive ? "firebase" : "local",
-      message: "आदरणीय गुरुजी, आपका विवरण सफलतापूर्वक दर्ज हो गया है! प्रधानाचार्य/एडमिन सत्यापन के तुरंत बाद आपका प्रोफाइल 'गुरु स्तंभ' पर लाइव दिखेगा।"
-    };
+    return { mode: "local", message: "प्रोफाइल सुरक्षित कर लिया गया है!" };
   },
 
   async fetchApprovedFaculty() {
@@ -334,7 +241,7 @@ globalWindow.BackendService = {
       list.sort((a, b) => String(a.wing || '').localeCompare(String(b.wing || '')));
       return list;
     } catch (e) {
-      console.warn("fetchApprovedFaculty fallback:", e);
+      console.warn("fetchApprovedFaculty error:", e);
       return [];
     }
   },
@@ -364,4 +271,4 @@ globalWindow.BackendService = {
   }
 };
 
-globalWindow.dispatchEvent?.(new CustomEvent('backend-ready'));
+window.dispatchEvent(new CustomEvent('backend-ready'));
