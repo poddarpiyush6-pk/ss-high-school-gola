@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /guru-sankalan.html
+
+Sitemap: https://poddarpiyush6-pk.github.io/ss-high-school-gola/sitemap.xml
