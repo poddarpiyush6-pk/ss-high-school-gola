@@ -1,14 +1,15 @@
 // ============================================================================
-// FILE: royal-rajpatra-core.js — INSTITUTIONAL ROYAL ARCHITECTURE SUITE
-// 1. Living Garbhagriha: 432Hz WebAudio Temple Bell Acoustics + Live Prahar Bar
-// 2. Ctrl+K Royal Omni-Spotlight: Instant Search across Notices, Faculty, Alumni & Schemes
-// 3. Official Rajpatra Gazette Engine: Govt. Letterhead + Seal + QR + A4 PDF Print
-// 100% Zero-Risk Plugin: Untouched config.js, firebase-backend.js, and app.js!
+// FILE: royal-rajpatra-core.js (v2.0 — DEEP-LINK QR + CLICKABLE PDF EDITION)
+// 1. Direct URL QR Code: Scanning opens Website -> Scrolls to Exact Notice!
+// 2. Clickable Mobile PDF Links (<a href>) + Refined Circular Official Stamp
+// 3. Living Garbhagriha (432Hz Bell Acoustics + Live Gola Prahar Ribbon)
+// 4. Ctrl+K Royal Omni-Spotlight Search across Notices, Faculty, Alumni & Schemes
 // ============================================================================
 
 (function () {
   "use strict";
 
+  const PORTAL_BASE_URL = "https://poddarpiyush6-pk.github.io/ss-high-school-gola/";
   const cfg = window.SCHOOL_MASTER_CONFIG || {};
   const schoolIdentity = cfg.identity || {
     nameHi: "राज्य संपोषित +2 उच्च विद्यालय, गोला",
@@ -39,7 +40,6 @@
 
   // ==========================================================================
   // 🔔 ENGINE 1A: PURE MATHEMATICAL WEBAUDIO TEMPLE BELL & DEEP ACOUSTICS
-  // Zero external MP3 files! Generates authentic 432Hz Bronze Ghanta Resonance
   // ==========================================================================
   function playSacredTempleBell(variant = "bell") {
     if (!soundEnabled) return;
@@ -50,24 +50,21 @@
       if (sharedAudioCtx.state === "suspended") sharedAudioCtx.resume();
 
       const now = sharedAudioCtx.currentTime;
-
-      // Haptic physical feedback on mobile devices
       if (navigator.vibrate) {
         navigator.vibrate(variant === "deep" ? [35, 40, 65] : [50]);
       }
 
-      // Harmonic frequencies modeled after a traditional Indian bronze temple bell
       const harmonics = variant === "deep"
         ? [
-            { freq: 528.0, amp: 0.16, decay: 2.6 }, // Solfeggio Sacred Flame Chime
+            { freq: 528.0, amp: 0.16, decay: 2.6 },
             { freq: 1056.0, amp: 0.08, decay: 1.8 },
             { freq: 1584.0, amp: 0.04, decay: 1.1 }
           ]
         : [
-            { freq: 432.0, amp: 0.22, decay: 3.4 }, // Fundamental Hum
-            { freq: 864.0, amp: 0.14, decay: 2.5 }, // Prime Octave
-            { freq: 1296.5, amp: 0.08, decay: 1.7 }, // Metallic Tierce
-            { freq: 2048.0, amp: 0.04, decay: 0.7 }  // Initial Strike Shimmer
+            { freq: 432.0, amp: 0.22, decay: 3.4 },
+            { freq: 864.0, amp: 0.14, decay: 2.5 },
+            { freq: 1296.5, amp: 0.08, decay: 1.7 },
+            { freq: 2048.0, amp: 0.04, decay: 0.7 }
           ];
 
       harmonics.forEach((h, idx) => {
@@ -76,7 +73,6 @@
 
         osc.type = idx === 0 ? "sine" : idx === harmonics.length - 1 ? "triangle" : "sine";
         osc.frequency.setValueAtTime(h.freq, now);
-        // Subtle natural pitch vibrato
         osc.frequency.exponentialRampToValueAtTime(h.freq * 0.998, now + h.decay);
 
         gain.gain.setValueAtTime(0.0001, now);
@@ -93,9 +89,7 @@
           osc.disconnect();
         };
       });
-    } catch (e) {
-      // Fail silently if audio hardware is unavailable
-    }
+    } catch (e) {}
   }
 
   window.playSacredTempleBell = playSacredTempleBell;
@@ -134,12 +128,12 @@
     styleTag.id = "royal-rajpatra-styles";
     styleTag.textContent = `
       @keyframes royalPulseHalo {
-        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.85), 0 0 30px rgba(234, 88, 12, 0.5); transform: scale(1.01); }
-        50% { box-shadow: 0 0 0 14px rgba(245, 158, 11, 0), 0 0 45px rgba(245, 158, 11, 0.75); transform: scale(1.015); }
+        0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.9), 0 0 30px rgba(234, 88, 12, 0.6); transform: scale(1.01); }
+        50% { box-shadow: 0 0 0 16px rgba(245, 158, 11, 0), 0 0 50px rgba(245, 158, 11, 0.85); transform: scale(1.015); }
         100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0), 0 0 0 rgba(245, 158, 11, 0); transform: scale(1); }
       }
       .royal-spotlight-highlight {
-        animation: royalPulseHalo 2.4s cubic-bezier(0.16, 1, 0.3, 1) 2;
+        animation: royalPulseHalo 2.2s cubic-bezier(0.16, 1, 0.3, 1) 3;
         border-color: #f59e0b !important;
       }
       .rajpatra-seal-ring {
@@ -165,6 +159,8 @@
           margin: 0 !important;
           color: #1c1917 !important;
           background: #fffdf9 !important;
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
         }
         .no-print-control {
           display: none !important;
@@ -185,16 +181,14 @@
         </div>
 
         <div class="flex items-center gap-2 ml-auto">
-          <!-- Omni-Search Trigger Button (Ctrl + K) -->
-          <button id="royal-cmd-trigger" type="button"
+          <button id="royal-cmd-trigger" type="button" aria-label="Quick Search Portal"
             class="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500/30 border border-amber-400/40 text-amber-200 font-hindi font-bold text-[11px] transition-all cursor-pointer shadow-sm">
             <span>🔍</span>
-            <span id="royal-search-btn-lbl">त्वरित खोज (Search Portal)</span>
+            <span id="royal-search-btn-lbl">त्वरित खोज</span>
             <kbd class="hidden sm:inline-block px-1.5 py-0.2 rounded bg-stone-900 text-amber-300 font-mono text-[9px] border border-amber-500/30">Ctrl+K</kbd>
           </button>
 
-          <!-- Sacred Temple Sound Toggle -->
-          <button id="royal-sound-toggle" type="button" title="Toggle 432Hz Temple Bell Sound"
+          <button id="royal-sound-toggle" type="button" aria-label="Toggle 432Hz Temple Bell Sound"
             class="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-stone-900 hover:bg-amber-500/20 border border-amber-500/30 text-amber-300 font-mono font-bold text-[10px] transition-all cursor-pointer">
             <span id="royal-sound-icon">${soundEnabled ? "🔔" : "🔕"}</span>
             <span id="royal-sound-lbl" class="hidden sm:inline">${soundEnabled ? "मंदिर ध्वनि: ON" : "ध्वनि: OFF"}</span>
@@ -243,7 +237,6 @@
     document.getElementById("royal-cmd-trigger").addEventListener("click", openOmniSpotlight);
   }
 
-  // Attach Temple Bell Acoustics to existing Bell & Vidya Deep buttons
   function bindTempleBellInteractions() {
     document.addEventListener("click", (e) => {
       const btn = e.target.closest("button, a");
@@ -273,13 +266,11 @@
 
   // ==========================================================================
   // 🔍 ENGINE 2: CTRL + K ROYAL OMNI-SPOTLIGHT SEARCH ENGINE
-  // Scans Live Notices, Faculty (Guru Stambh), Alumni (Gaurav Stambh) & Schemes
   // ==========================================================================
   function buildLiveSearchIndex() {
     const items = [];
 
-    // 1. Index Live Notices
-    document.querySelectorAll("#notices-container article").forEach((el, idx) => {
+    document.querySelectorAll("#notices-container article").forEach((el) => {
       const title = el.querySelector("h4")?.textContent?.trim() || "Official Notice";
       const desc = el.querySelector("p")?.textContent?.trim() || "";
       const date = el.textContent.match(/\d{1,2}\s+[A-Za-z]{3,9}\s+\d{4}/)?.[0] || "Notice";
@@ -293,7 +284,6 @@
       });
     });
 
-    // 2. Index Faculty (Guru Stambh)
     document.querySelectorAll("#verified-faculty-grid > div").forEach((el) => {
       const name = el.querySelector("h3")?.textContent?.trim();
       if (!name) return;
@@ -308,7 +298,6 @@
       });
     });
 
-    // 3. Index Alumni (Gaurav Stambh)
     document.querySelectorAll("#verified-alumni-grid > div").forEach((el) => {
       const name = el.querySelector("h4")?.textContent?.trim();
       if (!name) return;
@@ -324,7 +313,6 @@
       });
     });
 
-    // 4. Index Govt Schemes
     document.querySelectorAll("#schemes-grid .scheme-card").forEach((el) => {
       const title = el.querySelector("h3")?.textContent?.trim();
       if (!title) return;
@@ -339,34 +327,6 @@
       });
     });
 
-    // 5. Core Institutional Quick Jumps
-    items.push(
-      {
-        category: "🏛️ विद्यालय नेविगेशन (Quick Jump)",
-        badge: "UDISE: " + schoolIdentity.udiseCode,
-        title: "प्रधानाचार्य संदेश — " + principalInfo.nameHi,
-        subtitle: "Principal's Desk • S.S. +2 High School, Gola (Estd. 1940)",
-        view: "home",
-        element: document.getElementById("principal-name-slot") || document.body
-      },
-      {
-        category: "🏛️ विद्यालय नेविगेशन (Quick Jump)",
-        badge: "Faculty Wall",
-        title: "गुरु स्तंभ — समस्त शिक्षक वृंद (View All Teachers)",
-        subtitle: "PGT (+2), TGT (Secondary), एवं Primary Wing के आदरणीय गुरुजन",
-        view: "guru-stambh",
-        element: document.getElementById("verified-faculty-grid")
-      },
-      {
-        category: "🏛️ विद्यालय नेविगेशन (Quick Jump)",
-        badge: "Alumni Wall",
-        title: "गौरव स्तंभ — पूर्व छात्र एवं टॉपर पंजीकरण (Alumni Portal)",
-        subtitle: "S.S. +2 High School Gola के सत्यापित पूर्व छात्र एवं पंजीकरण फॉर्म",
-        view: "gaurav-stambh",
-        element: document.getElementById("verified-alumni-grid")
-      }
-    );
-
     return items;
   }
 
@@ -378,7 +338,6 @@
     modal.className = "fixed inset-0 z-[9996] bg-black/80 backdrop-blur-md hidden items-start justify-center pt-14 sm:pt-24 px-3 sm:px-4";
     modal.innerHTML = `
       <div class="w-full max-w-2xl rounded-3xl bg-stone-950/95 border-2 border-amber-500/50 text-stone-100 shadow-[0_25px_70px_rgba(0,0,0,0.85)] overflow-hidden">
-        <!-- Search Input Header -->
         <div class="p-4 bg-gradient-to-r from-amber-500/20 via-orange-500/10 to-transparent border-b border-amber-500/30 flex items-center gap-3">
           <span class="text-xl">🔍</span>
           <input id="royal-spotlight-input" type="text" autocomplete="off"
@@ -389,11 +348,7 @@
             ESC ✕
           </button>
         </div>
-
-        <!-- Results List -->
         <div id="royal-spotlight-results" class="max-h-[62vh] overflow-y-auto p-3 space-y-2 divide-y divide-amber-500/10"></div>
-
-        <!-- Footer -->
         <div class="px-4 py-2.5 bg-stone-900/90 border-t border-amber-500/20 flex items-center justify-between text-[11px] font-mono text-stone-400">
           <span>⚡ Live Cloud Index • S.S. +2 High School, Gola</span>
           <span>Press <strong class="text-amber-300">Ctrl + K</strong> anytime</span>
@@ -436,7 +391,6 @@
         <div class="p-8 text-center space-y-2">
           <div class="text-2xl">🪔</div>
           <p class="font-hindi text-sm font-bold text-amber-300">कोई परिणाम नहीं मिला ("${escapeSafe(queryText)}")</p>
-          <p class="text-xs text-stone-400 font-hindi">कृपया किसी शिक्षक का नाम, पूर्व छात्र का बैच (जैसे 2022, 2025), या योजना का नाम लिखें।</p>
         </div>
       `;
       return;
@@ -474,7 +428,6 @@
           window.switchView(chosen.view);
         }
 
-        // If hidden by scheme filter, show all schemes
         if (chosen.element && chosen.element.classList.contains("hidden")) {
           chosen.element.classList.remove("hidden");
         }
@@ -521,8 +474,7 @@
   });
 
   // ==========================================================================
-  // 📜 ENGINE 3: OFFICIAL "RAJPATRA" (राजपत्र) GAZETTE & TAMRAPATRA ENGINE
-  // Turns every Notice on the Notice Board into an Official Signed Govt Circular
+  // 📜 ENGINE 3: OFFICIAL "RAJPATRA" (राजपत्र) WITH DIRECT DEEP-LINK QR & PDF LINK
   // ==========================================================================
   function generateDigitalHash(str) {
     let h = 2166136261;
@@ -545,7 +497,7 @@
         <div class="no-print-control flex flex-wrap items-center justify-between gap-2 bg-stone-900/95 border border-amber-500/40 px-4 py-2.5 rounded-2xl text-xs">
           <div class="flex items-center gap-2 text-amber-300 font-hindi font-bold">
             <span>🏛️</span>
-            <span>आधिकारिक विद्यालय राजपत्र एवं सूचना प्रारूप (Official Verifiable Gazette)</span>
+            <span>आधिकारिक विद्यालय राजपत्र (QR स्कैन करने पर सीधा नोटिस बोर्ड खुलेगा!)</span>
           </div>
           <div class="flex items-center gap-2">
             <button id="rajpatra-print-btn" type="button"
@@ -563,8 +515,7 @@
         <div id="royal-rajpatra-sheet"
           class="rounded-2xl bg-[#FFFDF7] text-stone-900 border-4 border-double border-amber-800/80 shadow-2xl p-6 sm:p-10 space-y-6 relative overflow-hidden">
           
-          <!-- Subtle Corner Ornamental Borders -->
-          <div class=" pointer-events-none absolute inset-2 border border-amber-700/25 rounded-xl"></div>
+          <div class="pointer-events-none absolute inset-2 border border-amber-700/25 rounded-xl"></div>
 
           <!-- Official Government & Institutional Header -->
           <div class="text-center space-y-1.5 border-b-2 border-amber-800/70 pb-5 relative">
@@ -613,28 +564,38 @@
             </div>
           </div>
 
-          <!-- Official Seal, QR Code & Principal Signature Block -->
+          <!-- Official Seal, Direct URL QR Code & Principal Signature Block -->
           <div class="pt-4 border-t-2 border-amber-800/60 grid grid-cols-1 sm:grid-cols-3 gap-6 items-center">
             
-            <!-- Left: Cryptographic Verification & Live QR -->
+            <!-- Left: Scannable Direct URL QR + Clickable Mobile PDF Anchor Link -->
             <div class="flex items-center gap-3">
-              <img id="rajpatra-qr-img" alt="Official Verification QR"
-                class="w-20 h-20 rounded-lg border-2 border-amber-900/40 p-1 bg-white shrink-0" />
-              <div class="text-[10px] font-mono text-stone-700 space-y-0.5">
+              <a id="rajpatra-qr-link" href="${PORTAL_BASE_URL}#notices-container" target="_blank" rel="noopener noreferrer"
+                title="Scan or Click to Open Official Notice Board" class="shrink-0 block">
+                <img id="rajpatra-qr-img" alt="Scan to Open Notice Board"
+                  class="w-24 h-24 rounded-lg border-2 border-amber-900/50 p-1 bg-white shadow-sm" />
+              </a>
+              <div class="text-[10px] font-mono text-stone-700 space-y-1">
                 <div class="font-extrabold text-emerald-800">✓ VERIFIED DIGITAL RECORD</div>
                 <div>Hash: <strong id="rajpatra-hash" class="text-stone-900"></strong></div>
-                <div>Verify at Official Portal:</div>
-                <div class="text-[9px] text-amber-900 break-all">${escapeSafe(window.location.origin + window.location.pathname)}</div>
+                <div class="font-hindi font-bold text-stone-800">QR स्कैन करें या नीचे टैप करें:</div>
+                <a id="rajpatra-text-link" href="${PORTAL_BASE_URL}#notices-container" target="_blank" rel="noopener noreferrer"
+                  class="inline-block px-2.5 py-1 rounded bg-amber-900 text-amber-100 font-mono font-extrabold text-[10px] underline decoration-amber-300 shadow-sm">
+                  🌐 Open Live Notice Board ↗
+                </a>
+                <a id="rajpatra-raw-url" href="${PORTAL_BASE_URL}#notices-container" target="_blank" rel="noopener noreferrer"
+                  class="block text-[8.5px] text-blue-800 underline whitespace-nowrap overflow-hidden text-ellipsis max-w-[165px]">
+                  ${PORTAL_BASE_URL}
+                </a>
               </div>
             </div>
 
-            <!-- Center: Circular Institutional Stamp Emblem -->
+            <!-- Center: Properly Proportioned Circular Institutional Stamp Emblem -->
             <div class="flex justify-center">
-              <div class="rajpatra-seal-ring w-28 h-28 rounded-full border-2 border-dashed border-amber-800/70 flex flex-col items-center justify-center text-center p-2 text-amber-900">
-                <span class="text-[9px] font-mono font-extrabold tracking-tighter">S.S. +2 HIGH SCHOOL</span>
-                <span class="text-base">🪔</span>
-                <span class="font-hindi text-[10px] font-extrabold leading-tight">आधिकारिक मुहर<br>गोला • 1940</span>
-                <span class="text-[8px] font-mono font-bold">UDISE: 20240701206</span>
+              <div class="rajpatra-seal-ring w-32 h-32 rounded-full border-2 border-dashed border-amber-800/75 flex flex-col items-center justify-center text-center p-3 text-amber-900">
+                <span class="text-[8.5px] font-mono font-extrabold tracking-tight">S.S. +2 HIGH SCHOOL</span>
+                <span class="text-lg leading-none my-0.5">🪔</span>
+                <span class="font-hindi text-[10px] font-extrabold leading-snug">आधिकारिक मुहर<br>गोला • 1940</span>
+                <span class="text-[8px] font-mono font-bold mt-0.5">UDISE: 20240701206</span>
               </div>
             </div>
 
@@ -680,7 +641,14 @@
     playSacredTempleBell("bell");
 
     const hash = generateDigitalHash(noticeData.title + noticeData.date);
-    const memoNo = `SSHS/GOLA/${new Date().getFullYear()}/${hash.slice(-4)}`;
+    const shortCode = hash.slice(-4);
+    const memoNo = `SSHS/GOLA/${new Date().getFullYear()}/${shortCode}`;
+
+    // 🔗 100% Pure Direct URL inside QR Code so ANY phone camera opens the site directly to Notice Section!
+    const baseClean = (window.location.origin && window.location.origin !== "null")
+      ? (window.location.origin + window.location.pathname)
+      : PORTAL_BASE_URL;
+    const directNoticeUrl = `${baseClean}?notice=${encodeURIComponent(shortCode)}#notices-container`;
 
     document.getElementById("rajpatra-memo-no").textContent = memoNo;
     document.getElementById("rajpatra-date").textContent = noticeData.date;
@@ -689,11 +657,19 @@
     document.getElementById("rajpatra-desc").textContent = noticeData.desc;
     document.getElementById("rajpatra-hash").textContent = hash;
 
-    const qrPayload = encodeURIComponent(
-      `VERIFIED NOTICE | S.S. +2 High School Gola (UDISE: 20240701206) | Memo: ${memoNo} | Date: ${noticeData.date} | ${window.location.href}`
-    );
+    // Update all clickable PDF links + QR Image with pure URL
+    const qrLinkEl = document.getElementById("rajpatra-qr-link");
+    const textLinkEl = document.getElementById("rajpatra-text-link");
+    const rawUrlEl = document.getElementById("rajpatra-raw-url");
+    if (qrLinkEl) qrLinkEl.href = directNoticeUrl;
+    if (textLinkEl) textLinkEl.href = directNoticeUrl;
+    if (rawUrlEl) {
+      rawUrlEl.href = directNoticeUrl;
+      rawUrlEl.textContent = baseClean;
+    }
+
     document.getElementById("rajpatra-qr-img").src =
-      `https://api.qrserver.com/v1/create-qr-code/?size=160x160&margin=4&data=${qrPayload}`;
+      `https://api.qrserver.com/v1/create-qr-code/?size=200x200&ecc=M&margin=4&data=${encodeURIComponent(directNoticeUrl)}`;
 
     const modal = document.getElementById("royal-rajpatra-modal");
     modal.classList.remove("hidden");
@@ -708,7 +684,44 @@
     }
   }
 
-  // Automatically enhance every Notice Card with the Royal Rajpatra Button
+  // ==========================================================================
+  // 🎯 ENGINE 4: INCOMING QR DEEP-LINK AUTO-SCROLLER & HIGHLIGHTER
+  // When user scans QR code on phone, site opens -> jumps to exact Notice!
+  // ==========================================================================
+  function handleIncomingQRDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const noticeCode = params.get("notice");
+    const hashTarget = window.location.hash;
+
+    if (!noticeCode && hashTarget !== "#notices-container") return;
+
+    if (typeof window.switchView === "function") {
+      window.switchView("home");
+    }
+
+    const container = document.getElementById("notices-container");
+    if (!container) return;
+
+    let targetArticle = null;
+    if (noticeCode) {
+      container.querySelectorAll("article").forEach((art) => {
+        if (art.getAttribute("data-notice-code") === noticeCode) {
+          targetArticle = art;
+        }
+      });
+    }
+
+    const scrollEl = targetArticle || container;
+    setTimeout(() => {
+      scrollEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      if (targetArticle) {
+        targetArticle.classList.remove("royal-spotlight-highlight");
+        void targetArticle.offsetWidth;
+        targetArticle.classList.add("royal-spotlight-highlight");
+      }
+    }, 350);
+  }
+
   function enhanceNoticeCardsWithRajpatra() {
     const container = document.getElementById("notices-container");
     if (!container) return;
@@ -724,11 +737,15 @@
       const tag = spans[0]?.textContent?.trim() || "OFFICIAL NOTICE";
       const date = spans[1]?.textContent?.trim() || new Date().toLocaleDateString("en-IN");
 
+      const hash = generateDigitalHash(title + date);
+      const shortCode = hash.slice(-4);
+      article.setAttribute("data-notice-code", shortCode);
+
       const footerBar = document.createElement("div");
       footerBar.className = "pt-3 mt-2 border-t border-amber-500/20 flex items-center justify-between gap-2";
       footerBar.innerHTML = `
         <span class="text-[10px] font-mono t-muted flex items-center gap-1">
-          <span>🛡️</span> <span>Memo: SSHS/GOLA/0${idx + 1}</span>
+          <span>🛡️</span> <span>Memo: SSHS/GOLA/${new Date().getFullYear()}/${shortCode}</span>
         </span>
         <button type="button"
           class="rajpatra-open-btn px-3 py-1.5 rounded-xl bg-amber-500/15 hover:bg-amber-500 text-amber-600 dark:text-amber-300 hover:text-stone-950 border border-amber-500/40 font-hindi font-extrabold text-xs transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-sm">
@@ -743,9 +760,10 @@
 
       article.appendChild(footerBar);
     });
+
+    handleIncomingQRDeepLink();
   }
 
-  // Watch #notices-container so Firebase updates or Language switches automatically get the button
   function observeNoticesContainer() {
     const container = document.getElementById("notices-container");
     if (!container) return;
@@ -759,14 +777,13 @@
     observer.observe(container, { childList: true });
   }
 
-  // ==========================================================================
-  // 🚀 INITIALIZE ALL 3 ROYAL ARCHITECTURAL ENGINES
-  // ==========================================================================
   function initRoyalArchitecture() {
     injectRoyalCommandRibbon();
     bindTempleBellInteractions();
     observeNoticesContainer();
-    console.log("👑 [S.S. +2 High School Gola] Royal Rajpatra, 432Hz Bell & Omni-Spotlight Active.");
+    window.addEventListener("backend-ready", () => {
+      setTimeout(handleIncomingQRDeepLink, 500);
+    });
   }
 
   if (document.readyState === "loading") {
