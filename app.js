@@ -2,7 +2,7 @@
 // FILE 3: app.js — COMPLETE BILINGUAL ENGINE + GURU STAMBH + ADMIN CONTROLLER
 // ============================================================================
 
-let currentLang = 'hi';
+let currentLang = 'en';
 let currentSchemeFilter = 'all';
 let cachedNotices = (window.SCHOOL_MASTER_CONFIG && window.SCHOOL_MASTER_CONFIG.defaultNotices) || [];
 let cachedApprovedAlumni = [];
