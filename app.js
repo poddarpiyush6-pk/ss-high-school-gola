@@ -1,7 +1,7 @@
 // ============================================================================
-// FILE: app.js (v4.0 — NATIVE ENGLISH, ZERO-BLOAT CORE ENGINE)
+// FILE: app.js (v4.1 — NATIVE ENGLISH, ZERO-BLOAT CORE ENGINE)
 // Handles: Hero Metrics, Principal Desk, Live Notice Board, Scholarships Hub,
-//          Guru Stambh (Faculty), Gaurav Stambh (Alumni), Vidya Deep & Routing
+//          Guru Stambh (Face-Safe Portraits), Gaurav Stambh (Alumni) & Routing
 // ============================================================================
 
 let currentSchemeFilter = "all";
@@ -89,14 +89,12 @@ function renderMasterConfig() {
   const cfg = window.SCHOOL_MASTER_CONFIG;
   if (!cfg) return;
 
-  // Student Strength (Fixed blank display bug with clean fallback)
   const countEl = document.getElementById("metric-student-count");
   if (countEl) {
     const rawStrength = cfg.metrics && cfg.metrics.studentStrength ? String(cfg.metrics.studentStrength).trim() : "";
     countEl.textContent = rawStrength && rawStrength !== "0000" ? rawStrength : "1,800+";
   }
 
-  // Principal Name & Desk
   const principalName = (cfg.principal && cfg.principal.nameEn) || "Smt. Anupa Pushpa Tirkey";
   const principalRole = (cfg.principal && cfg.principal.designationEn) || "Principal, S.S. +2 High School, Gola";
   const principalMsg = (cfg.principal && cfg.principal.messageEn) ||
@@ -112,22 +110,17 @@ function renderMasterConfig() {
   if (pRole) pRole.textContent = principalRole;
   if (pMsg) pMsg.textContent = principalMsg;
 
-  // Institutional Motto Meaning
   const shlokaEl = document.getElementById("hero-shloka-meaning");
   if (shlokaEl) {
     shlokaEl.textContent = (cfg.identity && cfg.identity.shlokaMeaningEn) ||
       "Verily, there is nothing in this world as purifying as true knowledge; Education is that which liberates.";
   }
 
-  // Live Notice Board (Clickable to open full PDF/Image/YouTube Viewer)
   renderNoticesBoard();
-
-  // Schemes, Alumni & Faculty Walls
   renderSchemesGrid();
   renderVerifiedAlumniWall();
   renderVerifiedFacultyWall();
 
-  // Creator Credit
   if (cfg.creatorCredit) {
     const cName = document.getElementById("creator-name-slot");
     const cBatch = document.getElementById("creator-batch-slot");
@@ -216,16 +209,17 @@ function renderSchemesGrid() {
             ${s.elig}
           </div>
         </div>
-        ${s.link
-        ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer"
+        ${
+          s.link
+            ? `<a href="${s.link}" target="_blank" rel="noopener noreferrer"
                  class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-stone-950 font-extrabold text-xs flex items-center justify-center gap-2 transition-all">
                  <span>${s.btn}</span>
                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
                </a>`
-        : `<div class="w-full py-2.5 px-4 rounded-xl sacred-inner-box t-gold font-extrabold text-xs text-center">
+            : `<div class="w-full py-2.5 px-4 rounded-xl sacred-inner-box t-gold font-extrabold text-xs text-center">
                  ${s.btn}
                </div>`
-      }
+        }
       </div>
     `;
   }).join("");
@@ -266,7 +260,7 @@ function renderVerifiedAlumniWall() {
 }
 
 // ============================================================================
-// 3. GURU STAMBH (VERIFIED FACULTY WALL — 100% ENGLISH)
+// 3. GURU STAMBH (VERIFIED FACULTY WALL — FACE-SAFE PORTRAITS + FALLBACK)
 // ============================================================================
 function renderVerifiedFacultyWall() {
   const grid = document.getElementById("verified-faculty-grid");
@@ -290,7 +284,7 @@ function renderVerifiedFacultyWall() {
           </div>
           <div class="flex items-center gap-4">
             <img src="https://api.dicebear.com/7.x/initials/svg?seed=Anupa+Pushpa+Tirkey&backgroundColor=0b3066" alt="Principal"
-              class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500 shadow-sm shrink-0" />
+              class="w-20 h-20 rounded-2xl object-cover object-top border-2 border-amber-500 shadow-sm shrink-0 bg-slate-900" />
             <div class="space-y-0.5">
               <h3 class="text-lg font-extrabold t-heading">Smt. Anupa Pushpa Tirkey</h3>
               <p class="text-xs font-mono font-bold t-gold">Principal</p>
@@ -336,7 +330,8 @@ function renderVerifiedFacultyWall() {
 
           <div class="flex items-center gap-4">
             <img src="${f.photoDataUrl || avatarFallback}" alt="${escapeHTML(f.fullName)}"
-              class="w-20 h-20 rounded-2xl object-cover border-2 border-amber-500/70 shadow-sm shrink-0" />
+              onerror="this.onerror=null;this.src='${avatarFallback}';"
+              class="w-20 h-20 rounded-2xl object-cover object-top border-2 border-amber-500/70 shadow-sm shrink-0 bg-slate-900" />
             <div class="space-y-0.5 min-w-0">
               <h3 class="text-lg font-extrabold t-heading truncate">${escapeHTML(f.fullName)}</h3>
               <p class="text-xs font-mono font-bold t-gold">${escapeHTML(f.designation || "Faculty Member")}</p>
@@ -356,8 +351,9 @@ function renderVerifiedFacultyWall() {
           </div>
         </div>
 
-        ${f.thoughtForStudents
-        ? `<div class="p-4 rounded-2xl sacred-inner-box space-y-1">
+        ${
+          f.thoughtForStudents
+            ? `<div class="p-4 rounded-2xl sacred-inner-box space-y-1">
                  <span class="text-[10px] font-mono uppercase tracking-wider t-gold font-extrabold block">
                    Message for Students
                  </span>
@@ -365,8 +361,8 @@ function renderVerifiedFacultyWall() {
                    "${escapeHTML(f.thoughtForStudents)}"
                  </p>
                </div>`
-        : ""
-      }
+            : ""
+        }
       </div>
     `;
   }).join("");
@@ -389,11 +385,9 @@ async function syncWithBackend() {
     cachedApprovedFaculty = await window.BackendService.fetchApprovedFaculty();
   }
   renderMasterConfig();
-
 }
 
 window.syncSchoolPortalData = syncWithBackend;
-
 
 window.handleAlumniSubmit = async function (e) {
   e.preventDefault();
