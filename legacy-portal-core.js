@@ -1,10 +1,10 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v3.4 — HERO-SAFE + UNIFIED TEACHER SIGNUP)
+// FILE: legacy-portal-core.js (v3.5 — INSTANT TEACHER PHOTO + HERO-SAFE SHELL)
 // 1. 4-Tier NTA/JEE Legacy Header + True Sticky Navigation Bar (Mobile & PC)
 // 2. Eye-Friendly Dual Theme Engine (Zero Conflict with HD Hero Photo Banner)
 // 3. Adaptive Ctrl+K Spotlight Search Override + Mobile Sticky Search Button
 // 4. Zero-Button Continuous "LATEST NEWS" Marquee + In-Site PDF/YT/Image Viewer
-// 5. Curved Auth Modal + Unified Teacher Sign-Up (Auto-Syncs to Guru Stambh)
+// 5. Curved Auth Modal + Instant-Compress Teacher Sign-Up (Auto Guru Stambh)
 // ============================================================================
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -34,6 +34,7 @@ let currentUser = null;
 let currentUserProfile = null;
 let liveNoticesList = [];
 let fontScaleStep = 0;
+let signupTeacherPhotoDataUrl = "";
 
 function escapeSafe(str) {
   const d = document.createElement("div");
@@ -62,7 +63,7 @@ function compressAvatarFile(file) {
     r.onload = (ev) => {
       const im = new Image();
       im.onload = () => {
-        const MAX_W = 420;
+        const MAX_W = 480;
         let w = im.width;
         let h = im.height;
         if (w > MAX_W) {
@@ -72,8 +73,11 @@ function compressAvatarFile(file) {
         const c = document.createElement("canvas");
         c.width = w;
         c.height = h;
-        c.getContext("2d").drawImage(im, 0, 0, w, h);
-        resolve(c.toDataURL("image/jpeg", 0.72));
+        const ctx = c.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(im, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.78));
       };
       im.onerror = () => resolve("");
       im.src = ev.target.result;
@@ -946,7 +950,7 @@ function openInfoModal(type) {
 }
 
 // ============================================================================
-// 6. CURVED-GRADIENT AUTH MODAL + UNIFIED TEACHER SIGN-UP (GURU STAMBH READY)
+// 6. CURVED-GRADIENT AUTH MODAL + INSTANT-COMPRESS TEACHER SIGN-UP
 // ============================================================================
 function mountCurvedAuthModal() {
   if (document.getElementById("legacy-auth-modal")) return;
@@ -1150,6 +1154,7 @@ function mountCurvedAuthModal() {
                 <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Photo (Guru Stambh)</label>
                 <input id="signup-photo" type="file" accept="image/*"
                   class="w-full text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-900 file:font-bold" />
+                <div id="signup-photo-preview" class="hidden mt-1.5 flex items-center gap-2 text-[10px] font-bold text-emerald-700"></div>
               </div>
             </div>
 
@@ -1247,6 +1252,33 @@ function mountCurvedAuthModal() {
     });
   });
 
+  // Compress & lock teacher photo IMMEDIATELY on file select (fixes mobile lazy-read bug!)
+  const signupPhotoInput = document.getElementById("signup-photo");
+  if (signupPhotoInput) {
+    signupPhotoInput.addEventListener("change", async (e) => {
+      const file = e.target.files && e.target.files[0];
+      const prevEl = document.getElementById("signup-photo-preview");
+      if (!file) {
+        signupTeacherPhotoDataUrl = "";
+        if (prevEl) prevEl.classList.add("hidden");
+        return;
+      }
+      if (prevEl) {
+        prevEl.textContent = "Optimizing photo...";
+        prevEl.classList.remove("hidden");
+      }
+      signupTeacherPhotoDataUrl = await compressAvatarFile(file);
+      if (prevEl) {
+        if (signupTeacherPhotoDataUrl) {
+          const kb = Math.round((signupTeacherPhotoDataUrl.length * 3) / 4 / 1024);
+          prevEl.innerHTML = `<img src="${signupTeacherPhotoDataUrl}" class="w-8 h-8 rounded-lg object-cover object-top border border-emerald-500" /> <span>✓ Ready (${kb} KB)</span>`;
+        } else {
+          prevEl.textContent = "⚠️ Could not read image. Try JPG/PNG.";
+        }
+      }
+    });
+  }
+
   document.getElementById("legacy-signin-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("signin-submit-btn");
@@ -1308,7 +1340,6 @@ function mountCurvedAuthModal() {
       return;
     }
 
-    // Disable immediately BEFORE async photo compression (prevents mobile double-tap bug)
     btn.disabled = true;
     btn.textContent = "CREATING ACCOUNT...";
 
@@ -1339,12 +1370,16 @@ function mountCurvedAuthModal() {
         profileData.experience = document.getElementById("signup-experience").value.trim() || "Dedicated Service";
         profileData.thoughtForStudents = document.getElementById("signup-thought").value.trim() || "";
 
-        const photoInput = document.getElementById("signup-photo");
-        const photoFile = photoInput && photoInput.files[0];
-        if (photoFile) {
-          btn.textContent = "OPTIMIZING PHOTO...";
-          profileData.photoDataUrl = await compressAvatarFile(photoFile);
-          btn.textContent = "CREATING ACCOUNT...";
+        if (signupTeacherPhotoDataUrl) {
+          profileData.photoDataUrl = signupTeacherPhotoDataUrl;
+        } else {
+          const photoInput = document.getElementById("signup-photo");
+          const photoFile = photoInput && photoInput.files && photoInput.files[0];
+          if (photoFile) {
+            btn.textContent = "OPTIMIZING PHOTO...";
+            profileData.photoDataUrl = await compressAvatarFile(photoFile);
+            btn.textContent = "CREATING ACCOUNT...";
+          }
         }
       }
 
@@ -1352,6 +1387,10 @@ function mountCurvedAuthModal() {
       await setDoc(doc(fbDb, "users", cred.user.uid), profileData);
       currentUser = cred.user;
       currentUserProfile = profileData;
+      signupTeacherPhotoDataUrl = "";
+      const prevEl = document.getElementById("signup-photo-preview");
+      if (prevEl) prevEl.classList.add("hidden");
+
       updateAuthHeaderButton();
       showAuthStatus(
         status,
