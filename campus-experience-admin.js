@@ -1,8 +1,8 @@
 // ============================================================================
-// FILE: campus-experience-admin.js
-// 1. Secret Admin Executive Control Suite v3.0 (Obsidian + Gold Theme • Responsive)
-// 2. Campus Gallery Page (#view-gallery) + Auto-Sliding Photo Carousel + YT Embeds
-// 3. Admin Gallery Manager (Auto Image Compressor + YouTube Link + Custom Captions)
+// FILE: campus-experience-admin.js (v3.1 — 3-WAY MOBILE SIDEBAR + GALLERY + MAP)
+// 1. Secret Admin Executive Control Suite v3.0 (Obsidian + Gold • Mobile-First)
+// 2. Campus Gallery Page (#view-gallery) + Auto-Sliding Carousel + YT Embeds
+// 3. Admin Gallery Manager (Auto Image Compressor + YouTube Link + Captions)
 // 4. Lazy-Loaded Live School Location Map Card (Heramdaga Rd, Bantara, Gola)
 // ============================================================================
 
@@ -258,7 +258,6 @@ window.openCampusGalleryPage = async function () {
   });
 
   view.innerHTML = `
-    <!-- Header -->
     <div class="flex flex-wrap items-end justify-between gap-4 border-b leg-border pb-4">
       <div>
         <span class="px-3 py-1 rounded-full bg-[#0B3066] text-amber-300 font-mono text-[10px] font-extrabold uppercase tracking-widest">
@@ -285,7 +284,6 @@ window.openCampusGalleryPage = async function () {
       </div>
     </div>
 
-    <!-- AUTOMATIC SMOOTH PHOTO CAROUSEL -->
     ${
       photosOnly.length > 0
         ? `
@@ -306,7 +304,6 @@ window.openCampusGalleryPage = async function () {
         : ""
     }
 
-    <!-- GALLERY GRID (Photos + Embedded YouTube Videos) -->
     ${
       filtered.length === 0
         ? `
@@ -359,7 +356,6 @@ window.openCampusGalleryPage = async function () {
     }
   `;
 
-  // Category Filter Listeners
   view.querySelectorAll("[data-gal-cat]").forEach((btn) => {
     btn.addEventListener("click", () => {
       activeGalleryFilter = btn.getAttribute("data-gal-cat");
@@ -367,7 +363,6 @@ window.openCampusGalleryPage = async function () {
     });
   });
 
-  // Lightbox Listeners
   view.querySelectorAll("[data-open-gal-idx]").forEach((card) => {
     card.addEventListener("click", () => {
       const chosen = filtered[Number(card.getAttribute("data-open-gal-idx"))];
@@ -375,7 +370,6 @@ window.openCampusGalleryPage = async function () {
     });
   });
 
-  // Activate Auto-Slide Carousel
   if (photosOnly.length > 0) {
     carouselIndex = 0;
     renderCarouselSlide(photosOnly, "gal");
@@ -405,7 +399,6 @@ function mountSchoolLocationMapCard() {
 
   section.innerHTML = `
     <div class="sacred-card rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-12">
-      <!-- Left Info Panel -->
       <div class="lg:col-span-5 p-6 sm:p-8 flex flex-col justify-between gap-5">
         <div class="space-y-3">
           <span class="inline-block px-3 py-1 rounded-full bg-[#0B3066] text-amber-300 font-mono text-[10px] font-extrabold uppercase tracking-wider">
@@ -442,7 +435,6 @@ function mountSchoolLocationMapCard() {
         </div>
       </div>
 
-      <!-- Right Lazy-Loaded Interactive Map -->
       <div class="lg:col-span-7 min-h-[290px] sm:min-h-[340px] bg-slate-200 dark:bg-slate-900">
         <iframe
           title="S.S. +2 High School Gola Campus Map"
@@ -466,7 +458,7 @@ function mountSchoolLocationMapCard() {
 }
 
 // ============================================================================
-// 4. SECRET ADMIN EXECUTIVE CONTROL SUITE v3.0 (OBSIDIAN + GOLD THEME)
+// 4. SECRET ADMIN EXECUTIVE CONTROL SUITE v3.0 (3-WAY MOBILE DRAWER CLOSE)
 // ============================================================================
 function ensureExecutiveAdminModal() {
   let modal = document.getElementById("exec-admin-modal");
@@ -479,7 +471,7 @@ function ensureExecutiveAdminModal() {
   modal.innerHTML = `
     <div class="exec-shell w-full h-full sm:h-[92vh] sm:max-w-7xl sm:rounded-3xl border border-amber-500/25 shadow-[0_25px_80px_rgba(0,0,0,0.85)] overflow-hidden flex flex-col">
       
-      <!-- LOCKED LOGIN VIEW (Shown for everyone except Authorized Admin!) -->
+      <!-- LOCKED LOGIN VIEW -->
       <div id="exec-login-screen" class="flex-1 flex items-center justify-center p-6">
         <div class="exec-card rounded-3xl p-7 sm:p-9 max-w-md w-full space-y-6 border border-amber-500/35">
           <div class="flex items-center justify-between">
@@ -520,10 +512,17 @@ function ensureExecutiveAdminModal() {
       <!-- EXECUTIVE COMMAND CENTER (ONLY FOR VERIFIED ADMIN) -->
       <div id="exec-dashboard-screen" class="hidden flex-1 flex overflow-hidden relative">
         
-        <!-- Left Sidebar (Desktop Fixed | Mobile Slide-Over) -->
-        <aside id="exec-sidebar" class="exec-sidebar hidden lg:flex flex-col justify-between w-64 shrink-0 p-4 overflow-y-auto z-30">
+        <!-- Mobile Tap-Outside Dark Backdrop (Auto-closes sidebar) -->
+        <div id="exec-sidebar-backdrop" class="hidden fixed inset-0 bg-black/70 backdrop-blur-xs z-20 lg:hidden"></div>
+
+        <!-- Left Sidebar (Desktop Fixed | Mobile Slide-Over Drawer with ✕ Close) -->
+        <aside id="exec-sidebar" class="exec-sidebar hidden lg:flex lg:static flex-col justify-between w-64 max-w-[82vw] shrink-0 p-4 overflow-y-auto z-30">
           <div class="space-y-6">
-            <div class="text-center pt-2 pb-4 border-b border-amber-500/15">
+            <div class="relative text-center pt-2 pb-4 border-b border-amber-500/15">
+              <button id="exec-sidebar-close" type="button" aria-label="Close Sidebar"
+                class="lg:hidden absolute top-0 right-0 w-8 h-8 rounded-lg bg-white/10 hover:bg-red-600 text-slate-200 hover:text-white flex items-center justify-center text-sm font-bold cursor-pointer">
+                ✕
+              </button>
               <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/15 border border-amber-400/40 flex items-center justify-center text-2xl shadow-lg">🏛️</div>
               <div class="font-extrabold text-sm text-amber-300 tracking-wide mt-2.5">S.S. +2 HIGH SCHOOL</div>
               <div class="text-[11px] font-bold text-white">GOLA • RAMGARH</div>
@@ -550,10 +549,9 @@ function ensureExecutiveAdminModal() {
 
         <!-- Main Workspace -->
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
-          <!-- Top Executive Header -->
           <header class="px-4 sm:px-6 py-3.5 bg-[#0b1120] border-b border-amber-500/15 flex items-center justify-between gap-3 shrink-0">
             <div class="flex items-center gap-3 min-w-0">
-              <button id="exec-mob-menu" type="button" aria-label="Toggle Admin Menu"
+              <button id="exec-mob-menu" type="button" aria-label="Open Admin Menu"
                 class="lg:hidden px-2.5 py-1.5 rounded-lg bg-amber-500/15 border border-amber-400/35 text-amber-300 font-bold text-sm cursor-pointer">☰</button>
               <div class="min-w-0">
                 <h2 class="text-sm sm:text-base font-extrabold text-amber-300 truncate">Secret Admin Panel</h2>
@@ -572,10 +570,8 @@ function ensureExecutiveAdminModal() {
             </div>
           </header>
 
-          <!-- Mobile Horizontal Tab Strip (< 1024px) -->
           <div id="exec-mobile-tabs" class="lg:hidden px-3 py-2 bg-[#0a0f1d] border-b border-amber-500/15 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0"></div>
 
-          <!-- Dynamic Tab Workspace -->
           <main id="exec-workspace" class="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"></main>
         </div>
       </div>
@@ -585,20 +581,39 @@ function ensureExecutiveAdminModal() {
 
   document.body.appendChild(modal);
 
+  const openExecSidebar = () => {
+    const sb = document.getElementById("exec-sidebar");
+    const bd = document.getElementById("exec-sidebar-backdrop");
+    if (sb) {
+      sb.classList.remove("hidden");
+      sb.classList.add("flex", "fixed", "inset-y-0", "left-0", "shadow-2xl");
+    }
+    if (bd) bd.classList.remove("hidden");
+  };
+
+  const closeExecSidebar = () => {
+    const sb = document.getElementById("exec-sidebar");
+    const bd = document.getElementById("exec-sidebar-backdrop");
+    if (sb) {
+      sb.classList.add("hidden");
+      sb.classList.remove("flex", "fixed", "inset-y-0", "left-0", "shadow-2xl");
+    }
+    if (bd) bd.classList.add("hidden");
+  };
+
+  window._closeExecMobileSidebar = closeExecSidebar;
+
   const closeModal = () => {
+    closeExecSidebar();
     modal.classList.add("hidden");
     modal.classList.remove("flex");
   };
+
   document.getElementById("exec-login-close").addEventListener("click", closeModal);
   document.getElementById("exec-close-btn").addEventListener("click", closeModal);
-
-  document.getElementById("exec-mob-menu").addEventListener("click", () => {
-    const sb = document.getElementById("exec-sidebar");
-    sb.classList.toggle("hidden");
-    sb.classList.toggle("fixed");
-    sb.classList.toggle("inset-y-0");
-    sb.classList.toggle("left-0");
-  });
+  document.getElementById("exec-mob-menu").addEventListener("click", openExecSidebar);
+  document.getElementById("exec-sidebar-close").addEventListener("click", closeExecSidebar);
+  document.getElementById("exec-sidebar-backdrop").addEventListener("click", closeExecSidebar);
 
   document.getElementById("exec-admin-login-form").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -625,6 +640,7 @@ function ensureExecutiveAdminModal() {
   });
 
   document.getElementById("exec-logout-btn").addEventListener("click", async () => {
+    closeExecSidebar();
     await window.BackendService.logoutAdmin();
     renderExecutiveAdminState();
   });
@@ -667,6 +683,7 @@ function renderExecNav() {
   document.querySelectorAll("[data-exec-tab]").forEach((btn) => {
     btn.addEventListener("click", () => {
       adminActiveTab = btn.getAttribute("data-exec-tab");
+      if (window._closeExecMobileSidebar) window._closeExecMobileSidebar();
       renderExecNav();
       loadExecWorkspaceTab(adminActiveTab);
     });
@@ -709,7 +726,6 @@ async function loadExecWorkspaceTab(tab) {
     const pendingTeachers = users.filter((u) => u.role === "pending_teacher").length;
 
     ws.innerHTML = `
-      <!-- Welcome Hero Banner (Matches Screenshot Theme) -->
       <div class="exec-card rounded-2xl p-5 sm:p-6 border border-amber-500/25 flex flex-wrap items-center justify-between gap-4 relative overflow-hidden">
         <div class="space-y-1">
           <div class="text-xs text-slate-300 font-semibold">Welcome Back,</div>
@@ -722,7 +738,6 @@ async function loadExecWorkspaceTab(tab) {
         </div>
       </div>
 
-      <!-- 4 Glowing KPI Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3.5">
         <div class="exec-kpi-blue rounded-2xl p-4 space-y-1">
           <div class="text-xs text-blue-300 font-bold">Total Portal Users</div>
@@ -746,7 +761,6 @@ async function loadExecWorkspaceTab(tab) {
         </div>
       </div>
 
-      <!-- Quick Actions Grid -->
       <div class="exec-card rounded-2xl p-5 space-y-3">
         <h4 class="text-sm font-extrabold text-amber-300">⚡ Quick Actions</h4>
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs font-bold">
@@ -783,7 +797,6 @@ async function loadExecWorkspaceTab(tab) {
 
     ws.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Upload Form -->
         <form id="exec-gal-form" class="lg:col-span-5 exec-card rounded-2xl p-5 space-y-3.5 text-xs h-fit">
           <h3 class="text-sm font-extrabold text-amber-300">🖼️ Add Photo or YouTube Video to Gallery</h3>
 
@@ -837,7 +850,6 @@ async function loadExecWorkspaceTab(tab) {
           </button>
         </form>
 
-        <!-- Live Gallery Items List -->
         <div class="lg:col-span-7 exec-card rounded-2xl p-5 space-y-3">
           <h3 class="text-sm font-extrabold text-amber-300">Live Gallery Archive (${items.length})</h3>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
@@ -1179,7 +1191,6 @@ async function loadExecWorkspaceTab(tab) {
   }
 }
 
-// Intercept Secret Admin Modal Trigger (Ctrl+Shift+A & Footer Lock) cleanly!
 function bindExecutiveAdminTrigger() {
   window.openSecretAdminModal = function () {
     const oldModal = document.getElementById("secret-admin-modal");
