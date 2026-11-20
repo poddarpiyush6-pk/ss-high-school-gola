@@ -776,7 +776,7 @@ function ensureExecutiveAdminModal() {
           </div>
 
           <p class="text-xs text-slate-400 leading-relaxed">
-            Restricted to the Authorized School Administrator. Unauthorized Student or Teacher accounts are automatically blocked.
+            Restricted to the Authorized School Administrator. Unauthorized Student accounts are automatically blocked.
           </p>
 
           <form id="exec-admin-login-form" class="space-y-4 text-xs">
