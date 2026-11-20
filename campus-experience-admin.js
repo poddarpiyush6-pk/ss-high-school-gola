@@ -1,14 +1,14 @@
 // ============================================================================
-// FILE: campus-experience-admin.js (v4.0 — HD HERO + EDITORIAL SLIDER + GURU SYNC)
-// 1. 1-Click HD School Photo Hero Banner (Controlled from Admin Gallery)
+// FILE: campus-experience-admin.js (v4.1 — LUXURY HERO + FRESH GURU PHOTO SYNC)
+// 1. Luxury Hero HD School Photo Sync (Desktop Full-Bleed + Mobile Clean Stage)
 // 2. Zero-Blur Editorial Split-Stage Home Showcase (Positioned Below Hero)
 // 3. Pure Masonry Campus Gallery Page + Swipe/Keyboard Full-Screen Lightbox
-// 4. Unified Teacher Approval -> Auto-Publishes Public Card to Guru Stambh
+// 4. Unified Teacher Approval (Fresh getDoc) + Admin 📸 Faculty Photo Updater
 // 5. Secret Admin Executive Control Suite v3.0 + Lazy-Loaded Live School Map
 // ============================================================================
 
 import {
-  collection, addDoc, getDocs, doc, setDoc, updateDoc, deleteDoc
+  collection, addDoc, getDocs, getDoc, doc, setDoc, updateDoc, deleteDoc
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 const SCHOOL_MAP_SHORT_URL = "https://maps.app.goo.gl/jd1mnaUX5G7WL3hFA";
@@ -58,7 +58,10 @@ function compressPhoto(file, maxW = 1200, quality = 0.76) {
         const canvas = document.createElement("canvas");
         canvas.width = w;
         canvas.height = h;
-        canvas.getContext("2d").drawImage(img, 0, 0, w, h);
+        const ctx = canvas.getContext("2d");
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
         resolve(canvas.toDataURL("image/jpeg", quality));
       };
       img.onerror = reject;
@@ -142,7 +145,7 @@ function injectExecutiveStyles() {
 }
 
 // ============================================================================
-// 2. GALLERY DATA FETCH + HD HERO PHOTO ENGINE + INTERACTIVE LIGHTBOX
+// 2. GALLERY DATA FETCH + LUXURY HERO PHOTO ENGINE + INTERACTIVE LIGHTBOX
 // ============================================================================
 async function fetchGalleryItems() {
   const db = getDb();
@@ -158,7 +161,6 @@ async function fetchGalleryItems() {
   }
 }
 
-// Applies the Admin-selected HD School Photo to the Home Hero Section
 // Applies Admin-selected HD School Photo to Luxury Hero (Desktop Full-Bleed + Mobile Clean Top Stage)
 function applyHeroPhotoFromGallery(items) {
   const deskImg = document.getElementById("hero-bg-img-desktop");
@@ -426,7 +428,7 @@ async function mountHomeCampusShowcase() {
     <div id="home-gal-stage"
       class="sacred-card rounded-3xl overflow-hidden grid grid-cols-1 lg:grid-cols-12 shadow-lg select-none">
       
-      <!-- LEFT 7 COLS: ZERO-BLUR STUDIO PHOTO STAGE (Natural Aspect Ratio + Studio Shadow) -->
+      <!-- LEFT 7 COLS: ZERO-BLUR STUDIO PHOTO STAGE -->
       <div id="home-gal-photo-box"
         class="lg:col-span-7 editorial-photo-stage relative flex items-center justify-center p-4 sm:p-6 min-h-[260px] sm:min-h-[380px] lg:min-h-[420px] cursor-pointer group">
         <img id="home-gal-fg" src="${esc(photosOnly[0].imageDataUrl)}" alt="${esc(photosOnly[0].title)}"
@@ -457,17 +459,16 @@ async function mountHomeCampusShowcase() {
         </div>
 
         <div class="space-y-4 pt-2 border-t leg-border">
-          <!-- Auto-Slide Progress Bar -->
           <div class="w-full h-1 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
             <div id="home-gal-progress" class="h-full bg-[#f59e0b] rounded-full ${photosOnly.length > 1 ? "slide-progress-fill" : "w-full"}"></div>
           </div>
 
-          <!-- Controls Row -->
           <div class="flex items-center justify-between gap-3">
             <div id="home-gal-dots" class="flex items-center gap-1.5 flex-wrap"></div>
 
-            ${photosOnly.length > 1
-      ? `
+            ${
+              photosOnly.length > 1
+                ? `
                   <div class="flex items-center gap-2 shrink-0">
                     <button id="home-gal-prev" type="button" aria-label="Previous Slide"
                       class="w-9 h-9 rounded-xl sacred-inner-box hover:bg-[#0B3066] hover:text-white t-heading font-extrabold text-base flex items-center justify-center transition-colors cursor-pointer">‹</button>
@@ -475,8 +476,8 @@ async function mountHomeCampusShowcase() {
                       class="w-9 h-9 rounded-xl sacred-inner-box hover:bg-[#0B3066] hover:text-white t-heading font-extrabold text-base flex items-center justify-center transition-colors cursor-pointer">›</button>
                   </div>
                 `
-      : ""
-    }
+                : ""
+            }
           </div>
 
           <button id="home-gal-view-all" type="button"
@@ -510,7 +511,6 @@ async function mountHomeCampusShowcase() {
     openGalleryLightbox(homePhotosCache, carouselIndex % homePhotosCache.length);
   });
 
-  // Mobile Swipe on Photo Stage
   let startX = 0;
   photoBox.addEventListener("touchstart", (e) => {
     startX = e.changedTouches[0].screenX;
@@ -597,18 +597,20 @@ window.openCampusGalleryPage = async function () {
       <div class="flex flex-wrap gap-1.5">
         ${categories.map((cat) => `
           <button type="button" data-gal-cat="${cat}"
-            class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${activeGalleryFilter === cat
-      ? "bg-[#0B3066] text-white"
-      : "bg-[var(--leg-surface)] border leg-border leg-text-body hover:border-amber-500"
-    }">
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
+              activeGalleryFilter === cat
+                ? "bg-[#0B3066] text-white"
+                : "bg-[var(--leg-surface)] border leg-border leg-text-body hover:border-amber-500"
+            }">
             ${cat}
           </button>
         `).join("")}
       </div>
     </div>
 
-    ${filtered.length === 0
-      ? `
+    ${
+      filtered.length === 0
+        ? `
           <div class="sacred-card rounded-3xl p-10 text-center space-y-2">
             <div class="text-4xl">🖼️</div>
             <h3 class="text-base font-extrabold leg-text-primary">No Media in This Category Yet</h3>
@@ -617,12 +619,12 @@ window.openCampusGalleryPage = async function () {
             </p>
           </div>
         `
-      : `
+        : `
           <div class="columns-1 sm:columns-2 lg:columns-3 gap-5">
             ${filtered.map((item, idx) => {
-        const ytEmbed = getYouTubeEmbed(item.youtubeUrl || "");
-        if (item.type === "video" && ytEmbed) {
-          return `
+              const ytEmbed = getYouTubeEmbed(item.youtubeUrl || "");
+              if (item.type === "video" && ytEmbed) {
+                return `
                   <article class="gal-masonry-card mb-5 sacred-card rounded-2xl overflow-hidden flex flex-col">
                     <div class="aspect-video w-full bg-black">
                       <iframe src="${esc(ytEmbed)}" class="w-full h-full" loading="lazy" allowfullscreen></iframe>
@@ -634,8 +636,8 @@ window.openCampusGalleryPage = async function () {
                     </div>
                   </article>
                 `;
-        }
-        return `
+              }
+              return `
                 <article data-open-gal-idx="${idx}" class="gal-masonry-card mb-5 sacred-card rounded-2xl overflow-hidden cursor-pointer group">
                   <div class="relative bg-slate-950 overflow-hidden">
                     <img src="${esc(item.imageDataUrl)}" alt="${esc(item.title)}" loading="lazy"
@@ -652,7 +654,7 @@ window.openCampusGalleryPage = async function () {
                   </div>
                 </article>
               `;
-      }).join("")}
+            }).join("")}
           </div>
         `
     }
@@ -746,7 +748,7 @@ function mountSchoolLocationMapCard() {
 }
 
 // ============================================================================
-// 6. SECRET ADMIN EXECUTIVE CONTROL SUITE v3.0 (HERO TOGGLE + AUTO GURU SYNC)
+// 6. SECRET ADMIN EXECUTIVE CONTROL SUITE v3.0 (HERO TOGGLE + FRESH GURU SYNC)
 // ============================================================================
 function ensureExecutiveAdminModal() {
   let modal = document.getElementById("exec-admin-modal");
@@ -946,16 +948,18 @@ function renderExecNav() {
 
   sideNav.innerHTML = EXEC_TABS.map((t) => `
     <button type="button" data-exec-tab="${t.id}"
-      class="w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${adminActiveTab === t.id ? "exec-nav-active" : "hover:bg-white/5 text-slate-300"
-    }">
+      class="w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
+        adminActiveTab === t.id ? "exec-nav-active" : "hover:bg-white/5 text-slate-300"
+      }">
       <span>${t.icon}</span><span>${t.label}</span>
     </button>
   `).join("");
 
   mobNav.innerHTML = EXEC_TABS.map((t) => `
     <button type="button" data-exec-tab="${t.id}"
-      class="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${adminActiveTab === t.id ? "exec-nav-active" : "bg-white/5 text-slate-300"
-    }">
+      class="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
+        adminActiveTab === t.id ? "exec-nav-active" : "bg-white/5 text-slate-300"
+      }">
       ${t.icon} ${t.label}
     </button>
   `).join("");
@@ -1005,7 +1009,6 @@ async function syncTeacherToGuruStambh(db, teacherUser) {
     submittedAt: teacherUser.createdAt || new Date().toISOString()
   };
 
-  // 2-step atomic write guarantees 100% compatibility with strict Firestore rules
   const ref = doc(db, "faculty_submissions", teacherUser.uid);
   await setDoc(ref, { ...publicCard, status: "pending_verification" });
   await updateDoc(ref, { status: "approved" });
@@ -1163,29 +1166,32 @@ async function loadExecWorkspaceTab(tab) {
             <span class="text-[10px] font-mono text-slate-400">Click ⭐ on any photo to set as Home Hero Banner</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-            ${items.length === 0
-        ? `<p class="text-xs text-slate-400">No items uploaded yet.</p>`
-        : items.map((it) => `
+            ${
+              items.length === 0
+                ? `<p class="text-xs text-slate-400">No items uploaded yet.</p>`
+                : items.map((it) => `
                     <div class="p-3 rounded-xl bg-white/5 border ${it.isHero ? "border-amber-400 shadow-md" : "border-white/10"} space-y-2 text-xs">
-                      ${it.type === "video"
-            ? `<div class="h-28 rounded-lg bg-slate-900 flex items-center justify-center text-red-400 font-bold">▶ YouTube Video</div>`
-            : `<div class="h-28 rounded-lg bg-slate-950 flex items-center justify-center overflow-hidden"><img src="${esc(it.imageDataUrl)}" class="max-h-full max-w-full object-contain" /></div>`
-          }
+                      ${
+                        it.type === "video"
+                          ? `<div class="h-28 rounded-lg bg-slate-900 flex items-center justify-center text-red-400 font-bold">▶ YouTube Video</div>`
+                          : `<div class="h-28 rounded-lg bg-slate-950 flex items-center justify-center overflow-hidden"><img src="${esc(it.imageDataUrl)}" class="max-h-full max-w-full object-contain" /></div>`
+                      }
                       <div class="font-bold text-white truncate">${esc(it.title)}</div>
                       <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        ${it.type !== "video"
-            ? `<button type="button" data-set-hero="${esc(it.id)}"
+                        ${
+                          it.type !== "video"
+                            ? `<button type="button" data-set-hero="${esc(it.id)}"
                                  class="px-2.5 py-1 rounded font-bold cursor-pointer ${it.isHero ? "bg-amber-400 text-slate-950" : "bg-amber-500/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950"}">
                                  ${it.isHero ? "★ Active Hero" : "⭐ Set Hero"}
                                </button>`
-            : `<span class="text-[10px] font-mono text-amber-300">VIDEO</span>`
-          }
+                            : `<span class="text-[10px] font-mono text-amber-300">VIDEO</span>`
+                        }
                         <button type="button" data-del-gal="${esc(it.id)}"
                           class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-600 text-red-300 hover:text-white font-bold cursor-pointer">Delete</button>
                       </div>
                     </div>
                   `).join("")
-      }
+            }
           </div>
         </div>
       </div>
@@ -1245,7 +1251,6 @@ async function loadExecWorkspaceTab(tab) {
       }
     });
 
-    // 1-Click Set / Unset Home Hero Photo
     ws.querySelectorAll("[data-set-hero]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const targetId = btn.getAttribute("data-set-hero");
@@ -1357,7 +1362,7 @@ async function loadExecWorkspaceTab(tab) {
     return;
   }
 
-  // ==================== TAB: USERS & STAFF (AUTO-SYNCS TO GURU STAMBH!) ====================
+  // ==================== TAB: USERS & STAFF (FRESH getDoc -> AUTO GURU STAMBH!) ====================
   if (tab === "users") {
     const snap = await getDocs(collection(db, "users"));
     const users = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
@@ -1391,7 +1396,7 @@ async function loadExecWorkspaceTab(tab) {
         return `
           <div class="p-3.5 rounded-xl bg-white/5 border ${isPend ? "border-amber-400/60" : "border-white/10"} flex flex-wrap items-center justify-between gap-3">
             <div class="flex items-center gap-3 min-w-0">
-              ${u.photoDataUrl ? `<img src="${esc(u.photoDataUrl)}" class="w-11 h-11 rounded-xl object-cover border border-amber-400/50 shrink-0" />` : ""}
+              ${u.photoDataUrl ? `<img src="${esc(u.photoDataUrl)}" class="w-11 h-11 rounded-xl object-cover object-top border border-amber-400/50 shrink-0" />` : ""}
               <div class="space-y-0.5 min-w-0">
                 <div class="font-bold text-sm text-white">
                   ${esc(u.fullName)}
@@ -1412,12 +1417,13 @@ async function loadExecWorkspaceTab(tab) {
 
       grid.querySelectorAll("[data-eu-approve]").forEach((b) => b.addEventListener("click", async () => {
         const uid = b.getAttribute("data-eu-approve");
-        const targetUser = users.find((x) => x.uid === uid);
         b.disabled = true;
         b.textContent = "Approving...";
         try {
           await updateDoc(doc(db, "users", uid), { role: "teacher", approved: true });
-          if (targetUser) await syncTeacherToGuruStambh(db, targetUser);
+          const freshSnap = await getDoc(doc(db, "users", uid));
+          const freshTeacher = freshSnap.exists() ? { uid, ...freshSnap.data() } : users.find((x) => x.uid === uid);
+          if (freshTeacher) await syncTeacherToGuruStambh(db, freshTeacher);
           loadExecWorkspaceTab("users");
         } catch (err) {
           alert("Approval error: " + err.message);
@@ -1428,7 +1434,7 @@ async function loadExecWorkspaceTab(tab) {
         const uid = b.getAttribute("data-eu-revoke");
         b.disabled = true;
         await updateDoc(doc(db, "users", uid), { role: "pending_teacher", approved: false });
-        try { await updateDoc(doc(db, "faculty_submissions", uid), { status: "pending_verification" }); } catch (e) { }
+        try { await updateDoc(doc(db, "faculty_submissions", uid), { status: "pending_verification" }); } catch (e) {}
         if (typeof window.syncSchoolPortalData === "function") window.syncSchoolPortalData();
         loadExecWorkspaceTab("users");
       }));
@@ -1437,7 +1443,7 @@ async function loadExecWorkspaceTab(tab) {
         if (!confirm("Delete this user account profile permanently?")) return;
         const uid = b.getAttribute("data-eu-del");
         await deleteDoc(doc(db, "users", uid));
-        try { await deleteDoc(doc(db, "faculty_submissions", uid)); } catch (e) { }
+        try { await deleteDoc(doc(db, "faculty_submissions", uid)); } catch (e) {}
         if (typeof window.syncSchoolPortalData === "function") window.syncSchoolPortalData();
         loadExecWorkspaceTab("users");
       }));
@@ -1448,7 +1454,7 @@ async function loadExecWorkspaceTab(tab) {
     return;
   }
 
-  // ==================== TAB: GURU & GAURAV STAMBH ====================
+  // ==================== TAB: GURU & GAURAV STAMBH (WITH 📸 PHOTO UPDATER) ====================
   if (tab === "stambh") {
     const [faculty, alumni] = await Promise.all([
       window.BackendService.fetchAllFacultyForAdmin(),
@@ -1458,15 +1464,27 @@ async function loadExecWorkspaceTab(tab) {
     ws.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 text-xs">
         <div class="exec-card rounded-2xl p-5 space-y-3">
-          <h3 class="text-sm font-extrabold text-amber-300">👨‍🏫 Guru Stambh Live Cards (${faculty.length})</h3>
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-sm font-extrabold text-amber-300">👨‍🏫 Guru Stambh Live Cards (${faculty.length})</h3>
+            <span class="text-[10px] font-mono text-slate-400">Tap 📸 to upload/replace photo</span>
+          </div>
           <div class="space-y-2.5 max-h-[58vh] overflow-y-auto pr-1">
             ${faculty.length === 0 ? `<p class="text-slate-400">No faculty profiles yet.</p>` : faculty.map((f) => `
-              <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2">
-                <div class="min-w-0">
-                  <div class="font-bold text-white truncate">${esc(f.fullName)} (${esc(f.subject)})</div>
-                  <div class="text-slate-400">Class ${esc(f.wing)} • Status: <strong class="text-amber-300">${esc(f.status)}</strong></div>
+              <div class="p-3 rounded-xl bg-white/5 border border-white/10 flex items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <img src="${f.photoDataUrl || `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(f.fullName || "Guru")}&backgroundColor=0b3066`}"
+                    class="w-11 h-11 rounded-xl object-cover object-top border border-amber-400/50 shrink-0 bg-slate-900" />
+                  <div class="min-w-0">
+                    <div class="font-bold text-white truncate">${esc(f.fullName)} (${esc(f.subject)})</div>
+                    <div class="text-slate-400">Class ${esc(f.wing)} • Status: <strong class="text-amber-300">${esc(f.status)}</strong></div>
+                  </div>
                 </div>
-                <div class="flex gap-1.5 shrink-0">
+                <div class="flex items-center gap-1.5 shrink-0">
+                  <label title="Upload or Change Faculty Photo"
+                    class="px-2 py-1 rounded bg-amber-500/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950 font-bold cursor-pointer">
+                    📸
+                    <input type="file" accept="image/*" data-fac-photo-id="${esc(f.id)}" class="hidden" />
+                  </label>
                   ${f.status !== "approved" ? `<button data-app-fac="${esc(f.id)}" class="px-2.5 py-1 rounded bg-emerald-500 text-slate-950 font-extrabold cursor-pointer">✓</button>` : ""}
                   <button data-del-fac="${esc(f.id)}" class="px-2.5 py-1 rounded bg-red-500/20 text-red-300 font-bold cursor-pointer">✕</button>
                 </div>
@@ -1494,6 +1512,23 @@ async function loadExecWorkspaceTab(tab) {
         </div>
       </div>
     `;
+
+    ws.querySelectorAll("[data-fac-photo-id]").forEach((inp) => {
+      inp.addEventListener("change", async (e) => {
+        const file = e.target.files && e.target.files[0];
+        if (!file) return;
+        const facId = inp.getAttribute("data-fac-photo-id");
+        try {
+          const compressed = await compressPhoto(file, 480, 0.78);
+          await updateDoc(doc(db, "faculty_submissions", facId), { photoDataUrl: compressed });
+          try { await updateDoc(doc(db, "users", facId), { photoDataUrl: compressed }); } catch (err) {}
+          if (typeof window.syncSchoolPortalData === "function") window.syncSchoolPortalData();
+          loadExecWorkspaceTab("stambh");
+        } catch (err) {
+          alert("Photo update failed: " + err.message);
+        }
+      });
+    });
 
     ws.querySelectorAll("[data-app-fac]").forEach((b) => b.addEventListener("click", async () => {
       await window.BackendService.approveFaculty(b.getAttribute("data-app-fac"));
@@ -1529,9 +1564,10 @@ async function loadExecWorkspaceTab(tab) {
     ws.innerHTML = `
       <div class="exec-card rounded-2xl p-5 space-y-3 text-xs">
         <h3 class="text-sm font-extrabold text-red-400">🚩 Teacher-Reported Fake Students (${reports.length})</h3>
-        ${reports.length === 0
-        ? `<p class="text-slate-400">No active fake student reports.</p>`
-        : reports.map((r) => `
+        ${
+          reports.length === 0
+            ? `<p class="text-slate-400">No active fake student reports.</p>`
+            : reports.map((r) => `
                 <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/35 flex flex-wrap items-center justify-between gap-3">
                   <div class="space-y-1">
                     <div class="font-extrabold text-sm text-white">🚩 ${esc(r.reportedStudentName)} <span class="text-amber-300 font-mono text-xs">(Class ${esc(r.reportedStudentClass)})</span></div>
@@ -1544,7 +1580,7 @@ async function loadExecWorkspaceTab(tab) {
                   </div>
                 </div>
               `).join("")
-      }
+        }
       </div>
     `;
 
