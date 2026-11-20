@@ -390,24 +390,10 @@ async function syncWithBackend() {
   }
   renderMasterConfig();
 
-  const deepCount = await window.BackendService.getVidyaDeepCount();
-  const deepEl = document.getElementById("vidya-deep-count");
-  if (deepEl) deepEl.textContent = deepCount.toLocaleString("en-IN");
 }
 
 window.syncSchoolPortalData = syncWithBackend;
 
-window.handleLightVidyaDeep = async function () {
-  const btn = document.getElementById("btn-light-deep");
-  const countEl = document.getElementById("vidya-deep-count");
-  if (!window.BackendService || !btn) return;
-
-  btn.disabled = true;
-  const newCount = await window.BackendService.lightVidyaDeep();
-  if (countEl) countEl.textContent = newCount.toLocaleString("en-IN");
-  btn.innerHTML = `<i data-lucide="flame" class="w-4 h-4"></i> <span>Sacred Lamp Lit! (Thank You)</span>`;
-  if (window.lucide) lucide.createIcons();
-};
 
 window.handleAlumniSubmit = async function (e) {
   e.preventDefault();
