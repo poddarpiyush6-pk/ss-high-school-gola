@@ -137,40 +137,21 @@ html[data-theme="dark"] .suvarna-text {
 }
 
 /* HD Campus Photo Hero Backdrop Mode (Activated when Hero Photo is Set) */
-.hero-has-photo {
-  background-size: cover !important;
-  background-position: center !important;
-  border-color: rgba(245, 185, 66, 0.4) !important;
+/* Luxury Cinematic Hero Directional Fade & Fallback Ambient Glow */
+.hero-fallback-bg {
+  background:
+    radial-gradient(circle at 82% 28%, rgba(245, 185, 66, 0.16) 0%, transparent 45%),
+    radial-gradient(circle at 18% 80%, rgba(11, 48, 102, 0.55) 0%, transparent 55%),
+    #060c1a;
 }
 
-.hero-has-photo .t-heading,
-.hero-has-photo h2 {
-  color: #ffffff !important;
-}
-
-.hero-has-photo .t-body,
-.hero-has-photo p {
-  color: #e2e8f0 !important;
-}
-
-.hero-has-photo .t-gold {
-  color: #fbbf24 !important;
-}
-
-.hero-has-photo .sacred-inner-box {
-  background-color: rgba(15, 23, 42, 0.72) !important;
-  border-color: rgba(255, 255, 255, 0.16) !important;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-}
-
-.hero-has-photo .sacred-card {
-  background-color: rgba(15, 23, 42, 0.65) !important;
-  border-color: rgba(255, 255, 255, 0.14) !important;
-}
-
-.hero-has-photo .t-muted {
-  color: #cbd5e1 !important;
+.hero-desktop-fade {
+  background: linear-gradient(96deg,
+      #060c1a 0%,
+      rgba(6, 12, 26, 0.95) 36%,
+      rgba(6, 12, 26, 0.62) 56%,
+      rgba(6, 12, 26, 0.14) 78%,
+      rgba(6, 12, 26, 0.30) 100%);
 }
 
 /* Accessibility & Mobile Tap Polish */
