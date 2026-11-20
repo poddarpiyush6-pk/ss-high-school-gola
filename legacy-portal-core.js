@@ -1,5 +1,10 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v3.1 — STEALTH ADMIN + FRESH STATUS + PHASE 2B BRIDGE)
+// FILE: legacy-portal-core.js (v3.2 — ZERO-BLOAT LEGACY SHELL + GALLERY + AUTH)
+// 1. 4-Tier NTA/JEE Legacy Header + Mobile Drawer (with Gallery Route)
+// 2. Eye-Friendly Dual Theme Engine (Soft Paper Day & Comfort Slate Night)
+// 3. Adaptive Ctrl+K Spotlight Search Override
+// 4. Zero-Button Continuous "LATEST NEWS" Marquee + In-Site PDF/YT/Image Viewer
+// 5. Curved Animated Auth Modal (Stealth Admin Isolation + Fresh Profile Sync)
 // ============================================================================
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -16,8 +21,6 @@ import {
   doc,
   setDoc,
   getDoc,
-  updateDoc,
-  deleteDoc,
   collection,
   getDocs,
   orderBy,
@@ -49,11 +52,11 @@ function getDrivePreviewUrl(url) {
 
 function getYouTubeEmbedUrl(url) {
   if (!url || typeof url !== "string") return null;
-  const m = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/);
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return m && m[1] ? `https://www.youtube.com/embed/${m[1]}` : null;
 }
 
-// Check if logged-in user is a public Portal User (Student/Teacher) — NOT Secret Admin!
+// Stealth Admin Guard: Only returns true for registered Student/Teacher portal profiles
 function isPublicPortalUser() {
   return Boolean(
     currentUser &&
@@ -62,7 +65,7 @@ function isPublicPortalUser() {
   );
 }
 
-// Always fetch fresh profile from Firestore (Fixes stale "Awaiting Admin Verification" bug!)
+// Always fetches fresh profile from Firestore (Zero stale verification status)
 async function fetchFreshUserProfile(uid) {
   if (!fbDb || !uid) return null;
   try {
@@ -101,15 +104,12 @@ function initFirebaseSafe() {
       }
       updateAuthHeaderButton();
 
-      // If profile modal is currently open for a portal user, refresh it live
       const authModal = document.getElementById("legacy-auth-modal");
       const profView = document.getElementById("auth-view-profile");
       if (authModal && !authModal.classList.contains("hidden") && profView && !profView.classList.contains("hidden")) {
         if (isPublicPortalUser()) renderProfileSheet();
         else switchAuthView("welcome");
       }
-
-      if (user) refreshAdminPortalAccountsModule();
 
       window.dispatchEvent(new CustomEvent("portal-user-changed", {
         detail: { user: currentUser, profile: currentUserProfile, isPortalUser: isPublicPortalUser() }
@@ -151,33 +151,6 @@ function updateThemeToggleUI(mode) {
   if (topIcon) topIcon.textContent = isDark ? "☀️" : "🌙";
   if (topLbl) topLbl.textContent = isDark ? "Day" : "Night";
   if (drawerLbl) drawerLbl.textContent = isDark ? "☀️ Switch to Day Mode" : "🌙 Switch to Night Mode";
-}
-
-function hideLegacyOldTopStrips() {
-  document.querySelectorAll("body > div").forEach((div) => {
-    if (
-      [
-        "legacy-masthead",
-        "legacy-mobile-drawer",
-        "legacy-auth-modal",
-        "legacy-info-modal",
-        "portal-dashboard-modal",
-        "secret-admin-modal",
-        "royal-rajpatra-modal",
-        "royal-spotlight-modal"
-      ].includes(div.id)
-    ) {
-      return;
-    }
-    const txt = (div.textContent || "").trim();
-    if (
-      (txt.includes("सा विद्या या विमुक्तये") || txt.includes("Firebase Cloud Live")) &&
-      div.offsetHeight > 0 &&
-      div.offsetHeight < 120
-    ) {
-      div.style.display = "none";
-    }
-  });
 }
 
 function injectEyeFriendlyStyles() {
@@ -223,12 +196,8 @@ function injectEyeFriendlyStyles() {
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    body > header:not(#legacy-masthead),
-    #royal-prahar-ribbon,
-    #sacred-particles-canvas,
-    #pro-live-shell {
-      display: none !important;
-    }
+    /* Hide old Prahar ribbon from royal-rajpatra-core.js */
+    #royal-prahar-ribbon { display: none !important; }
 
     #legacy-masthead { background-color: var(--leg-surface); color: var(--leg-text); }
     .leg-tier-1 { background-color: var(--leg-top-strip); border-color: var(--leg-border); color: var(--leg-body); }
@@ -330,15 +299,19 @@ function injectEyeFriendlyStyles() {
     .auth-royal-gradient { background: linear-gradient(135deg, #b81d3d 0%, #5b1640 52%, #1d1135 100%); }
     .auth-btn-gradient { background: linear-gradient(90deg, #b81d3d 0%, #4b153d 55%, #1d1135 100%); }
     .auth-btn-gradient:hover { filter: brightness(1.12); }
+
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
   `;
   document.head.appendChild(style);
 }
 
 // ============================================================================
-// 3. MOUNT 4-TIER LEGACY HEADER + MOBILE DRAWER
+// 3. MOUNT 4-TIER LEGACY HEADER + MOBILE DRAWER (WITH GALLERY)
 // ============================================================================
 const NAV_ITEMS = [
   { key: "home", label: "Home", icon: "🏛️" },
+  { key: "gallery", label: "Gallery", icon: "🖼️" },
   { key: "guru-stambh", label: "Guru Stambh (Faculty)", icon: "👨‍🏫" },
   { key: "gaurav-stambh", label: "Gaurav Stambh (Alumni)", icon: "🏆" },
   { key: "academics", label: "Academics & Syllabus", icon: "📚" },
@@ -355,7 +328,7 @@ function mountLegacyHeader() {
 
   const desktopNavButtons = NAV_ITEMS.map((item, idx) => `
     <button type="button" data-leg-nav="${item.key}"
-      class="leg-nav-item shrink-0 px-4 py-3 ${idx === 0 ? "bg-[#f59e0b] text-slate-950" : "hover:bg-amber-500/15"} transition-colors cursor-pointer">
+      class="leg-nav-item shrink-0 px-3.5 py-3 ${idx === 0 ? "bg-[#f59e0b] text-slate-950" : "hover:bg-amber-500/15"} transition-colors cursor-pointer">
       ${item.label}
     </button>
   `).join("");
@@ -437,7 +410,7 @@ function mountLegacyHeader() {
 
     <nav aria-label="Main Navigation" class="leg-tier-3 w-full border-b">
       <div class="max-w-7xl mx-auto px-3 sm:px-6">
-        <div class="flex md:hidden items-center justify-between h-12 gap-2">
+        <div class="flex lg:hidden items-center justify-between h-12 gap-2">
           <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
             class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
             <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
@@ -454,7 +427,7 @@ function mountLegacyHeader() {
           </button>
         </div>
 
-        <div class="hidden md:flex items-center justify-center gap-0.5 text-[13px] font-bold">
+        <div class="hidden lg:flex items-center justify-center gap-0.5 text-[13px] font-bold">
           ${desktopNavButtons}
           <button type="button" id="legacy-nav-auth-btn"
             class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
@@ -504,7 +477,6 @@ function mountLegacyHeader() {
     document.documentElement.style.fontSize = `${16 + fontScaleStep}px`;
   });
 
-  // Stealth Admin Fix: Only open profile if user is an actual Student/Teacher portal user!
   const openAuth = async () => {
     if (currentUser && !currentUserProfile) {
       await fetchFreshUserProfile(currentUser.uid);
@@ -537,7 +509,7 @@ function mountMobileDrawer() {
   `).join("");
 
   drawer.innerHTML = `
-    <div class="mobile-drawer-panel w-[82%] max-w-[320px] h-full bg-[var(--leg-surface)] leg-text-primary shadow-2xl flex flex-col justify-between">
+    <div class="mobile-drawer-panel w-[82%] max-w-[320px] h-full bg-[var(--leg-surface)] leg-text-primary shadow-2xl flex flex-col justify-between overflow-y-auto">
       <div>
         <div class="px-5 py-4 bg-[#0B3066] text-white flex items-center justify-between border-b-2 border-[#f59e0b]">
           <div>
@@ -599,6 +571,22 @@ function closeMobileDrawer() {
 
 function handleNavSelection(target) {
   setActiveNavTab(target);
+  const galView = document.getElementById("view-gallery");
+
+  if (target === "gallery") {
+    ["home", "guru-stambh", "gaurav-stambh"].forEach((v) => {
+      const el = document.getElementById(`view-${v}`);
+      if (el) el.classList.add("hidden");
+    });
+    if (typeof window.openCampusGalleryPage === "function") {
+      window.openCampusGalleryPage();
+    }
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
+
+  if (galView) galView.classList.add("hidden");
+
   if (target === "home" || target === "guru-stambh" || target === "gaurav-stambh") {
     if (typeof window.switchView === "function") window.switchView(target);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -615,6 +603,22 @@ function handleNavSelection(target) {
   }
 }
 
+// Wrap app.js's switchView so clicking footer/back buttons always hides #view-gallery too
+function wrapGlobalSwitchView() {
+  const orig = window.switchView;
+  if (typeof orig !== "function" || orig._legacyWrapped) return;
+  const wrapped = function (viewName) {
+    const galView = document.getElementById("view-gallery");
+    if (galView) galView.classList.add("hidden");
+    if (["home", "guru-stambh", "gaurav-stambh"].includes(viewName)) {
+      setActiveNavTab(viewName);
+    }
+    return orig(viewName);
+  };
+  wrapped._legacyWrapped = true;
+  window.switchView = wrapped;
+}
+
 function setActiveNavTab(activeKey) {
   const found = NAV_ITEMS.find((i) => i.key === activeKey);
   const mobileLbl = document.getElementById("legacy-mobile-active-lbl");
@@ -623,8 +627,8 @@ function setActiveNavTab(activeKey) {
   document.querySelectorAll(".leg-nav-item").forEach((btn) => {
     const isAct = btn.getAttribute("data-leg-nav") === activeKey;
     btn.className = isAct
-      ? "leg-nav-item shrink-0 px-4 py-3 bg-[#f59e0b] text-slate-950 transition-colors cursor-pointer"
-      : "leg-nav-item shrink-0 px-4 py-3 hover:bg-amber-500/15 transition-colors cursor-pointer";
+      ? "leg-nav-item shrink-0 px-3.5 py-3 bg-[#f59e0b] text-slate-950 transition-colors cursor-pointer"
+      : "leg-nav-item shrink-0 px-3.5 py-3 hover:bg-amber-500/15 transition-colors cursor-pointer";
   });
 
   document.querySelectorAll(".leg-drawer-item").forEach((btn) => {
@@ -635,7 +639,6 @@ function setActiveNavTab(activeKey) {
   });
 }
 
-// STEALTH ADMIN FIX: Only show user's name if they are a registered Student or Teacher!
 function updateAuthHeaderButton() {
   const navBtn = document.getElementById("legacy-nav-auth-btn");
   const mobBtn = document.getElementById("legacy-mobile-auth-btn");
@@ -904,7 +907,7 @@ function openInfoModal(type) {
 }
 
 // ============================================================================
-// 6. CURVED-GRADIENT LIVE-ANIMATED AUTH MODAL (FRESH STATUS FETCH!)
+// 6. CURVED-GRADIENT LIVE-ANIMATED AUTH MODAL
 // ============================================================================
 function mountCurvedAuthModal() {
   if (document.getElementById("legacy-auth-modal")) return;
@@ -1165,7 +1168,6 @@ function mountCurvedAuthModal() {
     });
   });
 
-  // SIGN IN: Await fresh Firestore profile BEFORE switching to Profile view!
   document.getElementById("legacy-signin-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("signin-submit-btn");
@@ -1274,7 +1276,6 @@ function mountCurvedAuthModal() {
     }
   });
 
-  // OPEN PERSONALIZED DASHBOARD (Phase 2B Hook!)
   document.getElementById("profile-open-dashboard-btn").addEventListener("click", () => {
     close();
     if (typeof window.openPortalDashboard === "function") {
@@ -1364,155 +1365,7 @@ function openCurvedAuthModal(initialView = "welcome") {
 window.openSchoolPortalAuth = openCurvedAuthModal;
 
 // ============================================================================
-// 7. SECRET ADMIN PANEL MODULE 4 (TEACHER VERIFICATION)
-// ============================================================================
-async function refreshAdminPortalAccountsModule() {
-const dashView = document.getElementById("admin-dashboard-view");
-  if (!dashView || !fbDb || !currentUser || !window.BackendService || !window.BackendService.getAdminUser()) return;
-
-  let section = document.getElementById("admin-portal-accounts-section");
-  if (!section) {
-    section = document.createElement("div");
-    section.id = "admin-portal-accounts-section";
-    section.className = "space-y-3 border-t border-amber-500/30 pt-6 mt-6";
-    section.innerHTML = `
-      <div class="flex items-center justify-between gap-2">
-        <h4 class="text-base sm:text-lg font-extrabold text-amber-400">
-          4. Portal Accounts — Teacher Verification &amp; Control
-        </h4>
-        <button id="admin-refresh-portal-users" type="button"
-          class="px-2.5 py-1 rounded-lg bg-amber-500/20 hover:bg-amber-500/35 text-amber-300 font-mono text-[11px] font-bold cursor-pointer">
-          ↻ Refresh
-        </button>
-      </div>
-      <div id="admin-portal-users-list" class="space-y-2.5 max-h-72 overflow-y-auto"></div>
-    `;
-    dashView.appendChild(section);
-    document.getElementById("admin-refresh-portal-users").addEventListener("click", refreshAdminPortalAccountsModule);
-  }
-
-  const listEl = document.getElementById("admin-portal-users-list");
-  if (!listEl) return;
-
-  listEl.innerHTML = `<p class="text-xs text-slate-400">Loading portal accounts...</p>`;
-
-  try {
-    const snap = await getDocs(collection(fbDb, "users"));
-    const allUsers = snap.docs.map((d) => ({ uid: d.id, ...d.data() }));
-
-    allUsers.sort((a, b) => {
-      const score = (u) => (u.role === "pending_teacher" ? 0 : u.role === "teacher" ? 1 : 2);
-      return score(a) - score(b);
-    });
-
-    if (allUsers.length === 0) {
-      listEl.innerHTML = `<p class="text-xs text-slate-400">No student or teacher accounts registered yet.</p>`;
-      return;
-    }
-
-    listEl.innerHTML = allUsers.map((u) => {
-      const isPendingTeacher = u.role === "pending_teacher";
-      const isVerifiedTeacher = u.role === "teacher" && u.approved;
-      const borderCls = isPendingTeacher
-        ? "border-amber-500/70"
-        : isVerifiedTeacher
-        ? "border-emerald-500/50"
-        : "border-slate-600/50";
-
-      const metaLine = u.role === "student"
-        ? `Student • Class ${escapeSafe(u.classLevel || "-")} (${escapeSafe(u.stream || "General")})`
-        : `${escapeSafe(u.designation || "Teacher")} • Subject: ${escapeSafe(u.subject || "General")}`;
-
-      return `
-        <div class="p-3.5 rounded-xl bg-black/40 border ${borderCls} flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div class="space-y-0.5">
-            <div class="font-bold text-sm text-white">
-              ${escapeSafe(u.fullName || "Unnamed User")}
-              <span class="ml-1.5 px-2 py-0.5 rounded text-[10px] font-mono ${
-                isPendingTeacher ? "bg-amber-500 text-stone-950 font-extrabold"
-                : isVerifiedTeacher ? "bg-emerald-500/25 text-emerald-300"
-                : "bg-blue-500/25 text-blue-200"
-              }">
-                ${escapeSafe(u.role.toUpperCase())}
-              </span>
-            </div>
-            <div class="text-slate-300">${metaLine}</div>
-            <div class="font-mono text-[11px] text-amber-300">
-              📧 ${escapeSafe(u.email)} • 📞 ${escapeSafe(u.phone || "N/A")}
-            </div>
-          </div>
-
-          <div class="flex items-center gap-2">
-            ${isPendingTeacher ? `
-              <button type="button" data-adm-approve-teacher="${escapeSafe(u.uid)}"
-                class="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-mono font-extrabold cursor-pointer">
-                ✓ Approve Teacher
-              </button>
-            ` : ""}
-            ${isVerifiedTeacher ? `
-              <button type="button" data-adm-revoke-teacher="${escapeSafe(u.uid)}"
-                class="px-2.5 py-1.5 rounded-lg bg-amber-500/20 hover:bg-amber-500 text-amber-300 hover:text-stone-950 font-mono font-bold cursor-pointer">
-                Revoke
-              </button>
-            ` : ""}
-            <button type="button" data-adm-del-user="${escapeSafe(u.uid)}"
-              class="px-2.5 py-1.5 rounded-lg bg-red-500/20 hover:bg-red-500 text-red-300 hover:text-white font-mono font-bold cursor-pointer">
-              Delete
-            </button>
-          </div>
-        </div>
-      `;
-    }).join("");
-
-    listEl.querySelectorAll("[data-adm-approve-teacher]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const uid = btn.getAttribute("data-adm-approve-teacher");
-        btn.disabled = true;
-        btn.textContent = "Approving...";
-        await updateDoc(doc(fbDb, "users", uid), { role: "teacher", approved: true });
-        refreshAdminPortalAccountsModule();
-      });
-    });
-
-    listEl.querySelectorAll("[data-adm-revoke-teacher]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const uid = btn.getAttribute("data-adm-revoke-teacher");
-        btn.disabled = true;
-        await updateDoc(doc(fbDb, "users", uid), { role: "pending_teacher", approved: false });
-        refreshAdminPortalAccountsModule();
-      });
-    });
-
-    listEl.querySelectorAll("[data-adm-del-user]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        if (!confirm("Delete this user profile from Portal?")) return;
-        const uid = btn.getAttribute("data-adm-del-user");
-        btn.disabled = true;
-        await deleteDoc(doc(fbDb, "users", uid));
-        refreshAdminPortalAccountsModule();
-      });
-    });
-  } catch (err) {
-    listEl.innerHTML = `<p class="text-xs text-red-400">Admin access required to load accounts.</p>`;
-  }
-}
-
-function hookSecretAdminPanel() {
-  const modal = document.getElementById("secret-admin-modal");
-  if (!modal) return;
-  const obs = new MutationObserver(() => {
-    if (!modal.classList.contains("hidden")) {
-      refreshAdminPortalAccountsModule();
-      if (typeof window.refreshAdminReportsModule === "function") {
-        window.refreshAdminReportsModule();
-      }
-    }
-  });
-  obs.observe(modal, { attributes: true, attributeFilter: ["class"] });
-}
-
-// ============================================================================
-// 8. CLEAN BRIDGE FOR PHASE 2B (portal-dashboards.js)
+// 7. CLEAN BRIDGE FOR portal-dashboards.js & campus-experience-admin.js
 // ============================================================================
 window.LegacyPortalBridge = {
   getSession: () => ({
@@ -1527,28 +1380,27 @@ window.LegacyPortalBridge = {
   refreshNotices: async () => {
     await syncMarqueeNotices();
     window.dispatchEvent(new CustomEvent("backend-ready"));
-  },
-  refreshAdminAccounts: refreshAdminPortalAccountsModule
+  }
 };
 
 // ============================================================================
-// 9. BOOTSTRAP
+// 8. BOOTSTRAP
 // ============================================================================
 function bootLegacyPortal() {
   document.documentElement.lang = "en";
   injectEyeFriendlyStyles();
   mountLegacyHeader();
-  hideLegacyOldTopStrips();
+  wrapGlobalSwitchView();
 
   const savedTheme = localStorage.getItem("gola_school_theme") || "light";
   applyEyeFriendlyTheme(savedTheme);
 
   initFirebaseSafe();
   syncMarqueeNotices();
-  hookSecretAdminPanel();
 
   window.addEventListener("backend-ready", () => {
     initFirebaseSafe();
+    wrapGlobalSwitchView();
     setTimeout(syncMarqueeNotices, 350);
   });
 }
