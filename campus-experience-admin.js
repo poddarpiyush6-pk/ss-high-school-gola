@@ -159,20 +159,75 @@ async function fetchGalleryItems() {
 }
 
 // Applies the Admin-selected HD School Photo to the Home Hero Section
+// Applies Admin-selected HD School Photo to Luxury Hero (Desktop Full-Bleed + Mobile Clean Top Stage)
 function applyHeroPhotoFromGallery(items) {
-  const homeView = document.getElementById("view-home");
-  if (!homeView) return;
-  const heroSection = homeView.querySelector("section:first-of-type");
-  if (!heroSection || heroSection.id === "home-campus-showcase") return;
-
+  const deskImg = document.getElementById("hero-bg-img-desktop");
+  const mobImg = document.getElementById("hero-bg-img-mobile");
+  const mobWrap = document.getElementById("hero-mobile-photo-wrap");
   const heroItem = (items || []).find((i) => i.isHero === true && i.imageDataUrl);
+
   if (heroItem) {
-    heroSection.classList.add("hero-has-photo");
-    heroSection.style.backgroundImage = `linear-gradient(112deg, rgba(7, 17, 38, 0.90) 0%, rgba(11, 48, 102, 0.78) 52%, rgba(7, 17, 38, 0.88) 100%), url("${heroItem.imageDataUrl}")`;
+    if (deskImg) {
+      deskImg.src = heroItem.imageDataUrl;
+      deskImg.classList.remove("opacity-0");
+      deskImg.classList.add("opacity-100");
+    }
+    if (mobImg) mobImg.src = heroItem.imageDataUrl;
+    if (mobWrap) mobWrap.classList.remove("hidden");
   } else {
-    heroSection.classList.remove("hero-has-photo");
-    heroSection.style.backgroundImage = "";
+    if (deskImg) {
+      deskImg.src = "";
+      deskImg.classList.add("opacity-0");
+      deskImg.classList.remove("opacity-100");
+    }
+    if (mobImg) mobImg.src = "";
+    if (mobWrap) mobWrap.classList.add("hidden");
   }
+}
+
+function bindLuxuryHeroActions() {
+  const exploreBtn = document.getElementById("hero-btn-explore");
+  if (exploreBtn && !exploreBtn.dataset.bound) {
+    exploreBtn.dataset.bound = "1";
+    exploreBtn.addEventListener("click", () => {
+      const target = document.getElementById("academic-wings");
+      if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  }
+
+  const portalBtn = document.getElementById("hero-btn-portal");
+  if (portalBtn && !portalBtn.dataset.bound) {
+    portalBtn.dataset.bound = "1";
+    portalBtn.addEventListener("click", () => {
+      const bridge = window.LegacyPortalBridge;
+      const isUser = bridge && bridge.getSession().isPortalUser;
+      if (typeof window.openSchoolPortalAuth === "function") {
+        window.openSchoolPortalAuth(isUser ? "profile" : "welcome");
+      }
+    });
+  }
+
+  document.querySelectorAll("[data-hero-dock]").forEach((btn) => {
+    if (btn.dataset.bound) return;
+    btn.dataset.bound = "1";
+    btn.addEventListener("click", () => {
+      const act = btn.getAttribute("data-hero-dock");
+      if (act === "academics") {
+        const el = document.getElementById("academic-wings");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (act === "gallery") {
+        const navBtn = document.querySelector('[data-leg-nav="gallery"]');
+        if (navBtn) navBtn.click();
+        else if (typeof window.openCampusGalleryPage === "function") window.openCampusGalleryPage();
+      } else if (act === "notices") {
+        const el = document.getElementById("notices-container");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      } else if (act === "location") {
+        const el = document.getElementById("school-campus-map-section");
+        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  });
 }
 
 function ensureGalleryLightbox() {
@@ -411,9 +466,8 @@ async function mountHomeCampusShowcase() {
           <div class="flex items-center justify-between gap-3">
             <div id="home-gal-dots" class="flex items-center gap-1.5 flex-wrap"></div>
 
-            ${
-              photosOnly.length > 1
-                ? `
+            ${photosOnly.length > 1
+      ? `
                   <div class="flex items-center gap-2 shrink-0">
                     <button id="home-gal-prev" type="button" aria-label="Previous Slide"
                       class="w-9 h-9 rounded-xl sacred-inner-box hover:bg-[#0B3066] hover:text-white t-heading font-extrabold text-base flex items-center justify-center transition-colors cursor-pointer">‹</button>
@@ -421,8 +475,8 @@ async function mountHomeCampusShowcase() {
                       class="w-9 h-9 rounded-xl sacred-inner-box hover:bg-[#0B3066] hover:text-white t-heading font-extrabold text-base flex items-center justify-center transition-colors cursor-pointer">›</button>
                   </div>
                 `
-                : ""
-            }
+      : ""
+    }
           </div>
 
           <button id="home-gal-view-all" type="button"
@@ -543,20 +597,18 @@ window.openCampusGalleryPage = async function () {
       <div class="flex flex-wrap gap-1.5">
         ${categories.map((cat) => `
           <button type="button" data-gal-cat="${cat}"
-            class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${
-              activeGalleryFilter === cat
-                ? "bg-[#0B3066] text-white"
-                : "bg-[var(--leg-surface)] border leg-border leg-text-body hover:border-amber-500"
-            }">
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition-colors cursor-pointer ${activeGalleryFilter === cat
+      ? "bg-[#0B3066] text-white"
+      : "bg-[var(--leg-surface)] border leg-border leg-text-body hover:border-amber-500"
+    }">
             ${cat}
           </button>
         `).join("")}
       </div>
     </div>
 
-    ${
-      filtered.length === 0
-        ? `
+    ${filtered.length === 0
+      ? `
           <div class="sacred-card rounded-3xl p-10 text-center space-y-2">
             <div class="text-4xl">🖼️</div>
             <h3 class="text-base font-extrabold leg-text-primary">No Media in This Category Yet</h3>
@@ -565,12 +617,12 @@ window.openCampusGalleryPage = async function () {
             </p>
           </div>
         `
-        : `
+      : `
           <div class="columns-1 sm:columns-2 lg:columns-3 gap-5">
             ${filtered.map((item, idx) => {
-              const ytEmbed = getYouTubeEmbed(item.youtubeUrl || "");
-              if (item.type === "video" && ytEmbed) {
-                return `
+        const ytEmbed = getYouTubeEmbed(item.youtubeUrl || "");
+        if (item.type === "video" && ytEmbed) {
+          return `
                   <article class="gal-masonry-card mb-5 sacred-card rounded-2xl overflow-hidden flex flex-col">
                     <div class="aspect-video w-full bg-black">
                       <iframe src="${esc(ytEmbed)}" class="w-full h-full" loading="lazy" allowfullscreen></iframe>
@@ -582,8 +634,8 @@ window.openCampusGalleryPage = async function () {
                     </div>
                   </article>
                 `;
-              }
-              return `
+        }
+        return `
                 <article data-open-gal-idx="${idx}" class="gal-masonry-card mb-5 sacred-card rounded-2xl overflow-hidden cursor-pointer group">
                   <div class="relative bg-slate-950 overflow-hidden">
                     <img src="${esc(item.imageDataUrl)}" alt="${esc(item.title)}" loading="lazy"
@@ -600,7 +652,7 @@ window.openCampusGalleryPage = async function () {
                   </div>
                 </article>
               `;
-            }).join("")}
+      }).join("")}
           </div>
         `
     }
@@ -894,18 +946,16 @@ function renderExecNav() {
 
   sideNav.innerHTML = EXEC_TABS.map((t) => `
     <button type="button" data-exec-tab="${t.id}"
-      class="w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${
-        adminActiveTab === t.id ? "exec-nav-active" : "hover:bg-white/5 text-slate-300"
-      }">
+      class="w-full text-left px-3.5 py-2.5 rounded-xl flex items-center gap-3 transition-all cursor-pointer ${adminActiveTab === t.id ? "exec-nav-active" : "hover:bg-white/5 text-slate-300"
+    }">
       <span>${t.icon}</span><span>${t.label}</span>
     </button>
   `).join("");
 
   mobNav.innerHTML = EXEC_TABS.map((t) => `
     <button type="button" data-exec-tab="${t.id}"
-      class="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${
-        adminActiveTab === t.id ? "exec-nav-active" : "bg-white/5 text-slate-300"
-      }">
+      class="shrink-0 px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer ${adminActiveTab === t.id ? "exec-nav-active" : "bg-white/5 text-slate-300"
+    }">
       ${t.icon} ${t.label}
     </button>
   `).join("");
@@ -1113,32 +1163,29 @@ async function loadExecWorkspaceTab(tab) {
             <span class="text-[10px] font-mono text-slate-400">Click ⭐ on any photo to set as Home Hero Banner</span>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-[60vh] overflow-y-auto pr-1">
-            ${
-              items.length === 0
-                ? `<p class="text-xs text-slate-400">No items uploaded yet.</p>`
-                : items.map((it) => `
+            ${items.length === 0
+        ? `<p class="text-xs text-slate-400">No items uploaded yet.</p>`
+        : items.map((it) => `
                     <div class="p-3 rounded-xl bg-white/5 border ${it.isHero ? "border-amber-400 shadow-md" : "border-white/10"} space-y-2 text-xs">
-                      ${
-                        it.type === "video"
-                          ? `<div class="h-28 rounded-lg bg-slate-900 flex items-center justify-center text-red-400 font-bold">▶ YouTube Video</div>`
-                          : `<div class="h-28 rounded-lg bg-slate-950 flex items-center justify-center overflow-hidden"><img src="${esc(it.imageDataUrl)}" class="max-h-full max-w-full object-contain" /></div>`
-                      }
+                      ${it.type === "video"
+            ? `<div class="h-28 rounded-lg bg-slate-900 flex items-center justify-center text-red-400 font-bold">▶ YouTube Video</div>`
+            : `<div class="h-28 rounded-lg bg-slate-950 flex items-center justify-center overflow-hidden"><img src="${esc(it.imageDataUrl)}" class="max-h-full max-w-full object-contain" /></div>`
+          }
                       <div class="font-bold text-white truncate">${esc(it.title)}</div>
                       <div class="flex flex-wrap items-center justify-between gap-1.5">
-                        ${
-                          it.type !== "video"
-                            ? `<button type="button" data-set-hero="${esc(it.id)}"
+                        ${it.type !== "video"
+            ? `<button type="button" data-set-hero="${esc(it.id)}"
                                  class="px-2.5 py-1 rounded font-bold cursor-pointer ${it.isHero ? "bg-amber-400 text-slate-950" : "bg-amber-500/20 hover:bg-amber-400 text-amber-300 hover:text-slate-950"}">
                                  ${it.isHero ? "★ Active Hero" : "⭐ Set Hero"}
                                </button>`
-                            : `<span class="text-[10px] font-mono text-amber-300">VIDEO</span>`
-                        }
+            : `<span class="text-[10px] font-mono text-amber-300">VIDEO</span>`
+          }
                         <button type="button" data-del-gal="${esc(it.id)}"
                           class="px-2.5 py-1 rounded bg-red-500/20 hover:bg-red-600 text-red-300 hover:text-white font-bold cursor-pointer">Delete</button>
                       </div>
                     </div>
                   `).join("")
-            }
+      }
           </div>
         </div>
       </div>
@@ -1381,7 +1428,7 @@ async function loadExecWorkspaceTab(tab) {
         const uid = b.getAttribute("data-eu-revoke");
         b.disabled = true;
         await updateDoc(doc(db, "users", uid), { role: "pending_teacher", approved: false });
-        try { await updateDoc(doc(db, "faculty_submissions", uid), { status: "pending_verification" }); } catch (e) {}
+        try { await updateDoc(doc(db, "faculty_submissions", uid), { status: "pending_verification" }); } catch (e) { }
         if (typeof window.syncSchoolPortalData === "function") window.syncSchoolPortalData();
         loadExecWorkspaceTab("users");
       }));
@@ -1390,7 +1437,7 @@ async function loadExecWorkspaceTab(tab) {
         if (!confirm("Delete this user account profile permanently?")) return;
         const uid = b.getAttribute("data-eu-del");
         await deleteDoc(doc(db, "users", uid));
-        try { await deleteDoc(doc(db, "faculty_submissions", uid)); } catch (e) {}
+        try { await deleteDoc(doc(db, "faculty_submissions", uid)); } catch (e) { }
         if (typeof window.syncSchoolPortalData === "function") window.syncSchoolPortalData();
         loadExecWorkspaceTab("users");
       }));
@@ -1482,10 +1529,9 @@ async function loadExecWorkspaceTab(tab) {
     ws.innerHTML = `
       <div class="exec-card rounded-2xl p-5 space-y-3 text-xs">
         <h3 class="text-sm font-extrabold text-red-400">🚩 Teacher-Reported Fake Students (${reports.length})</h3>
-        ${
-          reports.length === 0
-            ? `<p class="text-slate-400">No active fake student reports.</p>`
-            : reports.map((r) => `
+        ${reports.length === 0
+        ? `<p class="text-slate-400">No active fake student reports.</p>`
+        : reports.map((r) => `
                 <div class="p-4 rounded-xl bg-red-500/10 border border-red-500/35 flex flex-wrap items-center justify-between gap-3">
                   <div class="space-y-1">
                     <div class="font-extrabold text-sm text-white">🚩 ${esc(r.reportedStudentName)} <span class="text-amber-300 font-mono text-xs">(Class ${esc(r.reportedStudentClass)})</span></div>
@@ -1498,7 +1544,7 @@ async function loadExecWorkspaceTab(tab) {
                   </div>
                 </div>
               `).join("")
-        }
+      }
       </div>
     `;
 
@@ -1540,6 +1586,7 @@ function bootCampusExperience() {
   injectExecutiveStyles();
   mountSchoolLocationMapCard();
   bindExecutiveAdminTrigger();
+  bindLuxuryHeroActions();
   mountHomeCampusShowcase();
 
   window.addEventListener("backend-ready", () => {
