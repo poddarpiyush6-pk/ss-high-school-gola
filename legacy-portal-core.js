@@ -1367,8 +1367,8 @@ window.openSchoolPortalAuth = openCurvedAuthModal;
 // 7. SECRET ADMIN PANEL MODULE 4 (TEACHER VERIFICATION)
 // ============================================================================
 async function refreshAdminPortalAccountsModule() {
-  const dashView = document.getElementById("admin-dashboard-view");
-  if (!dashView || !fbDb || !currentUser) return;
+const dashView = document.getElementById("admin-dashboard-view");
+  if (!dashView || !fbDb || !currentUser || !window.BackendService || !window.BackendService.getAdminUser()) return;
 
   let section = document.getElementById("admin-portal-accounts-section");
   if (!section) {
