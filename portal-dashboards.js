@@ -1,9 +1,9 @@
 // ============================================================================
-// FILE: portal-dashboards.js — PHASE 2B: STUDENT & TEACHER COMMAND PORTALS
+// FILE: portal-dashboards.js (v2.0 — CLEAN STUDENT & TEACHER COMMAND PORTALS)
 // 1. Student Dashboard: Class-Filtered Notices, Syllabus, Message Verified Teachers
-// 2. Teacher Command Studio: Multi-Option Notice Publisher (Text + Drive PDF + Auto Image Compressor)
-// 3. Teacher Unread Inbox: Unread Badge, Inline Reply, Report Fake Student
-// 4. Secret Admin Panel Module 5: Review Fake Student Reports & 1-Click Account Ban/Delete
+// 2. Teacher Studio: Multi-Option Notice Publisher (Text + Drive PDF + Auto Image Compressor)
+// 3. Teacher Unread Inbox: Unread Badge, Inline Reply, Report Fake Student,
+//    Individual Permanent Delete (🗑️) & Corner Clear All (Chunked writeBatch)
 // ============================================================================
 
 import {
@@ -13,6 +13,7 @@ import {
   doc,
   updateDoc,
   deleteDoc,
+  writeBatch,
   query,
   where
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
@@ -70,7 +71,6 @@ function ensureDashboardModal() {
 
   modal.innerHTML = `
     <div class="w-full max-w-5xl rounded-3xl bg-[var(--leg-surface)] border leg-border leg-text-primary shadow-2xl overflow-hidden my-auto max-h-[93vh] flex flex-col auth-sheet-animate">
-      <!-- Top Bar -->
       <div class="px-4 sm:px-6 py-4 bg-[#0B3066] text-white flex items-center justify-between gap-3 border-b-2 border-[#f59e0b]">
         <div class="min-w-0">
           <div id="pd-role-chip" class="text-[10px] font-bold uppercase tracking-widest text-amber-300">PORTAL DASHBOARD</div>
@@ -82,10 +82,8 @@ function ensureDashboardModal() {
         </button>
       </div>
 
-      <!-- Tab Navigation Strip -->
       <div id="pd-tabs" class="px-4 sm:px-6 py-2.5 bg-[var(--leg-surface-alt)] border-b leg-border flex items-center gap-2 overflow-x-auto no-scrollbar"></div>
 
-      <!-- Dynamic Body -->
       <div id="pd-content" class="p-4 sm:p-6 overflow-y-auto flex-1 space-y-5"></div>
     </div>
   `;
@@ -165,7 +163,6 @@ async function renderStudentNoticesTab(profile, db) {
     const myClass = String(profile.classLevel || "");
     const myStream = String(profile.stream || "");
 
-    // Filter: All School OR matching student's class/stream
     const relevant = notices.filter((n) => {
       const target = String(n.targetAudience || "All School");
       if (target === "All School" || target === "") return true;
@@ -267,20 +264,17 @@ async function renderStudentMessagesTab(user, profile, db) {
   box.innerHTML = `<p class="text-xs leg-text-muted">Loading verified teachers &amp; your messages...</p>`;
 
   try {
-    // 1. Fetch Admin-Approved Teachers
     const tSnap = await getDocs(
       query(collection(db, "users"), where("role", "==", "teacher"), where("approved", "==", true))
     );
     const teachers = tSnap.docs.map((d) => ({ uid: d.id, ...d.data() }));
 
-    // 2. Fetch Student's Sent Messages & Replies
     const mSnap = await getDocs(query(collection(db, "messages"), where("studentUid", "==", user.uid)));
     const myMsgs = mSnap.docs.map((d) => ({ id: d.id, ...d.data() }));
     myMsgs.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
 
     box.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
-        <!-- Send Message Form -->
         <form id="stu-send-msg-form" class="lg:col-span-5 p-4 rounded-2xl bg-[var(--leg-surface-alt)] border leg-border space-y-3 h-fit">
           <h3 class="text-sm font-extrabold leg-text-primary">✉️ Send Message / Doubt to Teacher</h3>
           ${
@@ -312,7 +306,6 @@ async function renderStudentMessagesTab(user, profile, db) {
           }
         </form>
 
-        <!-- Sent Messages & Teacher Replies -->
         <div class="lg:col-span-7 space-y-3">
           <h3 class="text-sm font-extrabold leg-text-primary">📬 Your Sent Messages &amp; Teacher Replies (${myMsgs.length})</h3>
           ${
@@ -390,14 +383,13 @@ async function renderStudentMessagesTab(user, profile, db) {
 }
 
 // ============================================================================
-// 3. VERIFIED TEACHER COMMAND STUDIO (NOTICE PUBLISHER + UNREAD INBOX)
+// 3. VERIFIED TEACHER COMMAND STUDIO (INBOX + NOTICE PUBLISHER)
 // ============================================================================
 async function mountTeacherDashboard(user, profile, db) {
   document.getElementById("pd-role-chip").textContent =
     `VERIFIED FACULTY STUDIO • ${profile.designation || "TEACHER"} (${profile.subject || "General"})`;
   document.getElementById("pd-user-title").textContent = profile.fullName || user.email;
 
-  // Count unread messages for badge
   let unreadCount = 0;
   try {
     const snap = await getDocs(query(collection(db, "messages"), where("teacherUid", "==", user.uid)));
@@ -421,7 +413,7 @@ async function mountTeacherDashboard(user, profile, db) {
   renderTeacherInboxTab(user, profile, db);
 }
 
-// TAB 1: TEACHER UNREAD INBOX (REPLY + REPORT FAKE STUDENT)
+// TAB 1: TEACHER UNREAD INBOX (REPLY + REPORT + PERMANENT DELETE & CLEAR ALL)
 async function renderTeacherInboxTab(user, profile, db) {
   const box = document.getElementById("pd-content");
   box.innerHTML = `<p class="text-xs leg-text-muted">Loading student messages...</p>`;
@@ -446,6 +438,14 @@ async function renderTeacherInboxTab(user, profile, db) {
     }
 
     box.innerHTML = `
+      <div class="flex items-center justify-between gap-2 pb-1">
+        <span class="text-xs font-bold leg-text-muted">Total Messages: <strong class="leg-text-primary">${msgs.length}</strong></span>
+        <button id="tch-clear-all-msgs" type="button"
+          class="px-3 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white font-bold text-xs transition-colors cursor-pointer">
+          🗑️ Clear All
+        </button>
+      </div>
+
       <div class="space-y-3.5">
         ${msgs.map((m) => `
           <div class="p-4 rounded-2xl bg-[var(--leg-surface-alt)] border ${
@@ -459,10 +459,16 @@ async function renderTeacherInboxTab(user, profile, db) {
                   Class ${esc(m.studentClass)} (${esc(m.studentStream)})
                 </span>
               </div>
-              <button type="button" data-report-student="${esc(m.id)}"
-                class="px-2.5 py-1 rounded-lg bg-red-500/15 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white font-bold text-[11px] transition-colors cursor-pointer">
-                🚩 Report Fake Student
-              </button>
+              <div class="flex items-center gap-1.5">
+                <button type="button" data-report-student="${esc(m.id)}"
+                  class="px-2.5 py-1 rounded-lg bg-amber-500/15 hover:bg-amber-500 text-amber-700 dark:text-amber-300 hover:text-stone-950 font-bold text-[11px] transition-colors cursor-pointer">
+                  🚩 Report
+                </button>
+                <button type="button" data-del-single-msg="${esc(m.id)}" title="Delete message permanently" aria-label="Delete message"
+                  class="w-7 h-7 rounded-lg bg-red-500/15 hover:bg-red-600 text-red-600 dark:text-red-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer">
+                  🗑️
+                </button>
+              </div>
             </div>
 
             <div class="font-extrabold text-[#0B3066] dark:text-amber-400">${esc(m.subject)}</div>
@@ -491,7 +497,45 @@ async function renderTeacherInboxTab(user, profile, db) {
       </div>
     `;
 
-    // Bind Reply Buttons
+    // Clear All (Chunked Firestore Batch Delete — permanent wipe from backend!)
+    const clearAllBtn = document.getElementById("tch-clear-all-msgs");
+    if (clearAllBtn) {
+      clearAllBtn.addEventListener("click", async () => {
+        if (!confirm(`Permanently delete all ${msgs.length} messages from your inbox & database to free storage?`)) return;
+        clearAllBtn.disabled = true;
+        clearAllBtn.textContent = "Clearing...";
+        try {
+          for (let i = 0; i < msgs.length; i += 400) {
+            const batch = writeBatch(db);
+            msgs.slice(i, i + 400).forEach((m) => batch.delete(doc(db, "messages", m.id)));
+            await batch.commit();
+          }
+          mountTeacherDashboard(user, profile, db);
+        } catch (err) {
+          alert("Clear failed: " + err.message);
+          clearAllBtn.disabled = false;
+          clearAllBtn.textContent = "🗑️ Clear All";
+        }
+      });
+    }
+
+    // Individual Message Permanent Delete
+    box.querySelectorAll("[data-del-single-msg]").forEach((btn) => {
+      btn.addEventListener("click", async () => {
+        if (!confirm("Permanently delete this message from database?")) return;
+        const msgId = btn.getAttribute("data-del-single-msg");
+        btn.disabled = true;
+        try {
+          await deleteDoc(doc(db, "messages", msgId));
+          mountTeacherDashboard(user, profile, db);
+        } catch (err) {
+          alert("Delete failed: " + err.message);
+          btn.disabled = false;
+        }
+      });
+    });
+
+    // Reply Buttons
     box.querySelectorAll("[data-send-reply]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const msgId = btn.getAttribute("data-send-reply");
@@ -516,7 +560,7 @@ async function renderTeacherInboxTab(user, profile, db) {
       });
     });
 
-    // Bind Report Fake Student Buttons (Goes straight to Secret Admin Panel!)
+    // Report Fake Student Buttons (Goes to Executive Secret Admin Panel -> Flagged Reports)
     box.querySelectorAll("[data-report-student]").forEach((btn) => {
       btn.addEventListener("click", async () => {
         const msgId = btn.getAttribute("data-report-student");
@@ -524,7 +568,7 @@ async function renderTeacherInboxTab(user, profile, db) {
         if (!msgObj) return;
 
         const reason = prompt(
-          `Report "${msgObj.studentName}" to Secret Admin Panel?\nEnter reason (e.g., Fake account / Abusive message / Unknown student):`,
+          `Report "${msgObj.studentName}" to Secret Admin Panel?\nEnter reason:`,
           "Suspected fake student account"
         );
         if (!reason) return;
@@ -545,12 +589,12 @@ async function renderTeacherInboxTab(user, profile, db) {
             status: "open",
             createdAt: new Date().toISOString()
           });
-          alert("🚩 Report sent securely to the Secret Admin Panel for immediate action.");
+          alert("🚩 Report sent securely to the Secret Admin Panel.");
           btn.textContent = "✓ Reported";
         } catch (err) {
           alert("Report failed: " + err.message);
           btn.disabled = false;
-          btn.textContent = "🚩 Report Fake Student";
+          btn.textContent = "🚩 Report";
         }
       });
     });
@@ -775,102 +819,3 @@ function renderDashTabs(tabs, activeId, onSelect) {
   };
   paint(activeId);
 }
-
-// ============================================================================
-// 4. SECRET ADMIN PANEL MODULE 5: FAKE STUDENT REPORTS CONTROL CENTER
-// ============================================================================
-window.refreshAdminReportsModule = async function () {
-  const dashView = document.getElementById("admin-dashboard-view");
-  const bridge = getBridge();
-  if (!dashView || !bridge) return;
-
-  const { user, db } = bridge.getSession();
-  if (!user || !db) return;
-
-  let section = document.getElementById("admin-reports-section");
-  if (!section) {
-    section = document.createElement("div");
-    section.id = "admin-reports-section";
-    section.className = "space-y-3 border-t border-red-500/35 pt-6 mt-6";
-    section.innerHTML = `
-      <div class="flex items-center justify-between gap-2">
-        <h4 class="text-base sm:text-lg font-extrabold text-red-400">
-          5. Teacher Reports — Flagged / Fake Students
-        </h4>
-        <button id="admin-refresh-reports-btn" type="button"
-          class="px-2.5 py-1 rounded-lg bg-red-500/20 hover:bg-red-500/35 text-red-300 font-mono text-[11px] font-bold cursor-pointer">
-          ↻ Refresh
-        </button>
-      </div>
-      <div id="admin-reports-list" class="space-y-2.5 max-h-72 overflow-y-auto"></div>
-    `;
-    dashView.appendChild(section);
-    document.getElementById("admin-refresh-reports-btn").addEventListener("click", window.refreshAdminReportsModule);
-  }
-
-  const listEl = document.getElementById("admin-reports-list");
-  if (!listEl) return;
-  listEl.innerHTML = `<p class="text-xs text-slate-400">Checking teacher reports...</p>`;
-
-  try {
-    const snap = await getDocs(collection(db, "reports"));
-    const reports = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
-    reports.sort((a, b) => String(b.createdAt || "").localeCompare(String(a.createdAt || "")));
-
-    if (reports.length === 0) {
-      listEl.innerHTML = `<p class="text-xs text-slate-400">No fake student reports submitted by teachers.</p>`;
-      return;
-    }
-
-    listEl.innerHTML = reports.map((r) => `
-      <div class="p-3.5 rounded-xl bg-black/45 border border-red-500/45 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div class="space-y-1">
-          <div class="font-bold text-sm text-white">
-            🚩 ${esc(r.reportedStudentName)}
-            <span class="text-amber-300 font-mono text-[11px]">(Class ${esc(r.reportedStudentClass)})</span>
-          </div>
-          <div class="text-red-300 font-semibold">Reason: ${esc(r.reason)}</div>
-          <div class="text-slate-300">Reported by: <strong>${esc(r.reportedByTeacherName)}</strong> • 📧 ${esc(r.reportedStudentEmail)} • 📞 ${esc(r.reportedStudentPhone)}</div>
-        </div>
-        <div class="flex items-center gap-2">
-          <button type="button" data-adm-ban-student="${esc(r.reportedStudentUid)}" data-rep-id="${esc(r.id)}"
-            class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-500 text-white font-mono font-extrabold cursor-pointer">
-            Delete Student &amp; Resolve
-          </button>
-          <button type="button" data-adm-dismiss-rep="${esc(r.id)}"
-            class="px-2.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-slate-200 font-mono font-bold cursor-pointer">
-            Dismiss
-          </button>
-        </div>
-      </div>
-    `).join("");
-
-    listEl.querySelectorAll("[data-adm-ban-student]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        if (!confirm("Permanently remove this student's portal profile and resolve the report?")) return;
-        const uid = btn.getAttribute("data-adm-ban-student");
-        const repId = btn.getAttribute("data-rep-id");
-        btn.disabled = true;
-        try {
-          if (uid) await deleteDoc(doc(db, "users", uid));
-          await deleteDoc(doc(db, "reports", repId));
-          window.refreshAdminReportsModule();
-          if (bridge.refreshAdminAccounts) bridge.refreshAdminAccounts();
-        } catch (err) {
-          alert("Action failed: " + err.message);
-        }
-      });
-    });
-
-    listEl.querySelectorAll("[data-adm-dismiss-rep]").forEach((btn) => {
-      btn.addEventListener("click", async () => {
-        const repId = btn.getAttribute("data-adm-dismiss-rep");
-        btn.disabled = true;
-        await deleteDoc(doc(db, "reports", repId));
-        window.refreshAdminReportsModule();
-      });
-    });
-  } catch (err) {
-    listEl.innerHTML = `<p class="text-xs text-red-400">Admin access required to view reports.</p>`;
-  }
-};
