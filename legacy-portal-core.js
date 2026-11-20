@@ -1,8 +1,8 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v3.2 — ZERO-BLOAT LEGACY SHELL + GALLERY + AUTH)
-// 1. 4-Tier NTA/JEE Legacy Header + Mobile Drawer (with Gallery Route)
+// FILE: legacy-portal-core.js (v3.3 — STICKY MOBILE NAV + ZERO-BLOAT SHELL)
+// 1. 4-Tier NTA/JEE Legacy Header + True Sticky Navigation Bar (Mobile & PC)
 // 2. Eye-Friendly Dual Theme Engine (Soft Paper Day & Comfort Slate Night)
-// 3. Adaptive Ctrl+K Spotlight Search Override
+// 3. Adaptive Ctrl+K Spotlight Search Override + Mobile Sticky Search Button
 // 4. Zero-Button Continuous "LATEST NEWS" Marquee + In-Site PDF/YT/Image Viewer
 // 5. Curved Animated Auth Modal (Stealth Admin Isolation + Fresh Profile Sync)
 // ============================================================================
@@ -187,26 +187,39 @@ function injectEyeFriendlyStyles() {
       --leg-shadow: 0 4px 20px rgba(2, 6, 23, 0.4);
     }
 
+    /* overflow-x: clip preserves position:sticky on mobile Chrome & Safari! */
     html, body {
       background-color: var(--leg-bg) !important;
       color: var(--leg-text) !important;
       max-width: 100vw;
-      overflow-x: hidden;
+      overflow-x: clip;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       transition: background-color 0.25s ease, color 0.25s ease;
     }
 
-    /* Hide old Prahar ribbon from royal-rajpatra-core.js */
     #royal-prahar-ribbon { display: none !important; }
 
     #legacy-masthead { background-color: var(--leg-surface); color: var(--leg-text); }
     .leg-tier-1 { background-color: var(--leg-top-strip); border-color: var(--leg-border); color: var(--leg-body); }
     .leg-tier-2 { background-color: var(--leg-surface); border-color: var(--leg-border); }
-    .leg-tier-3 { background-color: var(--leg-surface-alt); border-color: var(--leg-border); color: var(--leg-text); }
     .leg-text-primary { color: var(--leg-text); }
     .leg-text-body { color: var(--leg-body); }
     .leg-text-muted { color: var(--leg-muted); }
     .leg-border { border-color: var(--leg-border); }
+
+    /* True Sticky Navigation Bar */
+    #legacy-sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background-color: var(--leg-surface-alt);
+      border-bottom: 1px solid var(--leg-border);
+      color: var(--leg-text);
+      transition: box-shadow 0.2s ease, background-color 0.25s ease;
+    }
+    #legacy-sticky-nav.is-stuck {
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
+    }
 
     .sacred-card {
       background: var(--leg-surface) !important;
@@ -307,7 +320,7 @@ function injectEyeFriendlyStyles() {
 }
 
 // ============================================================================
-// 3. MOUNT 4-TIER LEGACY HEADER + MOBILE DRAWER (WITH GALLERY)
+// 3. MOUNT LEGACY MASTHEAD + STICKY NAV BAR + NEWS MARQUEE + MOBILE DRAWER
 // ============================================================================
 const NAV_ITEMS = [
   { key: "home", label: "Home", icon: "🏛️" },
@@ -324,7 +337,7 @@ function mountLegacyHeader() {
 
   const header = document.createElement("header");
   header.id = "legacy-masthead";
-  header.className = "w-full shadow-sm relative z-50";
+  header.className = "w-full relative z-50";
 
   const desktopNavButtons = NAV_ITEMS.map((item, idx) => `
     <button type="button" data-leg-nav="${item.key}"
@@ -407,66 +420,91 @@ function mountLegacyHeader() {
         </div>
       </div>
     </div>
+  `;
 
-    <nav aria-label="Main Navigation" class="leg-tier-3 w-full border-b">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6">
-        <div class="flex lg:hidden items-center justify-between h-12 gap-2">
-          <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
-            <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-            </svg>
-            <span>Menu</span>
-            <span class="opacity-30">|</span>
-            <span id="legacy-mobile-active-lbl" class="text-[#0B3066] dark:text-amber-400 truncate max-w-[110px]">Home</span>
+  // STANDALONE STICKY NAVIGATION BAR (Always accessible while scrolling!)
+  const stickyNav = document.createElement("nav");
+  stickyNav.id = "legacy-sticky-nav";
+  stickyNav.setAttribute("aria-label", "Main Navigation");
+  stickyNav.className = "w-full";
+  stickyNav.innerHTML = `
+    <div class="max-w-7xl mx-auto px-3 sm:px-6">
+      <div class="flex lg:hidden items-center justify-between h-12 gap-2">
+        <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
+          <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+          </svg>
+          <span>Menu</span>
+          <span class="opacity-30">|</span>
+          <span id="legacy-mobile-active-lbl" class="text-[#0B3066] dark:text-amber-400 truncate max-w-[100px]">Home</span>
+        </button>
+
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button id="legacy-mobile-search-btn" type="button" aria-label="Search Portal"
+            class="w-9 h-9 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary flex items-center justify-center active:scale-95 transition-transform cursor-pointer">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/></svg>
           </button>
-
           <button id="legacy-mobile-auth-btn" type="button"
-            class="px-3.5 py-2 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer shrink-0">
-            Sign In / Register
-          </button>
-        </div>
-
-        <div class="hidden lg:flex items-center justify-center gap-0.5 text-[13px] font-bold">
-          ${desktopNavButtons}
-          <button type="button" id="legacy-nav-auth-btn"
-            class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
+            class="px-3 py-2 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer">
             Sign In / Register
           </button>
         </div>
       </div>
-    </nav>
 
-    <div class="w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-11 flex items-center">
-        <div class="pr-3 sm:pr-5 mr-3 sm:mr-5 border-r border-white/25 shrink-0 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
-          <span class="text-[11px] sm:text-xs font-extrabold tracking-widest uppercase text-white">
-            LATEST NEWS
-          </span>
-        </div>
+      <div class="hidden lg:flex items-center justify-center gap-0.5 text-[13px] font-bold">
+        ${desktopNavButtons}
+        <button type="button" id="legacy-nav-auth-btn"
+          class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
+          Sign In / Register
+        </button>
+      </div>
+    </div>
+  `;
 
-        <div class="legacy-marquee-viewport flex-1 min-w-0">
-          <div id="legacy-marquee-track" class="legacy-marquee-track text-xs sm:text-[13px] font-medium text-blue-50">
-            <span class="px-6">Loading latest official announcements from S.S. +2 High School, Gola...</span>
-          </div>
+  // LATEST NEWS CONTINUOUS MARQUEE BAR
+  const newsBar = document.createElement("div");
+  newsBar.id = "legacy-news-bar";
+  newsBar.className = "w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]";
+  newsBar.innerHTML = `
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 h-11 flex items-center">
+      <div class="pr-3 sm:pr-5 mr-3 sm:mr-5 border-r border-white/25 shrink-0 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
+        <span class="text-[11px] sm:text-xs font-extrabold tracking-widest uppercase text-white">
+          LATEST NEWS
+        </span>
+      </div>
+
+      <div class="legacy-marquee-viewport flex-1 min-w-0">
+        <div id="legacy-marquee-track" class="legacy-marquee-track text-xs sm:text-[13px] font-medium text-blue-50">
+          <span class="px-6">Loading latest official announcements from S.S. +2 High School, Gola...</span>
         </div>
       </div>
     </div>
   `;
 
-  document.body.insertBefore(header, document.body.firstChild);
+  const firstEl = document.body.firstChild;
+  document.body.insertBefore(header, firstEl);
+  document.body.insertBefore(stickyNav, header.nextSibling);
+  document.body.insertBefore(newsBar, stickyNav.nextSibling);
   mountMobileDrawer();
 
-  header.querySelectorAll(".leg-nav-item").forEach((btn) => {
+  window.addEventListener("scroll", () => {
+    stickyNav.classList.toggle("is-stuck", window.scrollY > 110);
+  }, { passive: true });
+
+  stickyNav.querySelectorAll(".leg-nav-item").forEach((btn) => {
     btn.addEventListener("click", () => handleNavSelection(btn.getAttribute("data-leg-nav")));
   });
 
+  const triggerSpotlight = () => {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+  };
+
   document.getElementById("legacy-theme-toggle").addEventListener("click", toggleEyeFriendlyTheme);
   document.getElementById("legacy-mobile-menu-btn").addEventListener("click", openMobileDrawer);
-  document.getElementById("legacy-search-btn").addEventListener("click", () => {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
-  });
+  document.getElementById("legacy-search-btn").addEventListener("click", triggerSpotlight);
+  document.getElementById("legacy-mobile-search-btn").addEventListener("click", triggerSpotlight);
 
   document.getElementById("legacy-font-inc").addEventListener("click", () => {
     fontScaleStep = Math.min(2, fontScaleStep + 1);
@@ -603,7 +641,6 @@ function handleNavSelection(target) {
   }
 }
 
-// Wrap app.js's switchView so clicking footer/back buttons always hides #view-gallery too
 function wrapGlobalSwitchView() {
   const orig = window.switchView;
   if (typeof orig !== "function" || orig._legacyWrapped) return;
@@ -1310,8 +1347,8 @@ function renderProfileSheet() {
   const roleText = isApprovedTeacher
     ? `Verified Faculty • ${p.designation || "Teacher"} (${p.subject || "General"})`
     : isPendingTeacher
-    ? "Teacher Account (Pending Admin Verification)"
-    : `Student • Class ${p.classLevel || "N/A"} (${p.stream || "General"})`;
+      ? "Teacher Account (Pending Admin Verification)"
+      : `Student • Class ${p.classLevel || "N/A"} (${p.stream || "General"})`;
 
   document.getElementById("profile-role-badge").textContent = roleText;
 
