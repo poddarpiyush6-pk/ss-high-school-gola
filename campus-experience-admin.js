@@ -1,9 +1,10 @@
 // ============================================================================
-// FILE: campus-experience-admin.js (v3.1 — 3-WAY MOBILE SIDEBAR + GALLERY + MAP)
-// 1. Secret Admin Executive Control Suite v3.0 (Obsidian + Gold • Mobile-First)
-// 2. Campus Gallery Page (#view-gallery) + Auto-Sliding Carousel + YT Embeds
-// 3. Admin Gallery Manager (Auto Image Compressor + YouTube Link + Captions)
-// 4. Lazy-Loaded Live School Location Map Card (Heramdaga Rd, Bantara, Gola)
+// FILE: campus-experience-admin.js (v3.2 — ZERO-CROP SHOWCASE + MASONRY GALLERY)
+// 1. Home Page Cinematic Auto-Sliding Showcase (Ambient Blur + Zero-Crop Contain)
+// 2. Pure Masonry Campus Gallery Page (#view-gallery — Natural Aspect Ratios)
+// 3. Full-Screen Interactive Lightbox (Prev/Next + Touch Swipe + Keyboard)
+// 4. Secret Admin Executive Control Suite v3.0 (3-Way Mobile Drawer Close)
+// 5. Lazy-Loaded Live School Location Map Card (Heramdaga Rd, Bantara, Gola)
 // ============================================================================
 
 import {
@@ -16,9 +17,12 @@ const SCHOOL_MAP_EMBED_URL =
 
 let galleryCache = [];
 let activeGalleryFilter = "All";
+let homePhotosCache = [];
 let carouselIndex = 0;
 let carouselTimer = null;
 let carouselPaused = false;
+let lightboxItems = [];
+let lightboxIndex = 0;
 let adminActiveTab = "dashboard";
 let adminCompressedPhoto = "";
 let adminNoticeImage = "";
@@ -66,7 +70,7 @@ function compressPhoto(file, maxW = 1100, quality = 0.74) {
 }
 
 // ============================================================================
-// 1. EXECUTIVE OBSIDIAN-GOLD STYLES
+// 1. EXECUTIVE OBSIDIAN-GOLD & MASONRY GALLERY STYLES
 // ============================================================================
 function injectExecutiveStyles() {
   if (document.getElementById("exec-admin-gallery-styles")) return;
@@ -101,25 +105,30 @@ function injectExecutiveStyles() {
       border: 1px solid rgba(148, 163, 184, 0.22);
       color: #f8fafc;
     }
-    .exec-input:focus {
-      outline: none;
-      border-color: #f5b942;
+    .exec-input:focus { outline: none; border-color: #f5b942; }
+
+    /* Zero-Crop Masonry Cards */
+    .gal-masonry-card {
+      break-inside: avoid;
+      -webkit-column-break-inside: avoid;
+      page-break-inside: avoid;
     }
+
     @keyframes galleryFade {
-      0% { opacity: 0.3; transform: scale(1.02); }
+      0% { opacity: 0.25; transform: scale(0.985); }
       100% { opacity: 1; transform: scale(1); }
     }
-    .gal-slide-anim { animation: galleryFade 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    .gal-slide-anim { animation: galleryFade 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
   `;
   document.head.appendChild(style);
 }
 
 // ============================================================================
-// 2. CAMPUS GALLERY DATA + AUTO-SLIDING CAROUSEL + FULL GALLERY PAGE
+// 2. GALLERY DATA FETCH & FULL-SCREEN INTERACTIVE LIGHTBOX (PREV / NEXT / SWIPE)
 // ============================================================================
 async function fetchGalleryItems() {
   const db = getDb();
-  if (!db) return [];
+  if (!db) return galleryCache;
   try {
     const snap = await getDocs(collection(db, "gallery_items"));
     const items = snap.docs.map((d) => ({ id: d.id, ...d.data() }));
@@ -137,15 +146,38 @@ function ensureGalleryLightbox() {
 
   lb = document.createElement("div");
   lb.id = "campus-gallery-lightbox";
-  lb.className = "fixed inset-0 z-[9999] bg-black/90 backdrop-blur-sm hidden items-center justify-center p-3 sm:p-6";
+  lb.className = "fixed inset-0 z-[9999] bg-black/92 backdrop-blur-md hidden items-center justify-center p-2 sm:p-6";
   lb.innerHTML = `
-    <div class="relative max-w-4xl w-full rounded-2xl overflow-hidden bg-slate-950 border border-amber-500/35 shadow-2xl">
-      <button id="lb-close" type="button" aria-label="Close Preview"
-        class="absolute top-3 right-3 z-10 w-9 h-9 rounded-full bg-black/70 hover:bg-red-600 text-white font-bold cursor-pointer">✕</button>
-      <div id="lb-media" class="bg-black flex items-center justify-center"></div>
-      <div class="p-4 sm:p-5 bg-slate-900 text-white space-y-1">
-        <span id="lb-cat" class="px-2 py-0.5 rounded bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase"></span>
-        <h3 id="lb-title" class="text-base sm:text-lg font-extrabold"></h3>
+    <div id="lb-card" class="relative max-w-5xl w-full rounded-2xl overflow-hidden bg-slate-950 border border-amber-500/35 shadow-2xl flex flex-col max-h-[94vh]">
+      
+      <!-- Top Counter + Close -->
+      <div class="absolute top-3 left-3 right-3 z-20 flex items-center justify-between pointer-events-none">
+        <span id="lb-counter" class="px-2.5 py-1 rounded-lg bg-black/70 text-amber-300 font-mono text-xs font-bold border border-white/15">
+          1 / 1
+        </span>
+        <button id="lb-close" type="button" aria-label="Close Preview"
+          class="pointer-events-auto w-9 h-9 rounded-full bg-black/75 hover:bg-red-600 text-white font-bold border border-white/15 cursor-pointer transition-colors">
+          ✕
+        </button>
+      </div>
+
+      <!-- Prev / Next Arrows -->
+      <button id="lb-prev" type="button" aria-label="Previous"
+        class="hidden absolute left-2 sm:left-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-black/70 hover:bg-amber-500 text-white hover:text-slate-950 border border-white/20 flex items-center justify-center text-xl font-extrabold cursor-pointer transition-colors">
+        ‹
+      </button>
+      <button id="lb-next" type="button" aria-label="Next"
+        class="hidden absolute right-2 sm:right-4 top-1/2 -translate-y-1/2 z-20 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-black/70 hover:bg-amber-500 text-white hover:text-slate-950 border border-white/20 flex items-center justify-center text-xl font-extrabold cursor-pointer transition-colors">
+        ›
+      </button>
+
+      <!-- Zero-Crop Media Viewport -->
+      <div id="lb-media" class="bg-black flex items-center justify-center min-h-[260px] flex-1 overflow-hidden"></div>
+
+      <!-- Caption Footer -->
+      <div class="p-4 sm:p-5 bg-slate-900 text-white space-y-1 border-t border-white/10 shrink-0">
+        <span id="lb-cat" class="inline-block px-2 py-0.5 rounded bg-amber-500 text-slate-950 text-[10px] font-extrabold uppercase"></span>
+        <h3 id="lb-title" class="text-sm sm:text-lg font-extrabold leading-snug"></h3>
         <p id="lb-caption" class="text-xs sm:text-sm text-slate-300"></p>
       </div>
     </div>
@@ -157,77 +189,258 @@ function ensureGalleryLightbox() {
     lb.classList.remove("flex");
     document.getElementById("lb-media").innerHTML = "";
   };
+
+  const step = (dir) => {
+    if (lightboxItems.length <= 1) return;
+    lightboxIndex = (lightboxIndex + dir + lightboxItems.length) % lightboxItems.length;
+    paintLightboxSlide();
+  };
+
   document.getElementById("lb-close").addEventListener("click", close);
+  document.getElementById("lb-prev").addEventListener("click", () => step(-1));
+  document.getElementById("lb-next").addEventListener("click", () => step(1));
   lb.addEventListener("click", (e) => { if (e.target === lb) close(); });
+
+  // Keyboard Navigation
+  document.addEventListener("keydown", (e) => {
+    if (lb.classList.contains("hidden")) return;
+    if (e.key === "Escape") close();
+    else if (e.key === "ArrowLeft") step(-1);
+    else if (e.key === "ArrowRight") step(1);
+  });
+
+  // Mobile Touch Swipe Support
+  let touchStartX = 0;
+  const lbCard = document.getElementById("lb-card");
+  lbCard.addEventListener("touchstart", (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+  lbCard.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].screenX - touchStartX;
+    if (Math.abs(dx) > 45) step(dx < 0 ? 1 : -1);
+  }, { passive: true });
+
   return lb;
 }
 
-function openGalleryLightbox(item) {
-  const lb = ensureGalleryLightbox();
+function paintLightboxSlide() {
+  const item = lightboxItems[lightboxIndex];
+  if (!item) return;
+
   const mediaEl = document.getElementById("lb-media");
   const ytEmbed = getYouTubeEmbed(item.youtubeUrl || "");
 
   if (item.type === "video" && ytEmbed) {
-    mediaEl.innerHTML = `<div class="aspect-video w-full"><iframe src="${esc(ytEmbed)}?autoplay=1" class="w-full h-full" allowfullscreen></iframe></div>`;
+    mediaEl.innerHTML = `<div class="aspect-video w-full max-h-[72vh]"><iframe src="${esc(ytEmbed)}?autoplay=1" class="w-full h-full" allowfullscreen></iframe></div>`;
   } else {
-    mediaEl.innerHTML = `<img src="${esc(item.imageDataUrl)}" alt="${esc(item.title)}" class="max-h-[70vh] w-auto object-contain mx-auto" />`;
+    mediaEl.innerHTML = `<img src="${esc(item.imageDataUrl)}" alt="${esc(item.title)}" class="max-h-[74vh] w-auto max-w-full object-contain mx-auto gal-slide-anim" />`;
   }
 
+  document.getElementById("lb-counter").textContent = `${lightboxIndex + 1} / ${lightboxItems.length}`;
   document.getElementById("lb-cat").textContent = item.category || "Campus";
   document.getElementById("lb-title").textContent = item.title || "S.S. +2 High School, Gola";
   document.getElementById("lb-caption").textContent = item.caption || "";
 
+  const showNav = lightboxItems.length > 1;
+  document.getElementById("lb-prev").classList.toggle("hidden", !showNav);
+  document.getElementById("lb-next").classList.toggle("hidden", !showNav);
+}
+
+function openGalleryLightbox(itemsList, startIdx = 0) {
+  if (!Array.isArray(itemsList) || itemsList.length === 0) return;
+  lightboxItems = itemsList;
+  lightboxIndex = Math.max(0, Math.min(startIdx, itemsList.length - 1));
+
+  const lb = ensureGalleryLightbox();
+  paintLightboxSlide();
   lb.classList.remove("hidden");
   lb.classList.add("flex");
 }
 
-function startCarouselTimer(photos, prefix) {
+// ============================================================================
+// 3. HOME PAGE CINEMATIC AUTO-SLIDING SHOWCASE (AMBIENT BLUR + ZERO CROPPING)
+// ============================================================================
+function startHomeCarouselTimer() {
   if (carouselTimer) clearInterval(carouselTimer);
-  if (photos.length <= 1) return;
+  if (homePhotosCache.length <= 1) return;
 
   carouselTimer = setInterval(() => {
     if (!carouselPaused && !document.hidden) {
-      carouselIndex = (carouselIndex + 1) % photos.length;
-      renderCarouselSlide(photos, prefix);
+      carouselIndex = (carouselIndex + 1) % homePhotosCache.length;
+      renderHomeCarouselSlide();
     }
-  }, 4200);
+  }, 4400);
 }
 
-function renderCarouselSlide(photos, prefix) {
-  const img = document.getElementById(`${prefix}-slide-img`);
-  const title = document.getElementById(`${prefix}-slide-title`);
-  const caption = document.getElementById(`${prefix}-slide-caption`);
-  const badge = document.getElementById(`${prefix}-slide-badge`);
-  const dots = document.getElementById(`${prefix}-slide-dots`);
-  if (!img || !photos.length) return;
+function renderHomeCarouselSlide() {
+  const fgImg = document.getElementById("home-gal-fg");
+  const bgImg = document.getElementById("home-gal-bg");
+  const title = document.getElementById("home-gal-title");
+  const caption = document.getElementById("home-gal-caption");
+  const badge = document.getElementById("home-gal-badge");
+  const dots = document.getElementById("home-gal-dots");
+  if (!fgImg || !homePhotosCache.length) return;
 
-  const item = photos[carouselIndex % photos.length];
-  img.classList.remove("gal-slide-anim");
-  void img.offsetWidth;
-  img.src = item.imageDataUrl;
-  img.alt = item.title || "Campus Photo";
-  img.classList.add("gal-slide-anim");
+  const item = homePhotosCache[carouselIndex % homePhotosCache.length];
 
+  fgImg.classList.remove("gal-slide-anim");
+  void fgImg.offsetWidth;
+  fgImg.src = item.imageDataUrl;
+  fgImg.alt = item.title || "Campus Showcase";
+  fgImg.classList.add("gal-slide-anim");
+
+  if (bgImg) bgImg.src = item.imageDataUrl;
   if (badge) badge.textContent = item.category || "CAMPUS";
   if (title) title.textContent = item.title || "S.S. +2 High School, Gola";
   if (caption) caption.textContent = item.caption || "";
 
   if (dots) {
-    dots.innerHTML = photos.map((_, i) => `
-      <button type="button" data-dot-idx="${i}" aria-label="Slide ${i + 1}"
-        class="h-2 rounded-full transition-all cursor-pointer ${i === (carouselIndex % photos.length) ? "w-7 bg-[#f59e0b]" : "w-2 bg-white/45 hover:bg-white"}"></button>
+    dots.innerHTML = homePhotosCache.map((_, i) => `
+      <button type="button" data-home-dot="${i}" aria-label="Slide ${i + 1}"
+        class="h-2 rounded-full transition-all cursor-pointer ${i === (carouselIndex % homePhotosCache.length) ? "w-7 bg-[#f59e0b]" : "w-2 bg-white/45 hover:bg-white"}"></button>
     `).join("");
 
-    dots.querySelectorAll("[data-dot-idx]").forEach((btn) => {
+    dots.querySelectorAll("[data-home-dot]").forEach((btn) => {
       btn.addEventListener("click", (e) => {
         e.stopPropagation();
-        carouselIndex = Number(btn.getAttribute("data-dot-idx"));
-        renderCarouselSlide(photos, prefix);
+        carouselIndex = Number(btn.getAttribute("data-home-dot"));
+        renderHomeCarouselSlide();
+        startHomeCarouselTimer();
       });
     });
   }
 }
 
+async function mountHomeCampusShowcase() {
+  const homeView = document.getElementById("view-home");
+  if (!homeView) return;
+
+  const items = await fetchGalleryItems();
+  const photosOnly = items.filter((i) => i.type !== "video" && i.imageDataUrl);
+  homePhotosCache = photosOnly;
+
+  let showcase = document.getElementById("home-campus-showcase");
+
+  // Clean zero-blank-state guard: hide if Admin hasn't uploaded any photos yet
+  if (photosOnly.length === 0) {
+    if (showcase) showcase.remove();
+    if (carouselTimer) clearInterval(carouselTimer);
+    return;
+  }
+
+  if (!showcase) {
+    showcase = document.createElement("section");
+    showcase.id = "home-campus-showcase";
+    showcase.setAttribute("aria-label", "Campus Photo Showcase");
+    homeView.insertBefore(showcase, homeView.firstChild);
+  }
+
+  showcase.innerHTML = `
+    <div id="home-gal-stage"
+      class="relative rounded-3xl overflow-hidden border leg-border shadow-xl bg-slate-950 h-[290px] sm:h-[430px] lg:h-[470px] cursor-pointer group select-none">
+      
+      <!-- Layer 1: Soft Ambient Blurred Backdrop (Fills Wide Frame Elegantly) -->
+      <img id="home-gal-bg" src="${esc(photosOnly[0].imageDataUrl)}" alt="" aria-hidden="true"
+        class="absolute inset-0 w-full h-full object-cover scale-110 blur-2xl opacity-55 brightness-75 pointer-events-none" />
+
+      <!-- Layer 2: Crisp 100% Uncropped Full Photo (Works for BOTH Vertical & Horizontal!) -->
+      <img id="home-gal-fg" src="${esc(photosOnly[0].imageDataUrl)}" alt="${esc(photosOnly[0].title)}"
+        class="relative z-10 w-full h-full object-contain mx-auto transition-transform duration-500" />
+
+      <!-- Subtle Bottom Gradient for Readable Caption -->
+      <div class="pointer-events-none absolute inset-x-0 bottom-0 h-36 bg-gradient-to-t from-slate-950/95 via-slate-950/55 to-transparent z-10"></div>
+
+      <!-- Top-Right View Full Gallery Pill -->
+      <button id="home-gal-view-all" type="button"
+        class="absolute top-3.5 right-3.5 z-20 px-3.5 py-1.5 rounded-xl bg-slate-950/75 hover:bg-[#f59e0b] text-white hover:text-slate-950 border border-white/20 text-xs font-extrabold backdrop-blur-sm transition-colors cursor-pointer">
+        🖼️ View Full Gallery →
+      </button>
+
+      <!-- Prev / Next Controls (if >1 photo) -->
+      ${
+        photosOnly.length > 1
+          ? `
+            <button id="home-gal-prev" type="button" aria-label="Previous Photo"
+              class="absolute left-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/55 hover:bg-[#f59e0b] text-white hover:text-slate-950 border border-white/20 flex items-center justify-center text-lg font-extrabold opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-all cursor-pointer">
+              ‹
+            </button>
+            <button id="home-gal-next" type="button" aria-label="Next Photo"
+              class="absolute right-3 top-1/2 -translate-y-1/2 z-20 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-black/55 hover:bg-[#f59e0b] text-white hover:text-slate-950 border border-white/20 flex items-center justify-center text-lg font-extrabold opacity-80 sm:opacity-0 sm:group-hover:opacity-100 transition-all cursor-pointer">
+              ›
+            </button>
+          `
+          : ""
+      }
+
+      <!-- Bottom Caption & Slide Dots -->
+      <div class="absolute bottom-0 inset-x-0 z-20 p-4 sm:p-6 text-white flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+        <div class="space-y-1 max-w-2xl">
+          <span id="home-gal-badge" class="inline-block px-2.5 py-0.5 rounded bg-[#f59e0b] text-slate-950 text-[10px] font-extrabold uppercase tracking-wider"></span>
+          <h3 id="home-gal-title" class="text-base sm:text-2xl font-extrabold leading-tight drop-shadow"></h3>
+          <p id="home-gal-caption" class="text-xs sm:text-sm text-slate-200 line-clamp-2"></p>
+        </div>
+        <div id="home-gal-dots" class="flex items-center gap-1.5 shrink-0"></div>
+      </div>
+    </div>
+  `;
+
+  carouselIndex = 0;
+  renderHomeCarouselSlide();
+  startHomeCarouselTimer();
+
+  const stage = document.getElementById("home-gal-stage");
+  stage.addEventListener("mouseenter", () => { carouselPaused = true; });
+  stage.addEventListener("mouseleave", () => { carouselPaused = false; });
+  stage.addEventListener("click", () => {
+    openGalleryLightbox(homePhotosCache, carouselIndex % homePhotosCache.length);
+  });
+
+  // Mobile Swipe on Home Carousel
+  let startX = 0;
+  stage.addEventListener("touchstart", (e) => {
+    startX = e.changedTouches[0].screenX;
+    carouselPaused = true;
+  }, { passive: true });
+  stage.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].screenX - startX;
+    if (Math.abs(dx) > 40 && homePhotosCache.length > 1) {
+      carouselIndex = (carouselIndex + (dx < 0 ? 1 : -1) + homePhotosCache.length) % homePhotosCache.length;
+      renderHomeCarouselSlide();
+      startHomeCarouselTimer();
+    }
+    carouselPaused = false;
+  }, { passive: true });
+
+  const prevBtn = document.getElementById("home-gal-prev");
+  const nextBtn = document.getElementById("home-gal-next");
+  if (prevBtn) {
+    prevBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      carouselIndex = (carouselIndex - 1 + homePhotosCache.length) % homePhotosCache.length;
+      renderHomeCarouselSlide();
+      startHomeCarouselTimer();
+    });
+  }
+  if (nextBtn) {
+    nextBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      carouselIndex = (carouselIndex + 1) % homePhotosCache.length;
+      renderHomeCarouselSlide();
+      startHomeCarouselTimer();
+    });
+  }
+
+  document.getElementById("home-gal-view-all").addEventListener("click", (e) => {
+    e.stopPropagation();
+    const galBtn = document.querySelector('[data-leg-nav="gallery"]');
+    if (galBtn) galBtn.click();
+    else window.openCampusGalleryPage();
+  });
+}
+
+// ============================================================================
+// 4. DEDICATED GALLERY PAGE (#view-gallery — PURE ZERO-CROP MASONRY ARCHIVE)
+// ============================================================================
 window.openCampusGalleryPage = async function () {
   let view = document.getElementById("view-gallery");
   const main = document.querySelector("main") || document.body;
@@ -248,7 +461,6 @@ window.openCampusGalleryPage = async function () {
   view.innerHTML = `<div class="p-10 text-center text-sm leg-text-muted">Loading Campus Gallery...</div>`;
 
   const items = await fetchGalleryItems();
-  const photosOnly = items.filter((i) => i.type !== "video" && i.imageDataUrl);
   const categories = ["All", "Campus", "Events", "Labs & NCC", "Sports", "Achievements", "Videos"];
 
   const filtered = items.filter((item) => {
@@ -267,7 +479,7 @@ window.openCampusGalleryPage = async function () {
           Campus Photo &amp; Video Gallery
         </h2>
         <p class="text-xs sm:text-sm leg-text-muted mt-0.5">
-          Glimpses of classrooms, science laboratories, NCC parades, sports &amp; celebrations at S.S. +2 High School, Gola.
+          Tap any photograph to view full-screen with swipe navigation. Every image displays in full original aspect ratio.
         </p>
       </div>
       <div class="flex flex-wrap gap-1.5">
@@ -285,48 +497,29 @@ window.openCampusGalleryPage = async function () {
     </div>
 
     ${
-      photosOnly.length > 0
-        ? `
-          <div id="gal-hero-carousel" class="relative rounded-3xl overflow-hidden border leg-border shadow-lg bg-slate-950 h-[260px] sm:h-[420px] cursor-pointer group">
-            <img id="gal-slide-img" src="${esc(photosOnly[0].imageDataUrl)}" alt="Campus Showcase"
-              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-[1.02]" />
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/25 to-transparent"></div>
-            <div class="absolute bottom-0 inset-x-0 p-5 sm:p-7 text-white flex flex-col sm:flex-row sm:items-end justify-between gap-3">
-              <div class="space-y-1 max-w-2xl">
-                <span id="gal-slide-badge" class="inline-block px-2.5 py-0.5 rounded bg-[#f59e0b] text-slate-950 text-[10px] font-extrabold uppercase"></span>
-                <h3 id="gal-slide-title" class="text-lg sm:text-2xl font-extrabold leading-tight"></h3>
-                <p id="gal-slide-caption" class="text-xs sm:text-sm text-slate-200 line-clamp-2"></p>
-              </div>
-              <div id="gal-slide-dots" class="flex items-center gap-1.5 shrink-0"></div>
-            </div>
-          </div>
-        `
-        : ""
-    }
-
-    ${
       filtered.length === 0
         ? `
           <div class="sacred-card rounded-3xl p-10 text-center space-y-2">
             <div class="text-4xl">🖼️</div>
-            <h3 class="text-base font-extrabold leg-text-primary">No Media Uploaded Yet</h3>
+            <h3 class="text-base font-extrabold leg-text-primary">No Media in This Category Yet</h3>
             <p class="text-xs leg-text-muted max-w-md mx-auto">
               School administrators can upload compressed campus photos and YouTube event videos directly from the Secret Admin Panel.
             </p>
           </div>
         `
         : `
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          <!-- PURE NATURAL-RATIO MASONRY GRID (ZERO CROPPING!) -->
+          <div class="columns-1 sm:columns-2 lg:columns-3 gap-5">
             ${filtered.map((item, idx) => {
               const ytEmbed = getYouTubeEmbed(item.youtubeUrl || "");
               if (item.type === "video" && ytEmbed) {
                 return `
-                  <article class="sacred-card rounded-2xl overflow-hidden flex flex-col">
+                  <article class="gal-masonry-card mb-5 sacred-card rounded-2xl overflow-hidden flex flex-col">
                     <div class="aspect-video w-full bg-black">
                       <iframe src="${esc(ytEmbed)}" class="w-full h-full" loading="lazy" allowfullscreen></iframe>
                     </div>
-                    <div class="p-4 space-y-1 flex-1">
-                      <span class="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-extrabold uppercase">▶ VIDEO</span>
+                    <div class="p-4 space-y-1">
+                      <span class="inline-block px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-extrabold uppercase">▶ VIDEO</span>
                       <h4 class="font-extrabold text-sm leg-text-primary pt-1">${esc(item.title)}</h4>
                       ${item.caption ? `<p class="text-xs leg-text-muted">${esc(item.caption)}</p>` : ""}
                     </div>
@@ -334,19 +527,19 @@ window.openCampusGalleryPage = async function () {
                 `;
               }
               return `
-                <article data-open-gal-idx="${idx}" class="sacred-card rounded-2xl overflow-hidden flex flex-col cursor-pointer group">
-                  <div class="relative h-52 overflow-hidden bg-slate-900">
+                <article data-open-gal-idx="${idx}" class="gal-masonry-card mb-5 sacred-card rounded-2xl overflow-hidden cursor-pointer group">
+                  <div class="relative bg-slate-950 overflow-hidden">
                     <img src="${esc(item.imageDataUrl)}" alt="${esc(item.title)}" loading="lazy"
-                      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                    <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-md bg-slate-950/75 text-amber-300 text-[10px] font-extrabold uppercase">
+                      class="w-full h-auto block group-hover:scale-[1.02] transition-transform duration-500" />
+                    <span class="absolute top-3 left-3 px-2.5 py-0.5 rounded-md bg-slate-950/80 text-amber-300 text-[10px] font-extrabold uppercase backdrop-blur-xs">
                       ${esc(item.category || "Campus")}
                     </span>
                   </div>
-                  <div class="p-4 space-y-1 flex-1">
+                  <div class="p-4 space-y-1">
                     <h4 class="font-extrabold text-sm leg-text-primary group-hover:text-[#0B3066] dark:group-hover:text-amber-400 transition-colors">
                       ${esc(item.title)}
                     </h4>
-                    ${item.caption ? `<p class="text-xs leg-text-body line-clamp-2">${esc(item.caption)}</p>` : ""}
+                    ${item.caption ? `<p class="text-xs leg-text-body leading-relaxed">${esc(item.caption)}</p>` : ""}
                   </div>
                 </article>
               `;
@@ -365,27 +558,14 @@ window.openCampusGalleryPage = async function () {
 
   view.querySelectorAll("[data-open-gal-idx]").forEach((card) => {
     card.addEventListener("click", () => {
-      const chosen = filtered[Number(card.getAttribute("data-open-gal-idx"))];
-      if (chosen) openGalleryLightbox(chosen);
+      const idx = Number(card.getAttribute("data-open-gal-idx"));
+      openGalleryLightbox(filtered, idx);
     });
   });
-
-  if (photosOnly.length > 0) {
-    carouselIndex = 0;
-    renderCarouselSlide(photosOnly, "gal");
-    startCarouselTimer(photosOnly, "gal");
-
-    const hero = document.getElementById("gal-hero-carousel");
-    if (hero) {
-      hero.addEventListener("mouseenter", () => { carouselPaused = true; });
-      hero.addEventListener("mouseleave", () => { carouselPaused = false; });
-      hero.addEventListener("click", () => openGalleryLightbox(photosOnly[carouselIndex % photosOnly.length]));
-    }
-  }
 };
 
 // ============================================================================
-// 3. HOME PAGE: LAZY-LOADED LIVE SCHOOL LOCATION MAP CARD
+// 5. HOME PAGE: LAZY-LOADED LIVE SCHOOL LOCATION MAP CARD
 // ============================================================================
 function mountSchoolLocationMapCard() {
   if (document.getElementById("school-campus-map-section")) return;
@@ -458,7 +638,7 @@ function mountSchoolLocationMapCard() {
 }
 
 // ============================================================================
-// 4. SECRET ADMIN EXECUTIVE CONTROL SUITE v3.0 (3-WAY MOBILE DRAWER CLOSE)
+// 6. SECRET ADMIN EXECUTIVE CONTROL SUITE v3.0 (3-WAY MOBILE DRAWER CLOSE)
 // ============================================================================
 function ensureExecutiveAdminModal() {
   let modal = document.getElementById("exec-admin-modal");
@@ -509,13 +689,11 @@ function ensureExecutiveAdminModal() {
         </div>
       </div>
 
-      <!-- EXECUTIVE COMMAND CENTER (ONLY FOR VERIFIED ADMIN) -->
+      <!-- EXECUTIVE COMMAND CENTER -->
       <div id="exec-dashboard-screen" class="hidden flex-1 flex overflow-hidden relative">
         
-        <!-- Mobile Tap-Outside Dark Backdrop (Auto-closes sidebar) -->
         <div id="exec-sidebar-backdrop" class="hidden fixed inset-0 bg-black/70 backdrop-blur-xs z-20 lg:hidden"></div>
 
-        <!-- Left Sidebar (Desktop Fixed | Mobile Slide-Over Drawer with ✕ Close) -->
         <aside id="exec-sidebar" class="exec-sidebar hidden lg:flex lg:static flex-col justify-between w-64 max-w-[82vw] shrink-0 p-4 overflow-y-auto z-30">
           <div class="space-y-6">
             <div class="relative text-center pt-2 pb-4 border-b border-amber-500/15">
@@ -547,7 +725,6 @@ function ensureExecutiveAdminModal() {
           </div>
         </aside>
 
-        <!-- Main Workspace -->
         <div class="flex-1 flex flex-col min-w-0 overflow-hidden">
           <header class="px-4 sm:px-6 py-3.5 bg-[#0b1120] border-b border-amber-500/15 flex items-center justify-between gap-3 shrink-0">
             <div class="flex items-center gap-3 min-w-0">
@@ -752,7 +929,7 @@ async function loadExecWorkspaceTab(tab) {
         <div class="exec-kpi-purple rounded-2xl p-4 space-y-1">
           <div class="text-xs text-purple-300 font-bold">Gallery Media</div>
           <div class="text-2xl sm:text-3xl font-extrabold text-white">${galItems.length}</div>
-          <div class="text-[11px] text-purple-200">Photos &amp; YouTube</div>
+          <div class="text-[11px] text-purple-200">Home Slider + Masonry</div>
         </div>
         <div class="exec-kpi-gold rounded-2xl p-4 space-y-1">
           <div class="text-xs text-amber-300 font-bold">Flagged Reports</div>
@@ -798,7 +975,7 @@ async function loadExecWorkspaceTab(tab) {
     ws.innerHTML = `
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
         <form id="exec-gal-form" class="lg:col-span-5 exec-card rounded-2xl p-5 space-y-3.5 text-xs h-fit">
-          <h3 class="text-sm font-extrabold text-amber-300">🖼️ Add Photo or YouTube Video to Gallery</h3>
+          <h3 class="text-sm font-extrabold text-amber-300">🖼️ Add Photo or YouTube Video</h3>
 
           <div class="grid grid-cols-2 gap-2">
             <div>
@@ -846,7 +1023,7 @@ async function loadExecWorkspaceTab(tab) {
           </div>
 
           <button id="eg-submit" type="submit" class="w-full py-3 rounded-xl exec-nav-active text-xs uppercase tracking-wider cursor-pointer">
-            🚀 Publish to Live Gallery
+            🚀 Publish to Live Gallery &amp; Home Slider
           </button>
         </form>
 
@@ -861,7 +1038,7 @@ async function loadExecWorkspaceTab(tab) {
                       ${
                         it.type === "video"
                           ? `<div class="h-28 rounded-lg bg-slate-900 flex items-center justify-center text-red-400 font-bold">▶ YouTube Video</div>`
-                          : `<img src="${esc(it.imageDataUrl)}" class="w-full h-28 object-cover rounded-lg" />`
+                          : `<div class="h-28 rounded-lg bg-slate-950 flex items-center justify-center overflow-hidden"><img src="${esc(it.imageDataUrl)}" class="max-h-full max-w-full object-contain" /></div>`
                       }
                       <div class="font-bold text-white truncate">${esc(it.title)}</div>
                       <div class="flex items-center justify-between gap-2">
@@ -892,7 +1069,7 @@ async function loadExecWorkspaceTab(tab) {
       try {
         adminCompressedPhoto = await compressPhoto(file, 1100, 0.74);
         const kb = Math.round((adminCompressedPhoto.length * 3) / 4 / 1024);
-        prev.innerHTML = `<img src="${adminCompressedPhoto}" class="w-12 h-12 rounded-lg object-cover border border-amber-400" /> <span>✓ Ready (${kb} KB)</span>`;
+        prev.innerHTML = `<img src="${adminCompressedPhoto}" class="w-12 h-12 rounded-lg object-contain bg-black border border-amber-400" /> <span>✓ Ready (${kb} KB)</span>`;
       } catch (err) {
         prev.textContent = "Compression error.";
       }
@@ -919,11 +1096,14 @@ async function loadExecWorkspaceTab(tab) {
           youtubeUrl: type === "video" ? ytUrl : "",
           createdAt: new Date().toISOString()
         });
+        await mountHomeCampusShowcase();
+        const galView = document.getElementById("view-gallery");
+        if (galView && !galView.classList.contains("hidden")) window.openCampusGalleryPage();
         loadExecWorkspaceTab("gallery");
       } catch (err) {
         alert("Upload failed: " + err.message);
         btn.disabled = false;
-        btn.textContent = "🚀 Publish to Live Gallery";
+        btn.textContent = "🚀 Publish to Live Gallery & Home Slider";
       }
     });
 
@@ -931,6 +1111,9 @@ async function loadExecWorkspaceTab(tab) {
       btn.addEventListener("click", async () => {
         if (!confirm("Delete this gallery item permanently?")) return;
         await deleteDoc(doc(db, "gallery_items", btn.getAttribute("data-del-gal")));
+        await mountHomeCampusShowcase();
+        const galView = document.getElementById("view-gallery");
+        if (galView && !galView.classList.contains("hidden")) window.openCampusGalleryPage();
         loadExecWorkspaceTab("gallery");
       });
     });
@@ -952,7 +1135,7 @@ async function loadExecWorkspaceTab(tab) {
           </div>
           <input id="en-title" required placeholder="Notice Headline *" class="exec-input w-full px-3.5 py-2.5 rounded-xl text-sm font-bold" />
           <textarea id="en-desc" required rows="3" placeholder="Complete official notice text *" class="exec-input w-full px-3.5 py-2.5 rounded-xl"></textarea>
-          <input id="en-link" type="url" placeholder="Google Drive PDF or YouTube Link (Optional)" class="exec-input w-full px-3.5 py-2 rounded-xl" />
+          <input id="en-link" type="url" placeholder="Google Drive PDF or YouTube Link (Optional)" class="exec-input w-full px-3.5 py-2.5 rounded-xl" />
           <input id="en-img" type="file" accept="image/*" class="w-full text-xs file:mr-2 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-amber-400 file:text-slate-950 file:font-bold" />
           <label class="flex items-center gap-2 font-bold text-slate-200 cursor-pointer">
             <input id="en-new" type="checkbox" checked class="accent-amber-400" /> Highlight with NEW badge in Marquee
@@ -1211,12 +1394,19 @@ function bindExecutiveAdminTrigger() {
 }
 
 // ============================================================================
-// 5. BOOTSTRAP
+// 7. BOOTSTRAP
 // ============================================================================
 function bootCampusExperience() {
   injectExecutiveStyles();
   mountSchoolLocationMapCard();
   bindExecutiveAdminTrigger();
+  mountHomeCampusShowcase();
+
+  // Sync Home Showcase once Firebase finishes connecting
+  window.addEventListener("backend-ready", () => {
+    setTimeout(mountHomeCampusShowcase, 300);
+  });
+  setTimeout(mountHomeCampusShowcase, 900);
 }
 
 if (document.readyState === "loading") {
