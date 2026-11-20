@@ -1,10 +1,10 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v3.3 — STICKY MOBILE NAV + ZERO-BLOAT SHELL)
+// FILE: legacy-portal-core.js (v3.4 — HERO-SAFE + UNIFIED TEACHER SIGNUP)
 // 1. 4-Tier NTA/JEE Legacy Header + True Sticky Navigation Bar (Mobile & PC)
-// 2. Eye-Friendly Dual Theme Engine (Soft Paper Day & Comfort Slate Night)
+// 2. Eye-Friendly Dual Theme Engine (Zero Conflict with HD Hero Photo Banner)
 // 3. Adaptive Ctrl+K Spotlight Search Override + Mobile Sticky Search Button
 // 4. Zero-Button Continuous "LATEST NEWS" Marquee + In-Site PDF/YT/Image Viewer
-// 5. Curved Animated Auth Modal (Stealth Admin Isolation + Fresh Profile Sync)
+// 5. Curved Auth Modal + Unified Teacher Sign-Up (Auto-Syncs to Guru Stambh)
 // ============================================================================
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -54,6 +54,33 @@ function getYouTubeEmbedUrl(url) {
   if (!url || typeof url !== "string") return null;
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return m && m[1] ? `https://www.youtube.com/embed/${m[1]}` : null;
+}
+
+function compressAvatarFile(file) {
+  return new Promise((resolve) => {
+    const r = new FileReader();
+    r.onload = (ev) => {
+      const im = new Image();
+      im.onload = () => {
+        const MAX_W = 420;
+        let w = im.width;
+        let h = im.height;
+        if (w > MAX_W) {
+          h = Math.round((h * MAX_W) / w);
+          w = MAX_W;
+        }
+        const c = document.createElement("canvas");
+        c.width = w;
+        c.height = h;
+        c.getContext("2d").drawImage(im, 0, 0, w, h);
+        resolve(c.toDataURL("image/jpeg", 0.72));
+      };
+      im.onerror = () => resolve("");
+      im.src = ev.target.result;
+    };
+    r.onerror = () => resolve("");
+    r.readAsDataURL(file);
+  });
 }
 
 // Stealth Admin Guard: Only returns true for registered Student/Teacher portal profiles
@@ -123,7 +150,7 @@ function initFirebaseSafe() {
 }
 
 // ============================================================================
-// 2. EYE-FRIENDLY DAY / NIGHT THEME ENGINE
+// 2. EYE-FRIENDLY DAY / NIGHT THEME ENGINE (HERO-SAFE, ZERO DUPLICATE CSS)
 // ============================================================================
 function applyEyeFriendlyTheme(mode) {
   const safeMode = mode === "dark" ? "dark" : "light";
@@ -170,7 +197,6 @@ function injectEyeFriendlyStyles() {
       --leg-muted: #64748b;
       --leg-accent: #0b3066;
       --leg-gold: #b45309;
-      --leg-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
     }
 
     html[data-theme="dark"] {
@@ -184,17 +210,10 @@ function injectEyeFriendlyStyles() {
       --leg-muted: #94a3b8;
       --leg-accent: #172554;
       --leg-gold: #fbbf24;
-      --leg-shadow: 0 4px 20px rgba(2, 6, 23, 0.4);
     }
 
-    /* overflow-x: clip preserves position:sticky on mobile Chrome & Safari! */
     html, body {
-      background-color: var(--leg-bg) !important;
-      color: var(--leg-text) !important;
-      max-width: 100vw;
-      overflow-x: clip;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
     #royal-prahar-ribbon { display: none !important; }
@@ -220,23 +239,6 @@ function injectEyeFriendlyStyles() {
     #legacy-sticky-nav.is-stuck {
       box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
     }
-
-    .sacred-card {
-      background: var(--leg-surface) !important;
-      border: 1px solid var(--leg-border) !important;
-      box-shadow: var(--leg-shadow) !important;
-      transform: none !important;
-      backdrop-filter: none !important;
-      -webkit-backdrop-filter: none !important;
-    }
-    .sacred-inner-box {
-      background: var(--leg-surface-alt) !important;
-      border: 1px solid var(--leg-border) !important;
-    }
-    .t-heading, .theme-heading { color: var(--leg-text) !important; }
-    .t-body, .theme-subtext { color: var(--leg-body) !important; }
-    .t-muted, .theme-muted { color: var(--leg-muted) !important; }
-    .t-gold { color: var(--leg-gold) !important; }
 
     /* Eye-Friendly Ctrl+K Spotlight Search Override */
     #royal-spotlight-modal { background: rgba(15, 23, 42, 0.55) !important; backdrop-filter: blur(6px) !important; }
@@ -944,7 +946,7 @@ function openInfoModal(type) {
 }
 
 // ============================================================================
-// 6. CURVED-GRADIENT LIVE-ANIMATED AUTH MODAL
+// 6. CURVED-GRADIENT AUTH MODAL + UNIFIED TEACHER SIGN-UP (GURU STAMBH READY)
 // ============================================================================
 function mountCurvedAuthModal() {
   if (document.getElementById("legacy-auth-modal")) return;
@@ -955,7 +957,7 @@ function mountCurvedAuthModal() {
 
   modal.innerHTML = `
     <div id="legacy-auth-card"
-      class="relative w-full max-w-[400px] min-h-[580px] max-h-[92vh] rounded-[34px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.45)] auth-royal-gradient flex flex-col justify-between my-auto">
+      class="relative w-full max-w-[410px] min-h-[580px] max-h-[92vh] rounded-[34px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.45)] auth-royal-gradient flex flex-col justify-between my-auto">
       
       <div class="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-rose-400/20 blur-2xl auth-orb-a"></div>
       <div class="pointer-events-none absolute top-28 -left-14 w-36 h-36 rounded-full bg-indigo-400/20 blur-2xl auth-orb-b"></div>
@@ -1043,7 +1045,7 @@ function mountCurvedAuthModal() {
         </form>
       </div>
 
-      <!-- VIEW 3: CREATE ACCOUNT -->
+      <!-- VIEW 3: CREATE ACCOUNT (UNIFIED STUDENT & GURU STAMBH TEACHER FORM) -->
       <div id="auth-view-signup" class="hidden relative z-10 flex-1 flex flex-col justify-between max-h-[92vh]">
         <div class="px-7 pt-7 pb-5 text-white shrink-0">
           <button type="button" data-auth-goto="welcome" class="text-xs text-rose-200 hover:text-white font-semibold mb-2 inline-flex items-center gap-1 cursor-pointer">← Back</button>
@@ -1076,6 +1078,7 @@ function mountCurvedAuthModal() {
             </div>
           </div>
 
+          <!-- STUDENT FIELDS -->
           <div id="signup-student-fields" class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Class</label>
@@ -1101,19 +1104,58 @@ function mountCurvedAuthModal() {
             </div>
           </div>
 
-          <div id="signup-teacher-fields" class="hidden grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Designation</label>
-              <select id="signup-designation" class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 bg-transparent focus:outline-none">
-                <option value="PGT (+2 Teacher)">PGT (+2 Teacher)</option>
-                <option value="TGT (High School)">TGT (High School)</option>
-                <option value="PRT (Primary)">PRT (Primary)</option>
-                <option value="Lab / ICT Instructor">Lab / ICT Staff</option>
-              </select>
+          <!-- UNIFIED TEACHER + GURU STAMBH FIELDS -->
+          <div id="signup-teacher-fields" class="hidden space-y-3">
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Designation</label>
+                <select id="signup-designation" class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 bg-transparent focus:outline-none">
+                  <option value="PGT (+2 Teacher)">PGT (+2 Teacher)</option>
+                  <option value="TGT (High School)">TGT (High School)</option>
+                  <option value="PRT (Primary)">PRT (Primary)</option>
+                  <option value="Lab / ICT Instructor">Lab / ICT Staff</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Teaching Wing</label>
+                <select id="signup-wing" class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 bg-transparent focus:outline-none">
+                  <option value="11-12">Class 11–12 (+2)</option>
+                  <option value="9-10">Class 9–10 (Matric)</option>
+                  <option value="6-8">Class 6–8</option>
+                  <option value="1-5">Class 1–5</option>
+                </select>
+              </div>
             </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Primary Subject</label>
+                <input id="signup-subject" type="text" placeholder="e.g. Physics"
+                  class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Qualification</label>
+                <input id="signup-qualification" type="text" placeholder="e.g. M.Sc, B.Ed"
+                  class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Experience</label>
+                <input id="signup-experience" type="text" placeholder="e.g. 10+ Years"
+                  class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
+              </div>
+              <div>
+                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Photo (Guru Stambh)</label>
+                <input id="signup-photo" type="file" accept="image/*"
+                  class="w-full text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-900 file:font-bold" />
+              </div>
+            </div>
+
             <div>
-              <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Primary Subject</label>
-              <input id="signup-subject" type="text" placeholder="e.g. Physics"
+              <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Short Message for Students (Guru Stambh)</label>
+              <input id="signup-thought" type="text" maxlength="160" placeholder="e.g. Discipline and curiosity build great futures."
                 class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
             </div>
           </div>
@@ -1266,6 +1308,10 @@ function mountCurvedAuthModal() {
       return;
     }
 
+    // Disable immediately BEFORE async photo compression (prevents mobile double-tap bug)
+    btn.disabled = true;
+    btn.textContent = "CREATING ACCOUNT...";
+
     const pickedRole = document.getElementById("signup-role").value;
     const fullName = document.getElementById("signup-name").value.trim();
     const email = document.getElementById("signup-email").value.trim();
@@ -1281,17 +1327,27 @@ function mountCurvedAuthModal() {
       createdAt: new Date().toISOString()
     };
 
-    if (pickedRole === "student") {
-      profileData.classLevel = document.getElementById("signup-class").value;
-      profileData.stream = document.getElementById("signup-stream").value;
-    } else {
-      profileData.designation = document.getElementById("signup-designation").value;
-      profileData.subject = document.getElementById("signup-subject").value.trim() || "General";
-    }
-
-    btn.disabled = true;
-    btn.textContent = "CREATING ACCOUNT...";
     try {
+      if (pickedRole === "student") {
+        profileData.classLevel = document.getElementById("signup-class").value;
+        profileData.stream = document.getElementById("signup-stream").value;
+      } else {
+        profileData.designation = document.getElementById("signup-designation").value;
+        profileData.wing = document.getElementById("signup-wing").value;
+        profileData.subject = document.getElementById("signup-subject").value.trim() || "General";
+        profileData.qualification = document.getElementById("signup-qualification").value.trim() || "Faculty Member";
+        profileData.experience = document.getElementById("signup-experience").value.trim() || "Dedicated Service";
+        profileData.thoughtForStudents = document.getElementById("signup-thought").value.trim() || "";
+
+        const photoInput = document.getElementById("signup-photo");
+        const photoFile = photoInput && photoInput.files[0];
+        if (photoFile) {
+          btn.textContent = "OPTIMIZING PHOTO...";
+          profileData.photoDataUrl = await compressAvatarFile(photoFile);
+          btn.textContent = "CREATING ACCOUNT...";
+        }
+      }
+
       const cred = await createUserWithEmailAndPassword(fbAuth, email, password);
       await setDoc(doc(fbDb, "users", cred.user.uid), profileData);
       currentUser = cred.user;
@@ -1300,7 +1356,7 @@ function mountCurvedAuthModal() {
       showAuthStatus(
         status,
         pickedRole === "teacher"
-          ? "Account created! Pending Admin verification."
+          ? "Account created! Pending Admin approval (will auto-publish to Guru Stambh)."
           : "Student account created successfully!",
         false
       );
