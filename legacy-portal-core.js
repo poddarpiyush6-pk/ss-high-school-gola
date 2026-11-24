@@ -1,12 +1,9 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v4.0 — 100% VERIFIED ZERO-BUG MASTER EDITION)
-// Features:
-//  1. 4-Tier Official Masthead + Mobile Drawer (with Developer Email Contact)
-//  2. Eye-Friendly Day/Night Theme Engine + Working Quick Search (Ctrl + K)
-//  3. Continuous Live News Marquee + Adaptive Notice/Media Viewer Modal
-//  4. Curved Student/Teacher Auth Modal + Instant-Compress Teacher Photo
-//  5. Gallery Route + Safe switchView Wrapper + Stealth Admin Compatibility
-//  6. window.LegacyPortalBridge for portal-dashboards.js & campus-experience-admin.js
+// FILE: legacy-portal-core.js (v4.1 — STICKY NAV + GALLERY VIEW FIX + MOBILE EMAIL)
+// Fixes:
+//  1. Restores Sticky Navigation Bar (#legacy-sticky-nav) on Mobile & Desktop
+//  2. Fixes Gallery View (Menu + Explore Full Campus Gallery) hiding Home & Map cleanly
+//  3. Keeps Mobile Drawer Developer Email, Ctrl+K Search, Day/Night & Teacher Photo Compress
 // ============================================================================
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -98,7 +95,6 @@ function isPublicPortalUser() {
   );
 }
 
-// Always read fresh profile from Firestore (prevents stale approval badge)
 async function fetchFreshUserProfile(uid) {
   if (!fbDb || !uid) return null;
   try {
@@ -158,7 +154,7 @@ function initFirebaseSafe() {
 }
 
 // ============================================================================
-// 2. EYE-FRIENDLY DAY / NIGHT THEME ENGINE & CORE STYLES
+// 2. EYE-FRIENDLY DAY / NIGHT THEME ENGINE & STICKY NAV STYLES
 // ============================================================================
 function applyEyeFriendlyTheme(mode) {
   const safeMode = mode === "dark" ? "dark" : "light";
@@ -222,6 +218,10 @@ function injectEyeFriendlyStyles() {
       --leg-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
     }
 
+    html, body {
+      overflow-x: clip !important;
+    }
+
     .leg-tier-1 { background: var(--leg-top-strip); border-color: var(--leg-border); }
     .leg-tier-2 { background: var(--leg-surface); border-color: var(--leg-border); }
     .leg-tier-3 { background: var(--leg-surface-alt); border-color: var(--leg-border); }
@@ -229,6 +229,19 @@ function injectEyeFriendlyStyles() {
     .leg-text-primary { color: var(--leg-text); }
     .leg-text-body { color: var(--leg-body); }
     .leg-text-muted { color: var(--leg-muted); }
+
+    /* STICKY NAVIGATION BAR (DIRECT BODY CHILD — WORKS ON MOBILE & DESKTOP) */
+    #legacy-sticky-nav {
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background-color: var(--leg-surface-alt);
+      border-bottom: 1px solid var(--leg-border);
+      transition: box-shadow 0.2s ease;
+    }
+    #legacy-sticky-nav.is-stuck {
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
+    }
 
     .legacy-marquee-viewport { overflow: hidden; white-space: nowrap; position: relative; }
     .legacy-marquee-track {
@@ -271,7 +284,7 @@ function injectEyeFriendlyStyles() {
 }
 
 // ============================================================================
-// 3. 4-TIER OFFICIAL MASTHEAD HEADER + MOBILE DRAWER (WITH DEVELOPER EMAIL)
+// 3. 4-TIER MASTHEAD + SEPARATE STICKY NAV BAR + MARQUEE + MOBILE DRAWER
 // ============================================================================
 const NAV_ITEMS = [
   { key: "home", label: "Home", icon: "🏛️" },
@@ -286,23 +299,12 @@ const NAV_ITEMS = [
 function mountLegacyHeader() {
   if (document.getElementById("legacy-masthead")) return;
 
+  // 1) HEADER (Tier 1 Utility + Tier 2 Masthead — scrolls away smoothly)
   const header = document.createElement("header");
   header.id = "legacy-masthead";
-  header.className = "w-full shadow-sm relative z-50";
-
-  const desktopNavButtons = NAV_ITEMS.map(
-    (item, idx) => `
-      <button type="button" data-leg-nav="${item.key}"
-        class="leg-nav-item shrink-0 px-3.5 py-3 ${
-          idx === 0 ? "bg-[#f59e0b] text-slate-950" : "hover:bg-amber-500/15"
-        } transition-colors cursor-pointer">
-        ${item.label}
-      </button>
-    `
-  ).join("");
+  header.className = "w-full relative z-50";
 
   header.innerHTML = `
-    <!-- TIER 1: GOVERNMENT UTILITY BAR -->
     <div class="leg-tier-1 w-full border-b">
       <div class="max-w-7xl mx-auto px-3 sm:px-6 h-9 flex items-center justify-between gap-2 text-[11px] font-semibold">
         <div class="flex items-center gap-2 sm:gap-3 truncate">
@@ -342,7 +344,6 @@ function mountLegacyHeader() {
       </div>
     </div>
 
-    <!-- TIER 2: OFFICIAL INSTITUTIONAL MASTHEAD -->
     <div class="leg-tier-2 w-full border-b">
       <div class="max-w-7xl mx-auto px-3 sm:px-6 py-3 sm:py-4 flex flex-col md:flex-row items-center justify-between gap-2.5">
         <div class="hidden md:flex items-center gap-3 w-1/4">
@@ -384,60 +385,91 @@ function mountLegacyHeader() {
         </div>
       </div>
     </div>
+  `;
 
-    <!-- TIER 3: RESPONSIVE NAVIGATION BAR -->
-    <nav aria-label="Main Navigation" class="leg-tier-3 w-full border-b">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6">
-        <div class="flex md:hidden items-center justify-between h-12 gap-2">
-          <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
-            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
-            <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-            </svg>
-            <span>Menu</span>
-            <span class="opacity-30">|</span>
-            <span id="legacy-mobile-active-lbl" class="text-[#0B3066] dark:text-amber-400 truncate max-w-[110px]">Home</span>
-          </button>
+  // 2) STICKY NAVIGATION BAR (Direct child of <body> — sticks cleanly at top: 0!)
+  const desktopNavButtons = NAV_ITEMS.map(
+    (item, idx) => `
+      <button type="button" data-leg-nav="${item.key}"
+        class="leg-nav-item shrink-0 px-3.5 py-3 ${
+          idx === 0 ? "bg-[#f59e0b] text-slate-950" : "hover:bg-amber-500/15"
+        } transition-colors cursor-pointer">
+        ${item.label}
+      </button>
+    `
+  ).join("");
 
-          <button id="legacy-mobile-auth-btn" type="button"
-            class="px-3.5 py-2 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer shrink-0">
-            Sign In / Register
-          </button>
-        </div>
+  const stickyNav = document.createElement("nav");
+  stickyNav.id = "legacy-sticky-nav";
+  stickyNav.setAttribute("aria-label", "Main Navigation");
+  stickyNav.className = "leg-tier-3 w-full";
+  stickyNav.innerHTML = `
+    <div class="max-w-7xl mx-auto px-3 sm:px-6">
+      <div class="flex md:hidden items-center justify-between h-12 gap-2">
+        <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
+          <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+          </svg>
+          <span>Menu</span>
+          <span class="opacity-30">|</span>
+          <span id="legacy-mobile-active-lbl" class="text-[#0B3066] dark:text-amber-400 truncate max-w-[110px]">Home</span>
+        </button>
 
-        <div class="hidden md:flex items-center justify-center gap-0.5 text-[13px] font-bold">
-          ${desktopNavButtons}
-          <button type="button" id="legacy-nav-auth-btn"
-            class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
-            Sign In / Register
-          </button>
-        </div>
+        <button id="legacy-mobile-auth-btn" type="button"
+          class="px-3.5 py-2 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer shrink-0">
+          Sign In / Register
+        </button>
       </div>
-    </nav>
 
-    <!-- TIER 4: CONTINUOUS LIVE NEWS MARQUEE -->
-    <div class="w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]">
-      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-11 flex items-center">
-        <div class="pr-3 sm:pr-5 mr-3 sm:mr-5 border-r border-white/25 shrink-0 flex items-center gap-2">
-          <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
-          <span class="text-[11px] sm:text-xs font-extrabold tracking-widest uppercase text-white">
-            LATEST NEWS
-          </span>
-        </div>
+      <div class="hidden md:flex items-center justify-center gap-0.5 text-[13px] font-bold">
+        ${desktopNavButtons}
+        <button type="button" id="legacy-nav-auth-btn"
+          class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
+          Sign In / Register
+        </button>
+      </div>
+    </div>
+  `;
 
-        <div class="legacy-marquee-viewport flex-1 min-w-0">
-          <div id="legacy-marquee-track" class="legacy-marquee-track text-xs sm:text-[13px] font-medium text-blue-50">
-            <span class="px-6">Loading latest official announcements from S.S. +2 High School, Gola...</span>
-          </div>
+  // 3) CONTINUOUS LIVE NEWS MARQUEE BAR (Below Sticky Nav)
+  const marqueeBar = document.createElement("div");
+  marqueeBar.id = "legacy-marquee-bar";
+  marqueeBar.className = "w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]";
+  marqueeBar.innerHTML = `
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 h-11 flex items-center">
+      <div class="pr-3 sm:pr-5 mr-3 sm:mr-5 border-r border-white/25 shrink-0 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
+        <span class="text-[11px] sm:text-xs font-extrabold tracking-widest uppercase text-white">
+          LATEST NEWS
+        </span>
+      </div>
+
+      <div class="legacy-marquee-viewport flex-1 min-w-0">
+        <div id="legacy-marquee-track" class="legacy-marquee-track text-xs sm:text-[13px] font-medium text-blue-50">
+          <span class="px-6">Loading latest official announcements from S.S. +2 High School, Gola...</span>
         </div>
       </div>
     </div>
   `;
 
-  document.body.insertBefore(header, document.body.firstChild);
+  const firstChild = document.body.firstChild;
+  document.body.insertBefore(header, firstChild);
+  document.body.insertBefore(stickyNav, firstChild);
+  document.body.insertBefore(marqueeBar, firstChild);
+
+  // Subtle shadow when sticky nav locks to top
+  window.addEventListener(
+    "scroll",
+    () => {
+      stickyNav.classList.toggle("is-stuck", window.scrollY > 110);
+    },
+    { passive: true }
+  );
+
   mountMobileDrawer();
 
-  header.querySelectorAll(".leg-nav-item").forEach((btn) => {
+  stickyNav.querySelectorAll(".leg-nav-item").forEach((btn) => {
     btn.addEventListener("click", () => handleNavSelection(btn.getAttribute("data-leg-nav")));
   });
 
@@ -505,7 +537,7 @@ function mountMobileDrawer() {
         <div class="p-3 space-y-1">
           ${drawerLinks}
 
-          <!-- DIRECT DEVELOPER EMAIL CONTACT (NO PHONE NUMBER) -->
+          <!-- DIRECT DEVELOPER EMAIL CONTACT -->
           <a href="mailto:poddarpiyush6@gmail.com?subject=S.S.%20%2B2%20High%20School%20Gola%20Portal%20Inquiry"
             class="mt-2 w-full text-left px-4 py-3 rounded-xl flex items-center justify-between text-sm font-bold border border-amber-500/40 bg-amber-500/10 text-[#0B3066] dark:text-amber-300 hover:bg-amber-500/20 transition-colors">
             <span class="flex items-center gap-3 min-w-0">
@@ -566,32 +598,76 @@ function closeMobileDrawer() {
   if (drawer) drawer.classList.add("hidden");
 }
 
+// ============================================================================
+// 4. BULLETPROOF VIEW & GALLERY ROUTING (FIXES HOME/MAP OVERLAP 100%)
+// ============================================================================
+function setMapVisibility(show) {
+  const mapSec = document.getElementById("school-campus-map-section");
+  if (mapSec) mapSec.classList.toggle("hidden", !show);
+}
+
 function hideGalleryViewIfPresent() {
   const gal = document.getElementById("view-gallery");
   if (gal) gal.classList.add("hidden");
 }
 
+function activateCleanGalleryView() {
+  ["view-home", "view-guru-stambh", "view-gaurav-stambh"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
+  setMapVisibility(false);
+
+  const gal = document.getElementById("view-gallery");
+  if (gal) gal.classList.remove("hidden");
+
+  setActiveNavTab("gallery");
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
 function wrapSwitchViewForGallery() {
-  if (typeof window.switchView !== "function" || window.switchView.__legWrapped) return;
-  const origSwitch = window.switchView;
-  const wrapped = function (viewName) {
-    hideGalleryViewIfPresent();
-    origSwitch(viewName);
-    if (["home", "guru-stambh", "gaurav-stambh"].includes(viewName)) {
-      setActiveNavTab(viewName);
-    }
-  };
-  wrapped.__legWrapped = true;
-  window.switchView = wrapped;
+  if (typeof window.switchView === "function" && !window.switchView.__legWrapped) {
+    const origSwitch = window.switchView;
+    const wrapped = function (viewName) {
+      if (viewName === "gallery") {
+        activateCleanGalleryView();
+        return;
+      }
+      hideGalleryViewIfPresent();
+      origSwitch(viewName);
+      setMapVisibility(viewName === "home");
+      if (["home", "guru-stambh", "gaurav-stambh"].includes(viewName)) {
+        setActiveNavTab(viewName);
+      }
+    };
+    wrapped.__legWrapped = true;
+    window.switchView = wrapped;
+  }
+
+  // Also wrap campus-experience-admin.js's openCampusGalleryPage so BOTH
+  // "Explore Full Campus Gallery" button & Nav Gallery tab work identically!
+  if (typeof window.openCampusGalleryPage === "function" && !window.openCampusGalleryPage.__legWrapped) {
+    const origOpenGallery = window.openCampusGalleryPage;
+    const wrappedGallery = function (...args) {
+      const res = origOpenGallery.apply(this, args);
+      activateCleanGalleryView();
+      setTimeout(activateCleanGalleryView, 40);
+      return res;
+    };
+    wrappedGallery.__legWrapped = true;
+    window.openCampusGalleryPage = wrappedGallery;
+  }
 }
 
 function handleNavSelection(target) {
+  wrapSwitchViewForGallery();
   setActiveNavTab(target);
+
   if (target === "gallery") {
     if (typeof window.openCampusGalleryPage === "function") {
       window.openCampusGalleryPage();
     } else {
-      if (typeof window.switchView === "function") window.switchView("home");
+      activateCleanGalleryView();
     }
     return;
   }
@@ -655,7 +731,7 @@ function updateAuthHeaderButton() {
 }
 
 // ============================================================================
-// 4. CONTINUOUS LIVE NEWS MARQUEE
+// 5. CONTINUOUS LIVE NEWS MARQUEE
 // ============================================================================
 function renderLegacyMarquee(notices) {
   const track = document.getElementById("legacy-marquee-track");
@@ -717,7 +793,7 @@ async function syncMarqueeNotices() {
 }
 
 // ============================================================================
-// 5. ADAPTIVE NOTICE, INFO & QUICK SEARCH (CTRL+K) MODAL
+// 6. ADAPTIVE NOTICE, INFO & QUICK SEARCH (CTRL+K) MODAL
 // ============================================================================
 function ensureAdaptiveModal() {
   let modal = document.getElementById("legacy-info-modal");
@@ -988,7 +1064,7 @@ function openPortalSearchModal() {
 }
 
 // ============================================================================
-// 6. CURVED STUDENT / TEACHER AUTH MODAL + INSTANT-COMPRESS TEACHER PHOTO
+// 7. CURVED STUDENT / TEACHER AUTH MODAL + INSTANT-COMPRESS TEACHER PHOTO
 // ============================================================================
 function mountCurvedAuthModal() {
   if (document.getElementById("legacy-auth-modal")) return;
@@ -1119,7 +1195,6 @@ function mountCurvedAuthModal() {
             </div>
           </div>
 
-          <!-- STUDENT FIELDS -->
           <div id="signup-student-fields" class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Class</label>
@@ -1145,7 +1220,6 @@ function mountCurvedAuthModal() {
             </div>
           </div>
 
-          <!-- TEACHER FIELDS (UNIFIED WITH GURU STAMBH + INSTANT PHOTO COMPRESS) -->
           <div id="signup-teacher-fields" class="hidden space-y-3">
             <div class="grid grid-cols-2 gap-3">
               <div>
@@ -1291,7 +1365,6 @@ function mountCurvedAuthModal() {
     });
   });
 
-  // Instant-Compress Teacher Photo on Select (Mobile-Safe!)
   const signupPhotoInput = document.getElementById("signup-photo");
   if (signupPhotoInput) {
     signupPhotoInput.addEventListener("change", async (e) => {
@@ -1318,7 +1391,6 @@ function mountCurvedAuthModal() {
     });
   }
 
-  // SIGN IN HANDLER
   document.getElementById("legacy-signin-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("signin-submit-btn");
@@ -1354,7 +1426,6 @@ function mountCurvedAuthModal() {
     }
   });
 
-  // FORGOT PASSWORD HANDLER
   document.getElementById("auth-forgot-btn").addEventListener("click", async () => {
     const email = document.getElementById("signin-email").value.trim();
     const status = document.getElementById("signin-status");
@@ -1371,7 +1442,6 @@ function mountCurvedAuthModal() {
     }
   });
 
-  // SIGN UP HANDLER
   document.getElementById("legacy-signup-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("signup-submit-btn");
@@ -1447,7 +1517,6 @@ function mountCurvedAuthModal() {
     }
   });
 
-  // OPEN DASHBOARD & LOGOUT
   document.getElementById("profile-open-dashboard-btn").addEventListener("click", () => {
     close();
     if (typeof window.openPortalDashboard === "function") {
@@ -1537,7 +1606,7 @@ function openCurvedAuthModal(initialView = "welcome") {
 window.openSchoolPortalAuth = openCurvedAuthModal;
 
 // ============================================================================
-// 7. CLEAN BRIDGE FOR portal-dashboards.js & campus-experience-admin.js
+// 8. CLEAN BRIDGE FOR portal-dashboards.js & campus-experience-admin.js
 // ============================================================================
 window.LegacyPortalBridge = {
   getSession: () => ({
@@ -1556,7 +1625,6 @@ window.LegacyPortalBridge = {
   }
 };
 
-// Ctrl + K Quick Search Shortcut
 document.addEventListener("keydown", (e) => {
   if ((e.ctrlKey || e.metaKey) && (e.key === "k" || e.key === "K")) {
     e.preventDefault();
@@ -1565,7 +1633,7 @@ document.addEventListener("keydown", (e) => {
 });
 
 // ============================================================================
-// 8. BOOTSTRAP
+// 9. BOOTSTRAP
 // ============================================================================
 function bootLegacyPortal() {
   document.documentElement.lang = "en";
@@ -1578,6 +1646,13 @@ function bootLegacyPortal() {
 
   initFirebaseSafe();
   syncMarqueeNotices();
+
+  // Re-check wrappers once campus-experience-admin.js finishes module evaluation
+  setTimeout(wrapSwitchViewForGallery, 300);
+  window.addEventListener("load", () => {
+    wrapSwitchViewForGallery();
+    setTimeout(wrapSwitchViewForGallery, 400);
+  });
 
   window.addEventListener("backend-ready", () => {
     initFirebaseSafe();
