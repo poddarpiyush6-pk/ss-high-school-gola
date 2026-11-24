@@ -1,10 +1,10 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v3.5 — INSTANT TEACHER PHOTO + HERO-SAFE SHELL)
-// 1. 4-Tier NTA/JEE Legacy Header + True Sticky Navigation Bar (Mobile & PC)
-// 2. Eye-Friendly Dual Theme Engine (Zero Conflict with HD Hero Photo Banner)
-// 3. Adaptive Ctrl+K Spotlight Search Override + Mobile Sticky Search Button
+// FILE: legacy-portal-core.js (v3.2 — ZERO-BLOAT LEGACY SHELL + GALLERY + AUTH)
+// 1. 4-Tier NTA/JEE Legacy Header + Mobile Drawer (with Gallery Route)
+// 2. Eye-Friendly Dual Theme Engine (Soft Paper Day & Comfort Slate Night)
+// 3. Adaptive Ctrl+K Spotlight Search Override
 // 4. Zero-Button Continuous "LATEST NEWS" Marquee + In-Site PDF/YT/Image Viewer
-// 5. Curved Auth Modal + Instant-Compress Teacher Sign-Up (Auto Guru Stambh)
+// 5. Curved Animated Auth Modal (Stealth Admin Isolation + Fresh Profile Sync)
 // ============================================================================
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -34,7 +34,6 @@ let currentUser = null;
 let currentUserProfile = null;
 let liveNoticesList = [];
 let fontScaleStep = 0;
-let signupTeacherPhotoDataUrl = "";
 
 function escapeSafe(str) {
   const d = document.createElement("div");
@@ -55,36 +54,6 @@ function getYouTubeEmbedUrl(url) {
   if (!url || typeof url !== "string") return null;
   const m = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/);
   return m && m[1] ? `https://www.youtube.com/embed/${m[1]}` : null;
-}
-
-function compressAvatarFile(file) {
-  return new Promise((resolve) => {
-    const r = new FileReader();
-    r.onload = (ev) => {
-      const im = new Image();
-      im.onload = () => {
-        const MAX_W = 480;
-        let w = im.width;
-        let h = im.height;
-        if (w > MAX_W) {
-          h = Math.round((h * MAX_W) / w);
-          w = MAX_W;
-        }
-        const c = document.createElement("canvas");
-        c.width = w;
-        c.height = h;
-        const ctx = c.getContext("2d");
-        ctx.fillStyle = "#ffffff";
-        ctx.fillRect(0, 0, w, h);
-        ctx.drawImage(im, 0, 0, w, h);
-        resolve(c.toDataURL("image/jpeg", 0.78));
-      };
-      im.onerror = () => resolve("");
-      im.src = ev.target.result;
-    };
-    r.onerror = () => resolve("");
-    r.readAsDataURL(file);
-  });
 }
 
 // Stealth Admin Guard: Only returns true for registered Student/Teacher portal profiles
@@ -154,7 +123,7 @@ function initFirebaseSafe() {
 }
 
 // ============================================================================
-// 2. EYE-FRIENDLY DAY / NIGHT THEME ENGINE (HERO-SAFE, ZERO DUPLICATE CSS)
+// 2. EYE-FRIENDLY DAY / NIGHT THEME ENGINE
 // ============================================================================
 function applyEyeFriendlyTheme(mode) {
   const safeMode = mode === "dark" ? "dark" : "light";
@@ -201,6 +170,7 @@ function injectEyeFriendlyStyles() {
       --leg-muted: #64748b;
       --leg-accent: #0b3066;
       --leg-gold: #b45309;
+      --leg-shadow: 0 2px 12px rgba(15, 23, 42, 0.05);
     }
 
     html[data-theme="dark"] {
@@ -214,35 +184,46 @@ function injectEyeFriendlyStyles() {
       --leg-muted: #94a3b8;
       --leg-accent: #172554;
       --leg-gold: #fbbf24;
+      --leg-shadow: 0 4px 20px rgba(2, 6, 23, 0.4);
     }
 
     html, body {
+      background-color: var(--leg-bg) !important;
+      color: var(--leg-text) !important;
+      max-width: 100vw;
+      overflow-x: hidden;
       font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      transition: background-color 0.25s ease, color 0.25s ease;
     }
 
+    /* Hide old Prahar ribbon from royal-rajpatra-core.js */
     #royal-prahar-ribbon { display: none !important; }
 
     #legacy-masthead { background-color: var(--leg-surface); color: var(--leg-text); }
     .leg-tier-1 { background-color: var(--leg-top-strip); border-color: var(--leg-border); color: var(--leg-body); }
     .leg-tier-2 { background-color: var(--leg-surface); border-color: var(--leg-border); }
+    .leg-tier-3 { background-color: var(--leg-surface-alt); border-color: var(--leg-border); color: var(--leg-text); }
     .leg-text-primary { color: var(--leg-text); }
     .leg-text-body { color: var(--leg-body); }
     .leg-text-muted { color: var(--leg-muted); }
     .leg-border { border-color: var(--leg-border); }
 
-    /* True Sticky Navigation Bar */
-    #legacy-sticky-nav {
-      position: sticky;
-      top: 0;
-      z-index: 60;
-      background-color: var(--leg-surface-alt);
-      border-bottom: 1px solid var(--leg-border);
-      color: var(--leg-text);
-      transition: box-shadow 0.2s ease, background-color 0.25s ease;
+    .sacred-card {
+      background: var(--leg-surface) !important;
+      border: 1px solid var(--leg-border) !important;
+      box-shadow: var(--leg-shadow) !important;
+      transform: none !important;
+      backdrop-filter: none !important;
+      -webkit-backdrop-filter: none !important;
     }
-    #legacy-sticky-nav.is-stuck {
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.16);
+    .sacred-inner-box {
+      background: var(--leg-surface-alt) !important;
+      border: 1px solid var(--leg-border) !important;
     }
+    .t-heading, .theme-heading { color: var(--leg-text) !important; }
+    .t-body, .theme-subtext { color: var(--leg-body) !important; }
+    .t-muted, .theme-muted { color: var(--leg-muted) !important; }
+    .t-gold { color: var(--leg-gold) !important; }
 
     /* Eye-Friendly Ctrl+K Spotlight Search Override */
     #royal-spotlight-modal { background: rgba(15, 23, 42, 0.55) !important; backdrop-filter: blur(6px) !important; }
@@ -326,7 +307,7 @@ function injectEyeFriendlyStyles() {
 }
 
 // ============================================================================
-// 3. MOUNT LEGACY MASTHEAD + STICKY NAV BAR + NEWS MARQUEE + MOBILE DRAWER
+// 3. MOUNT 4-TIER LEGACY HEADER + MOBILE DRAWER (WITH GALLERY)
 // ============================================================================
 const NAV_ITEMS = [
   { key: "home", label: "Home", icon: "🏛️" },
@@ -343,7 +324,7 @@ function mountLegacyHeader() {
 
   const header = document.createElement("header");
   header.id = "legacy-masthead";
-  header.className = "w-full relative z-50";
+  header.className = "w-full shadow-sm relative z-50";
 
   const desktopNavButtons = NAV_ITEMS.map((item, idx) => `
     <button type="button" data-leg-nav="${item.key}"
@@ -426,91 +407,66 @@ function mountLegacyHeader() {
         </div>
       </div>
     </div>
-  `;
 
-  // STANDALONE STICKY NAVIGATION BAR (Always accessible while scrolling!)
-  const stickyNav = document.createElement("nav");
-  stickyNav.id = "legacy-sticky-nav";
-  stickyNav.setAttribute("aria-label", "Main Navigation");
-  stickyNav.className = "w-full";
-  stickyNav.innerHTML = `
-    <div class="max-w-7xl mx-auto px-3 sm:px-6">
-      <div class="flex lg:hidden items-center justify-between h-12 gap-2">
-        <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
-          class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
-          <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
-          </svg>
-          <span>Menu</span>
-          <span class="opacity-30">|</span>
-          <span id="legacy-mobile-active-lbl" class="text-[#0B3066] dark:text-amber-400 truncate max-w-[100px]">Home</span>
-        </button>
-
-        <div class="flex items-center gap-1.5 shrink-0">
-          <button id="legacy-mobile-search-btn" type="button" aria-label="Search Portal"
-            class="w-9 h-9 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary flex items-center justify-center active:scale-95 transition-transform cursor-pointer">
-            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35m0 0A7.5 7.5 0 1010.5 18a7.5 7.5 0 006.15-3.35z"/></svg>
+    <nav aria-label="Main Navigation" class="leg-tier-3 w-full border-b">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6">
+        <div class="flex lg:hidden items-center justify-between h-12 gap-2">
+          <button id="legacy-mobile-menu-btn" type="button" aria-label="Open Navigation Menu"
+            class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[var(--leg-surface)] border leg-border leg-text-primary text-xs font-extrabold shadow-xs active:scale-95 transition-transform cursor-pointer">
+            <svg class="w-5 h-5 text-[#0B3066] dark:text-amber-400" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5"/>
+            </svg>
+            <span>Menu</span>
+            <span class="opacity-30">|</span>
+            <span id="legacy-mobile-active-lbl" class="text-[#0B3066] dark:text-amber-400 truncate max-w-[110px]">Home</span>
           </button>
+
           <button id="legacy-mobile-auth-btn" type="button"
-            class="px-3 py-2 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer">
+            class="px-3.5 py-2 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold shadow-xs active:scale-95 transition-transform cursor-pointer shrink-0">
+            Sign In / Register
+          </button>
+        </div>
+
+        <div class="hidden lg:flex items-center justify-center gap-0.5 text-[13px] font-bold">
+          ${desktopNavButtons}
+          <button type="button" id="legacy-nav-auth-btn"
+            class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
             Sign In / Register
           </button>
         </div>
       </div>
+    </nav>
 
-      <div class="hidden lg:flex items-center justify-center gap-0.5 text-[13px] font-bold">
-        ${desktopNavButtons}
-        <button type="button" id="legacy-nav-auth-btn"
-          class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
-          Sign In / Register
-        </button>
-      </div>
-    </div>
-  `;
+    <div class="w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]">
+      <div class="max-w-7xl mx-auto px-3 sm:px-6 h-11 flex items-center">
+        <div class="pr-3 sm:pr-5 mr-3 sm:mr-5 border-r border-white/25 shrink-0 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
+          <span class="text-[11px] sm:text-xs font-extrabold tracking-widest uppercase text-white">
+            LATEST NEWS
+          </span>
+        </div>
 
-  // LATEST NEWS CONTINUOUS MARQUEE BAR
-  const newsBar = document.createElement("div");
-  newsBar.id = "legacy-news-bar";
-  newsBar.className = "w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]";
-  newsBar.innerHTML = `
-    <div class="max-w-7xl mx-auto px-3 sm:px-6 h-11 flex items-center">
-      <div class="pr-3 sm:pr-5 mr-3 sm:mr-5 border-r border-white/25 shrink-0 flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#f59e0b] animate-pulse"></span>
-        <span class="text-[11px] sm:text-xs font-extrabold tracking-widest uppercase text-white">
-          LATEST NEWS
-        </span>
-      </div>
-
-      <div class="legacy-marquee-viewport flex-1 min-w-0">
-        <div id="legacy-marquee-track" class="legacy-marquee-track text-xs sm:text-[13px] font-medium text-blue-50">
-          <span class="px-6">Loading latest official announcements from S.S. +2 High School, Gola...</span>
+        <div class="legacy-marquee-viewport flex-1 min-w-0">
+          <div id="legacy-marquee-track" class="legacy-marquee-track text-xs sm:text-[13px] font-medium text-blue-50">
+            <span class="px-6">Loading latest official announcements from S.S. +2 High School, Gola...</span>
+          </div>
         </div>
       </div>
     </div>
   `;
 
-  const firstEl = document.body.firstChild;
-  document.body.insertBefore(header, firstEl);
-  document.body.insertBefore(stickyNav, header.nextSibling);
-  document.body.insertBefore(newsBar, stickyNav.nextSibling);
+  document.body.insertBefore(header, document.body.firstChild);
   mountMobileDrawer();
 
-  window.addEventListener("scroll", () => {
-    stickyNav.classList.toggle("is-stuck", window.scrollY > 110);
-  }, { passive: true });
-
-  stickyNav.querySelectorAll(".leg-nav-item").forEach((btn) => {
+  header.querySelectorAll(".leg-nav-item").forEach((btn) => {
     btn.addEventListener("click", () => handleNavSelection(btn.getAttribute("data-leg-nav")));
   });
 
-  const triggerSpotlight = () => {
-    document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
-  };
-
   document.getElementById("legacy-theme-toggle").addEventListener("click", toggleEyeFriendlyTheme);
   document.getElementById("legacy-mobile-menu-btn").addEventListener("click", openMobileDrawer);
-  document.getElementById("legacy-search-btn").addEventListener("click", triggerSpotlight);
-  document.getElementById("legacy-mobile-search-btn").addEventListener("click", triggerSpotlight);
+  document.getElementById("legacy-search-btn").addEventListener("click", () => {
+    document.dispatchEvent(new KeyboardEvent("keydown", { key: "k", ctrlKey: true, bubbles: true }));
+  });
 
   document.getElementById("legacy-font-inc").addEventListener("click", () => {
     fontScaleStep = Math.min(2, fontScaleStep + 1);
@@ -661,6 +617,7 @@ function handleNavSelection(target) {
   }
 }
 
+// Wrap app.js's switchView so clicking footer/back buttons always hides #view-gallery too
 function wrapGlobalSwitchView() {
   const orig = window.switchView;
   if (typeof orig !== "function" || orig._legacyWrapped) return;
@@ -770,7 +727,7 @@ async function syncMarqueeNotices() {
         renderLegacyMarquee(live);
         return;
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 
   if (fbDb) {
@@ -780,7 +737,7 @@ async function syncMarqueeNotices() {
       if (!snap.empty) {
         renderLegacyMarquee(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
       }
-    } catch (e) {}
+    } catch (e) { }
   }
 }
 
@@ -878,13 +835,22 @@ function openNoticeViewerModal(notice) {
       ${escapeSafe(desc)}
     </div>
     ${mediaHTML}
-    <div class="pt-3 border-t leg-border flex items-center justify-between text-xs leg-text-muted">
-      <span>S.S. +2 High School, Gola • UDISE: 20240701206</span>
+    <div class="pt-3 border-t leg-border flex flex-wrap items-center justify-between gap-2.5 text-xs">
+      <button type="button" id="lim-wa-share"
+        class="flex-1 sm:flex-none min-h-[40px] px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold flex items-center justify-center gap-1.5 active:scale-95 transition-all cursor-pointer">
+        <span>📲 Share Notice on WhatsApp</span>
+      </button>
       <button type="button" id="lim-jump-notices" class="text-[#0B3066] dark:text-amber-400 font-bold hover:underline cursor-pointer">
-        View Full Notice Board →
+        View All Notices →
       </button>
     </div>
   `;
+
+  document.getElementById("lim-wa-share").addEventListener("click", () => {
+    if (typeof window.shareNoticeOnWhatsApp === "function") {
+      window.shareNoticeOnWhatsApp(notice);
+    }
+  });
 
   document.getElementById("lim-jump-notices").addEventListener("click", () => {
     modal.classList.add("hidden");
@@ -964,7 +930,7 @@ function openInfoModal(type) {
 }
 
 // ============================================================================
-// 6. CURVED-GRADIENT AUTH MODAL + INSTANT-COMPRESS TEACHER SIGN-UP
+// 6. CURVED-GRADIENT LIVE-ANIMATED AUTH MODAL
 // ============================================================================
 function mountCurvedAuthModal() {
   if (document.getElementById("legacy-auth-modal")) return;
@@ -975,7 +941,7 @@ function mountCurvedAuthModal() {
 
   modal.innerHTML = `
     <div id="legacy-auth-card"
-      class="relative w-full max-w-[410px] min-h-[580px] max-h-[92vh] rounded-[34px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.45)] auth-royal-gradient flex flex-col justify-between my-auto">
+      class="relative w-full max-w-[400px] min-h-[580px] max-h-[92vh] rounded-[34px] overflow-hidden shadow-[0_25px_70px_rgba(0,0,0,0.45)] auth-royal-gradient flex flex-col justify-between my-auto">
       
       <div class="pointer-events-none absolute -top-12 -right-12 w-44 h-44 rounded-full bg-rose-400/20 blur-2xl auth-orb-a"></div>
       <div class="pointer-events-none absolute top-28 -left-14 w-36 h-36 rounded-full bg-indigo-400/20 blur-2xl auth-orb-b"></div>
@@ -1063,7 +1029,7 @@ function mountCurvedAuthModal() {
         </form>
       </div>
 
-      <!-- VIEW 3: CREATE ACCOUNT (UNIFIED STUDENT & GURU STAMBH TEACHER FORM) -->
+      <!-- VIEW 3: CREATE ACCOUNT -->
       <div id="auth-view-signup" class="hidden relative z-10 flex-1 flex flex-col justify-between max-h-[92vh]">
         <div class="px-7 pt-7 pb-5 text-white shrink-0">
           <button type="button" data-auth-goto="welcome" class="text-xs text-rose-200 hover:text-white font-semibold mb-2 inline-flex items-center gap-1 cursor-pointer">← Back</button>
@@ -1096,7 +1062,6 @@ function mountCurvedAuthModal() {
             </div>
           </div>
 
-          <!-- STUDENT FIELDS -->
           <div id="signup-student-fields" class="grid grid-cols-2 gap-3">
             <div>
               <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Class</label>
@@ -1122,59 +1087,19 @@ function mountCurvedAuthModal() {
             </div>
           </div>
 
-          <!-- UNIFIED TEACHER + GURU STAMBH FIELDS -->
-          <div id="signup-teacher-fields" class="hidden space-y-3">
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Designation</label>
-                <select id="signup-designation" class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 bg-transparent focus:outline-none">
-                  <option value="PGT (+2 Teacher)">PGT (+2 Teacher)</option>
-                  <option value="TGT (High School)">TGT (High School)</option>
-                  <option value="PRT (Primary)">PRT (Primary)</option>
-                  <option value="Lab / ICT Instructor">Lab / ICT Staff</option>
-                </select>
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Teaching Wing</label>
-                <select id="signup-wing" class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 bg-transparent focus:outline-none">
-                  <option value="11-12">Class 11–12 (+2)</option>
-                  <option value="9-10">Class 9–10 (Matric)</option>
-                  <option value="6-8">Class 6–8</option>
-                  <option value="1-5">Class 1–5</option>
-                </select>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Primary Subject</label>
-                <input id="signup-subject" type="text" placeholder="e.g. Physics"
-                  class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Qualification</label>
-                <input id="signup-qualification" type="text" placeholder="e.g. M.Sc, B.Ed"
-                  class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
-              </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Experience</label>
-                <input id="signup-experience" type="text" placeholder="e.g. 10+ Years"
-                  class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
-              </div>
-              <div>
-                <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Photo (Guru Stambh)</label>
-                <input id="signup-photo" type="file" accept="image/*"
-                  class="w-full text-[11px] text-slate-600 file:mr-2 file:py-1 file:px-2 file:rounded file:border-0 file:bg-slate-200 file:text-slate-900 file:font-bold" />
-                <div id="signup-photo-preview" class="hidden mt-1.5 flex items-center gap-2 text-[10px] font-bold text-emerald-700"></div>
-              </div>
-            </div>
-
+          <div id="signup-teacher-fields" class="hidden grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Short Message for Students (Guru Stambh)</label>
-              <input id="signup-thought" type="text" maxlength="160" placeholder="e.g. Discipline and curiosity build great futures."
+              <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Designation</label>
+              <select id="signup-designation" class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 bg-transparent focus:outline-none">
+                <option value="PGT (+2 Teacher)">PGT (+2 Teacher)</option>
+                <option value="TGT (High School)">TGT (High School)</option>
+                <option value="PRT (Primary)">PRT (Primary)</option>
+                <option value="Lab / ICT Instructor">Lab / ICT Staff</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-bold text-[#9f1d3e] mb-0.5">Primary Subject</label>
+              <input id="signup-subject" type="text" placeholder="e.g. Physics"
                 class="w-full border-b border-slate-300 focus:border-[#b81d3d] pb-1.5 text-sm text-slate-900 focus:outline-none" />
             </div>
           </div>
@@ -1266,33 +1191,6 @@ function mountCurvedAuthModal() {
     });
   });
 
-  // Compress & lock teacher photo IMMEDIATELY on file select (fixes mobile lazy-read bug!)
-  const signupPhotoInput = document.getElementById("signup-photo");
-  if (signupPhotoInput) {
-    signupPhotoInput.addEventListener("change", async (e) => {
-      const file = e.target.files && e.target.files[0];
-      const prevEl = document.getElementById("signup-photo-preview");
-      if (!file) {
-        signupTeacherPhotoDataUrl = "";
-        if (prevEl) prevEl.classList.add("hidden");
-        return;
-      }
-      if (prevEl) {
-        prevEl.textContent = "Optimizing photo...";
-        prevEl.classList.remove("hidden");
-      }
-      signupTeacherPhotoDataUrl = await compressAvatarFile(file);
-      if (prevEl) {
-        if (signupTeacherPhotoDataUrl) {
-          const kb = Math.round((signupTeacherPhotoDataUrl.length * 3) / 4 / 1024);
-          prevEl.innerHTML = `<img src="${signupTeacherPhotoDataUrl}" class="w-8 h-8 rounded-lg object-cover object-top border border-emerald-500" /> <span>✓ Ready (${kb} KB)</span>`;
-        } else {
-          prevEl.textContent = "⚠️ Could not read image. Try JPG/PNG.";
-        }
-      }
-    });
-  }
-
   document.getElementById("legacy-signin-form").addEventListener("submit", async (e) => {
     e.preventDefault();
     const btn = document.getElementById("signin-submit-btn");
@@ -1354,9 +1252,6 @@ function mountCurvedAuthModal() {
       return;
     }
 
-    btn.disabled = true;
-    btn.textContent = "CREATING ACCOUNT...";
-
     const pickedRole = document.getElementById("signup-role").value;
     const fullName = document.getElementById("signup-name").value.trim();
     const email = document.getElementById("signup-email").value.trim();
@@ -1372,44 +1267,26 @@ function mountCurvedAuthModal() {
       createdAt: new Date().toISOString()
     };
 
+    if (pickedRole === "student") {
+      profileData.classLevel = document.getElementById("signup-class").value;
+      profileData.stream = document.getElementById("signup-stream").value;
+    } else {
+      profileData.designation = document.getElementById("signup-designation").value;
+      profileData.subject = document.getElementById("signup-subject").value.trim() || "General";
+    }
+
+    btn.disabled = true;
+    btn.textContent = "CREATING ACCOUNT...";
     try {
-      if (pickedRole === "student") {
-        profileData.classLevel = document.getElementById("signup-class").value;
-        profileData.stream = document.getElementById("signup-stream").value;
-      } else {
-        profileData.designation = document.getElementById("signup-designation").value;
-        profileData.wing = document.getElementById("signup-wing").value;
-        profileData.subject = document.getElementById("signup-subject").value.trim() || "General";
-        profileData.qualification = document.getElementById("signup-qualification").value.trim() || "Faculty Member";
-        profileData.experience = document.getElementById("signup-experience").value.trim() || "Dedicated Service";
-        profileData.thoughtForStudents = document.getElementById("signup-thought").value.trim() || "";
-
-        if (signupTeacherPhotoDataUrl) {
-          profileData.photoDataUrl = signupTeacherPhotoDataUrl;
-        } else {
-          const photoInput = document.getElementById("signup-photo");
-          const photoFile = photoInput && photoInput.files && photoInput.files[0];
-          if (photoFile) {
-            btn.textContent = "OPTIMIZING PHOTO...";
-            profileData.photoDataUrl = await compressAvatarFile(photoFile);
-            btn.textContent = "CREATING ACCOUNT...";
-          }
-        }
-      }
-
       const cred = await createUserWithEmailAndPassword(fbAuth, email, password);
       await setDoc(doc(fbDb, "users", cred.user.uid), profileData);
       currentUser = cred.user;
       currentUserProfile = profileData;
-      signupTeacherPhotoDataUrl = "";
-      const prevEl = document.getElementById("signup-photo-preview");
-      if (prevEl) prevEl.classList.add("hidden");
-
       updateAuthHeaderButton();
       showAuthStatus(
         status,
         pickedRole === "teacher"
-          ? "Account created! Pending Admin approval (will auto-publish to Guru Stambh)."
+          ? "Account created! Pending Admin verification."
           : "Student account created successfully!",
         false
       );
