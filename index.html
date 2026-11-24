@@ -16,7 +16,7 @@
   <link rel="canonical" href="https://poddarpiyush6-pk.github.io/ss-high-school-gola/" />
 
   <!-- ========================================================================
-       2. OFFICIAL SCHOOL FAVICON (Upload favicon.png in repo root)
+       2. OFFICIAL SCHOOL FAVICON (favicon.png in repo root)
   ======================================================================== -->
   <link rel="icon" type="image/png" sizes="192x192" href="https://poddarpiyush6-pk.github.io/ss-high-school-gola/favicon.png" />
   <link rel="apple-touch-icon" sizes="180x180" href="https://poddarpiyush6-pk.github.io/ss-high-school-gola/favicon.png" />
@@ -145,7 +145,7 @@
   <script src="https://unpkg.com/lucide@latest" defer></script>
 
   <!-- ========================================================================
-       6. 120Hz SMOOTHNESS & DUAL-THEME DESIGN SYSTEM
+       6. 120Hz SMOOTHNESS, OPTION-B HERO FADE & DUAL-THEME DESIGN SYSTEM
   ======================================================================== -->
   <style>
     :root,
@@ -211,12 +211,22 @@
       contain-intrinsic-size: 1px 420px;
     }
 
-    /* Luxury Hero Ambient Surface */
-    .luxury-hero-bg {
+    /* EXACT OPTION-B LUXURY HERO FADE (Left Sharp Text, Right 55% Crystal Clear Photo) */
+    .hero-fallback-bg {
       background:
-        radial-gradient(circle at 80% 18%, rgba(245, 158, 11, 0.22) 0%, transparent 45%),
-        radial-gradient(circle at 12% 88%, rgba(30, 64, 175, 0.35) 0%, transparent 50%),
-        linear-gradient(135deg, #071b3d 0%, #0b3066 52%, #07152e 100%);
+        radial-gradient(circle at 82% 22%, rgba(245, 185, 66, 0.18) 0%, transparent 45%),
+        radial-gradient(circle at 12% 85%, rgba(29, 78, 216, 0.28) 0%, transparent 50%),
+        linear-gradient(135deg, #060c1a 0%, #0b1e42 55%, #060c1a 100%);
+    }
+    .hero-desktop-fade {
+      background: linear-gradient(
+        90deg,
+        rgba(6, 12, 26, 0.96) 0%,
+        rgba(6, 12, 26, 0.88) 36%,
+        rgba(6, 12, 26, 0.45) 58%,
+        rgba(6, 12, 26, 0.10) 80%,
+        rgba(6, 12, 26, 0.28) 100%
+      );
     }
 
     @media (prefers-reduced-motion: reduce) {
@@ -238,115 +248,138 @@
     ====================================================================== -->
     <div id="view-home" class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 py-5 sm:py-8 space-y-8 sm:space-y-12">
 
-      <!-- SECTION 1 (MUST REMAIN FIRST SECTION): LUXURY OPTION-B CINEMATIC HERO -->
-      <section aria-label="School Identity Hero"
-        class="relative rounded-3xl overflow-hidden luxury-hero-bg text-white shadow-2xl border border-amber-400/25">
+      <!-- SECTION 1 (EXACT OPTION-B LUXURY CINEMATIC HERO — ZERO EXTRA BOXES) -->
+      <section id="luxury-hero-section" aria-label="School Identity Hero"
+        class="relative rounded-3xl overflow-hidden bg-[#060c1a] text-white shadow-2xl border border-amber-500/25 hero-fallback-bg">
 
-        <!-- Desktop Full-Bleed HD Campus Photo (Populated live by campus-experience-admin.js) -->
-        <div class="hidden lg:block absolute inset-0 pointer-events-none select-none">
-          <img id="hero-bg-img-desktop" src="" alt="S.S. +2 High School, Gola Campus"
-            class="w-full h-full object-cover opacity-0 transition-opacity duration-700" />
-          <div class="absolute inset-0 bg-gradient-to-r from-[#07152e]/95 via-[#0b2754]/82 to-[#07152e]/45"></div>
-        </div>
+        <!-- DESKTOP FULL-BLEED HD SCHOOL PHOTO + DIRECTIONAL LEFT-TO-RIGHT FADE -->
+        <img id="hero-bg-img-desktop" src="" alt="S.S. +2 High School, Gola Campus"
+          class="hidden lg:block opacity-0 absolute inset-0 w-full h-full object-cover object-center transition-opacity duration-700 pointer-events-none" />
+        <div class="hidden lg:block absolute inset-0 hero-desktop-fade pointer-events-none"></div>
+        <div class="hidden lg:block absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-[#060c1a]/90 via-[#060c1a]/40 to-transparent pointer-events-none"></div>
 
-        <!-- Mobile Clean Top Stage Photo (Zero Overlap / Zero Blur) -->
-        <div id="hero-mobile-photo-wrap" class="hidden lg:hidden w-full bg-slate-950 border-b border-amber-400/25">
+        <!-- MOBILE TOP CLEAN PHOTO STAGE (100% Unobstructed on Phone!) -->
+        <div id="hero-mobile-photo-wrap" class="hidden lg:hidden relative w-full aspect-[16/10] bg-[#091224] overflow-hidden">
           <img id="hero-bg-img-mobile" src="" alt="S.S. +2 High School, Gola Campus"
-            class="w-full aspect-[16/9] object-cover block" />
+            class="w-full h-full object-cover object-center" />
+          <div class="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-t from-[#060c1a] via-[#060c1a]/55 to-transparent pointer-events-none"></div>
+          <span class="absolute top-3 left-3 px-2.5 py-1 rounded-full bg-[#060c1a]/80 border border-amber-400/40 text-amber-300 font-mono text-[10px] font-extrabold tracking-wider backdrop-blur-xs">
+            ESTD. 1940 • JAC RANCHI
+          </span>
         </div>
 
-        <div class="relative z-10 p-5 sm:p-8 lg:p-12 grid grid-cols-1 lg:grid-cols-12 gap-7 lg:gap-10 items-center">
-          <!-- Left 7 Cols: Institutional Identity & Primary Actions -->
-          <div class="lg:col-span-7 space-y-5">
-            <div class="flex flex-wrap items-center gap-2 text-[10px] sm:text-[11px] font-mono font-extrabold tracking-wider uppercase">
-              <span class="px-2.5 py-1 rounded-full bg-amber-400 text-slate-950">ESTD. 1940</span>
-              <span class="px-2.5 py-1 rounded-full bg-white/10 border border-white/20 text-blue-100">UDISE: 20240701206</span>
-              <span class="px-2.5 py-1 rounded-full bg-emerald-500/20 border border-emerald-400/35 text-emerald-200">JAC RANCHI</span>
+        <!-- HERO MAIN CONTENT -->
+        <div class="relative z-10 p-5 sm:p-9 lg:px-14 lg:py-16 lg:pr-28 flex flex-col justify-between min-h-0 lg:min-h-[520px]">
+
+          <div class="max-w-xl space-y-5 sm:space-y-6">
+            <!-- Top Micro-Tracking Institutional Tag -->
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] sm:text-xs font-mono font-bold tracking-[0.16em] uppercase text-amber-300/95">
+              <span>S.S. +2 HIGH SCHOOL, GOLA</span>
+              <span class="text-white/35">•</span>
+              <span>ESTD. 1940</span>
+              <span class="text-white/35">•</span>
+              <span>UDISE: 20240701206</span>
             </div>
 
-            <div class="space-y-2.5">
-              <h2 class="text-2xl sm:text-4xl lg:text-[42px] font-extrabold tracking-tight leading-[1.14] text-white">
-                Our School As A Temple of <span class="text-amber-300">Knowledge &amp; Discipline</span>
-              </h2>
-              <p class="text-xs sm:text-sm lg:text-base text-blue-100/90 leading-relaxed max-w-2xl">
-                State Subsidized (S.S.) +2 High School, Gola — Ramgarh's premier Government institution nurturing academic excellence from <strong>Class 1 to 12 (Science, Arts &amp; Commerce)</strong> for over 86 years.
-              </p>
-            </div>
+            <!-- Option B Grand Headline with Hand-Crafted Gold Underline -->
+            <h2 class="text-3xl sm:text-5xl lg:text-[54px] font-extrabold tracking-tight leading-[1.12] text-white">
+              Building a Brighter<br />
+              <span class="relative inline-block text-amber-400 pb-1">
+                Future
+                <svg class="absolute -bottom-1 left-0 w-full h-3 text-amber-400" viewBox="0 0 180 14" fill="none" preserveAspectRatio="none" aria-hidden="true">
+                  <path d="M2 10.5C48 2.5 126 2 178 9.5" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" />
+                </svg>
+              </span>
+              <span class="italic font-semibold text-white/95"> Together</span>
+            </h2>
 
-            <div class="p-3.5 rounded-2xl bg-white/8 border border-white/15 backdrop-blur-xs max-w-xl">
-              <div class="text-[10px] font-mono uppercase tracking-widest text-amber-300 font-bold">Institutional Motto</div>
-              <p id="hero-shloka-meaning" class="text-xs sm:text-[13px] italic text-blue-50 mt-1 leading-relaxed">
-                Verily, there is nothing in this world as purifying as true knowledge; Education is that which liberates.
-              </p>
-            </div>
+            <!-- Clean Institutional Subtitle -->
+            <p class="text-xs sm:text-base text-slate-300 leading-relaxed max-w-lg">
+              State Subsidized +2 High School, Gola (Ramgarh, Jharkhand) — a temple of knowledge, values, and public excellence nurturing Class 1 to 12 across Science, Arts &amp; Commerce.
+            </p>
 
-            <div class="flex flex-wrap items-center gap-2.5 pt-1">
+            <!-- 2 Sleek Action Pills -->
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-1">
               <button id="hero-btn-explore" type="button"
-                class="min-h-[44px] px-5 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-slate-950 font-extrabold text-xs sm:text-sm shadow-lg active:scale-[0.98] transition-all cursor-pointer">
-                Explore Academics →
+                class="min-h-[44px] px-6 py-3 rounded-full bg-gradient-to-r from-[#f6d365] via-[#f5b942] to-[#d99526] text-slate-950 font-extrabold text-xs sm:text-sm tracking-wide shadow-[0_8px_28px_rgba(245,185,66,0.38)] hover:brightness-110 active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <span>Explore Our School</span>
+                <span>→</span>
               </button>
+
               <button id="hero-btn-portal" type="button"
-                class="min-h-[44px] px-5 py-2.5 rounded-xl bg-white/12 hover:bg-white/20 border border-white/25 text-white font-extrabold text-xs sm:text-sm active:scale-[0.98] transition-all cursor-pointer">
-                Student / Teacher Portal
+                class="min-h-[44px] px-6 py-3 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/25 font-bold text-xs sm:text-sm backdrop-blur-sm active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="user-circle" class="w-4 h-4 text-amber-300"></i>
+                <span>Student &amp; Faculty Portal</span>
               </button>
+            </div>
+
+            <!-- Minimalist Inline Stats Bar (Zero Boxes, Fits 360px Mobile Cleanly) -->
+            <div class="grid grid-cols-3 gap-3 sm:gap-6 pt-4 border-t border-white/12 max-w-md">
+              <div class="flex items-center gap-2">
+                <div class="hidden sm:flex w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/30 items-center justify-center text-amber-300 shrink-0">
+                  <i data-lucide="users" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div id="metric-student-count" class="font-mono text-base sm:text-xl font-extrabold text-white leading-none">1,800+</div>
+                  <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-1">Students</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="hidden sm:flex w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/30 items-center justify-center text-amber-300 shrink-0">
+                  <i data-lucide="landmark" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="font-mono text-base sm:text-xl font-extrabold text-amber-300 leading-none">86+ Yrs</div>
+                  <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-1">Since 1940</div>
+                </div>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <div class="hidden sm:flex w-9 h-9 rounded-xl bg-amber-400/15 border border-amber-400/30 items-center justify-center text-amber-300 shrink-0">
+                  <i data-lucide="graduation-cap" class="w-4 h-4"></i>
+                </div>
+                <div>
+                  <div class="font-mono text-base sm:text-xl font-extrabold text-emerald-400 leading-none">1 – 12</div>
+                  <div class="text-[10px] sm:text-[11px] text-slate-400 font-medium mt-1">Sci • Arts • Com</div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Right 5 Cols: Official Identity Matrix + Quick Dock -->
-          <div class="lg:col-span-5 space-y-3.5">
-            <div class="rounded-2xl bg-slate-950/55 border border-white/15 backdrop-blur-md p-4 sm:p-5 space-y-4">
-              <div class="flex items-center justify-between border-b border-white/12 pb-2.5">
-                <span class="text-[11px] font-mono font-extrabold uppercase tracking-wider text-amber-300">Official Identity Matrix</span>
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" title="Live Cloud Synced"></span>
-              </div>
-
-              <div class="grid grid-cols-2 gap-2.5 text-xs">
-                <div class="p-3 rounded-xl bg-white/6 border border-white/10">
-                  <div class="text-[10px] font-mono text-blue-200/80 uppercase">Established</div>
-                  <div class="text-lg font-extrabold text-white mt-0.5">1940</div>
-                  <div class="text-[10px] text-amber-300 font-semibold">86+ Years Legacy</div>
-                </div>
-                <div class="p-3 rounded-xl bg-white/6 border border-white/10">
-                  <div class="text-[10px] font-mono text-blue-200/80 uppercase">Enrolled Strength</div>
-                  <div id="metric-student-count" class="text-lg font-extrabold text-white mt-0.5">1,800+</div>
-                  <div class="text-[10px] text-emerald-300 font-semibold">Class 1 to 12</div>
-                </div>
-                <div class="p-3 rounded-xl bg-white/6 border border-white/10">
-                  <div class="text-[10px] font-mono text-blue-200/80 uppercase">+2 Streams</div>
-                  <div class="text-sm font-extrabold text-white mt-1">Sci • Arts • Com</div>
-                  <div class="text-[10px] text-blue-200">JAC Ranchi Board</div>
-                </div>
-                <div class="p-3 rounded-xl bg-white/6 border border-white/10">
-                  <div class="text-[10px] font-mono text-blue-200/80 uppercase">Principal</div>
-                  <div id="matrix-principal-name" class="text-xs font-extrabold text-white mt-1 leading-snug">Smt. Anupa Pushpa Tirkey</div>
-                </div>
-              </div>
-
-              <!-- 4-Action Quick Dock -->
-              <div class="grid grid-cols-4 gap-1.5 pt-1 text-[10px] font-bold">
-                <button type="button" data-hero-dock="academics"
-                  class="py-2 px-1 rounded-xl bg-white/8 hover:bg-amber-400 hover:text-slate-950 border border-white/12 transition-colors cursor-pointer text-center">
-                  📚 Wings
-                </button>
-                <button type="button" data-hero-dock="notices"
-                  class="py-2 px-1 rounded-xl bg-white/8 hover:bg-amber-400 hover:text-slate-950 border border-white/12 transition-colors cursor-pointer text-center">
-                  📢 Notices
-                </button>
-                <button type="button" data-hero-dock="gallery"
-                  class="py-2 px-1 rounded-xl bg-white/8 hover:bg-amber-400 hover:text-slate-950 border border-white/12 transition-colors cursor-pointer text-center">
-                  🖼️ Gallery
-                </button>
-                <button type="button" data-hero-dock="location"
-                  class="py-2 px-1 rounded-xl bg-white/8 hover:bg-amber-400 hover:text-slate-950 border border-white/12 transition-colors cursor-pointer text-center">
-                  📍 Map
-                </button>
-              </div>
-            </div>
+          <!-- Bottom Quote Bar (Mobile: Inline Footer | Desktop: Bottom-Right Corner) -->
+          <div class="mt-6 pt-4 border-t border-white/10 lg:mt-0 lg:pt-0 lg:border-0 lg:absolute lg:bottom-7 lg:right-24 lg:max-w-xs lg:text-right">
+            <p class="text-xs sm:text-[13px] italic text-slate-200/95 leading-relaxed">
+              <span class="text-amber-400 font-extrabold text-base not-italic mr-1">“</span>Sa Vidya Ya Vimuktaye — Education is not just about degrees, it is about building character and a better tomorrow.
+            </p>
           </div>
         </div>
+
+        <!-- DESKTOP RIGHT-EDGE FLOATING GLASS QUICK-DOCK -->
+        <div class="hidden lg:flex flex-col items-center gap-2 absolute right-4 top-1/2 -translate-y-1/2 z-20 p-2 rounded-2xl bg-[#060c1a]/70 border border-amber-400/25 backdrop-blur-md shadow-xl">
+          <button type="button" data-hero-dock="academics" class="w-14 py-2 rounded-xl hover:bg-amber-400/20 text-slate-200 hover:text-amber-300 flex flex-col items-center gap-1 text-[10px] font-bold transition-colors cursor-pointer">
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-amber-400"></i>
+            <span>Academics</span>
+          </button>
+          <button type="button" data-hero-dock="gallery" class="w-14 py-2 rounded-xl hover:bg-amber-400/20 text-slate-200 hover:text-amber-300 flex flex-col items-center gap-1 text-[10px] font-bold transition-colors cursor-pointer">
+            <i data-lucide="image" class="w-4 h-4 text-amber-400"></i>
+            <span>Gallery</span>
+          </button>
+          <button type="button" data-hero-dock="notices" class="w-14 py-2 rounded-xl hover:bg-amber-400/20 text-slate-200 hover:text-amber-300 flex flex-col items-center gap-1 text-[10px] font-bold transition-colors cursor-pointer">
+            <i data-lucide="bell" class="w-4 h-4 text-amber-400"></i>
+            <span>Notices</span>
+          </button>
+          <button type="button" data-hero-dock="location" class="w-14 py-2 rounded-xl hover:bg-amber-400/20 text-slate-200 hover:text-amber-300 flex flex-col items-center gap-1 text-[10px] font-bold transition-colors cursor-pointer">
+            <i data-lucide="map-pin" class="w-4 h-4 text-amber-400"></i>
+            <span>Location</span>
+          </button>
+        </div>
+
+        <!-- Subtle Bottom Gold Accent Ribbon -->
+        <div class="pointer-events-none absolute inset-x-0 bottom-0 h-1 bg-gradient-to-r from-transparent via-amber-400/80 to-amber-500/40"></div>
       </section>
 
-      <!-- SECTION 2: QUICK OFFICIAL GOVERNMENT PORTALS STRIP (ZERO MAINTENANCE, HIGH UTILITY) -->
+      <!-- SECTION 2: QUICK OFFICIAL GOVERNMENT PORTALS STRIP -->
       <section aria-label="Official Jharkhand Education Portals" class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         <a href="https://www.jacresults.com/" target="_blank" rel="noopener noreferrer"
           class="sacred-card rounded-2xl p-3.5 sm:p-4 flex items-center gap-3 hover:border-amber-500/60 active:scale-[0.99] group">
@@ -758,6 +791,7 @@
 
   <!-- ========================================================================
        OFFICIAL INSTITUTIONAL FOOTER + PREMIUM PORTAL ARCHITECT SIGNATURE CARD
+       (Stealth Admin Trigger hidden directly on #creator-name-slot plain text)
   ======================================================================== -->
   <footer class="mt-12 bg-[#07152e] text-slate-200 border-t-4 border-amber-400">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
@@ -793,7 +827,7 @@
         </ul>
       </div>
 
-      <!-- Right 5 Cols: Premium Portal Architect Signature Card (Live Photo + Email Only) -->
+      <!-- Right 5 Cols: Premium Portal Architect Signature Card (Live Photo + Email + Stealth Admin Trigger on Name) -->
       <div class="lg:col-span-5">
         <div class="rounded-2xl bg-gradient-to-br from-slate-900/95 to-[#0d2247]/90 border border-amber-400/35 p-4 sm:p-5 shadow-xl flex flex-col sm:flex-row items-center sm:items-start gap-4">
           <div class="relative shrink-0">
@@ -808,7 +842,9 @@
               Alma Mater Flagship Tribute
             </div>
             <div class="text-base font-extrabold text-white leading-tight">
-              <span id="creator-name-slot">Piyush Poddar</span>
+              <span id="creator-name-slot"
+                onclick="if(typeof window.openSecretAdminModal==='function') window.openSecretAdminModal();"
+                class="select-none">Piyush Poddar</span>
             </div>
             <div id="creator-batch-slot" class="text-[11px] font-semibold text-blue-200">
               Batch 2025 (Science) • Portal Architect &amp; Developer
@@ -857,14 +893,13 @@
   </script>
 
   <!-- ========================================================================
-       PORTAL CORE SCRIPTS (EXACT LOAD ORDER — ZERO CONFLICT)
+       PORTAL CORE SCRIPTS (EXACT REPO FILENAMES — ZERO 404, ZERO CONFLICT)
   ======================================================================== -->
   <script src="config.js"></script>
-  <script type="module" src="backend.js"></script>
+  <script type="module" src="firebase-backend.js"></script>
   <script src="app.js"></script>
   <script type="module" src="legacy-portal-core.js"></script>
   <script type="module" src="portal-dashboards.js"></script>
   <script type="module" src="campus-experience-admin.js"></script>
-  <script src="royal-experience.js" defer></script>
 </body>
 </html>
