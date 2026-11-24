@@ -566,7 +566,21 @@ function mountMobileDrawer() {
             ✕
           </button>
         </div>
-        <div class="p-3 space-y-1">${drawerLinks}</div>
+
+        <div class="p-3 space-y-1">
+          ${drawerLinks}
+          <a href="mailto:poddarpiyush6@gmail.com?subject=S.S.%20%2B2%20High%20School%20Gola%20Portal%20Inquiry"
+            class="mt-2 w-full text-left px-4 py-3.5 rounded-xl flex items-center justify-between text-sm font-bold border border-amber-500/35 bg-amber-500/10 text-[#0B3066] dark:text-amber-300 hover:bg-amber-500/20 transition-colors">
+            <span class="flex items-center gap-3 min-w-0">
+              <span class="text-base shrink-0">✉️</span>
+              <span class="min-w-0">
+                <span class="block leading-tight">Contact Developer</span>
+                <span class="block text-[10px] font-mono opacity-80 truncate">poddarpiyush6@gmail.com</span>
+              </span>
+            </span>
+            <span class="text-xs opacity-70 shrink-0">↗</span>
+          </a>
+        </div>
       </div>
 
       <div class="p-4 border-t leg-border bg-[var(--leg-surface-alt)] space-y-2.5">
