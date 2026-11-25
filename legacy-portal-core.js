@@ -1,9 +1,11 @@
 // ============================================================================
-// FILE: legacy-portal-core.js (v4.1 — STICKY NAV + GALLERY VIEW FIX + MOBILE EMAIL)
-// Fixes:
-//  1. Restores Sticky Navigation Bar (#legacy-sticky-nav) on Mobile & Desktop
-//  2. Fixes Gallery View (Menu + Explore Full Campus Gallery) hiding Home & Map cleanly
-//  3. Keeps Mobile Drawer Developer Email, Ctrl+K Search, Day/Night & Teacher Photo Compress
+// FILE: legacy-portal-core.js (v4.2 — MASTER ZERO-BUG EDITION)
+// Includes:
+//  1. Sticky Navigation Bar (#legacy-sticky-nav) on Mobile & Desktop
+//  2. Question Bank (📝) + Gallery (🖼️) Clean View Routing (Zero Overlap)
+//  3. Mobile Drawer Developer Email Contact (poddarpiyush6@gmail.com)
+//  4. Individual Class 1–12 Student Sign-Up + Instant-Compress Teacher Photo
+//  5. Quick Search (Ctrl + K), Continuous News Marquee & LegacyPortalBridge
 // ============================================================================
 
 import { initializeApp, getApps, getApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -291,6 +293,7 @@ const NAV_ITEMS = [
   { key: "guru-stambh", label: "Guru Stambh (Faculty)", icon: "👨‍🏫" },
   { key: "gaurav-stambh", label: "Gaurav Stambh (Alumni)", icon: "🏆" },
   { key: "gallery", label: "Gallery", icon: "🖼️" },
+  { key: "papers", label: "Question Bank", icon: "📝" },
   { key: "academics", label: "Academics & Syllabus", icon: "📚" },
   { key: "schemes", label: "Scholarships", icon: "🎓" },
   { key: "student-corner", label: "Student Corner", icon: "📄" }
@@ -391,7 +394,7 @@ function mountLegacyHeader() {
   const desktopNavButtons = NAV_ITEMS.map(
     (item, idx) => `
       <button type="button" data-leg-nav="${item.key}"
-        class="leg-nav-item shrink-0 px-3.5 py-3 ${
+        class="leg-nav-item shrink-0 px-3 py-3 ${
           idx === 0 ? "bg-[#f59e0b] text-slate-950" : "hover:bg-amber-500/15"
         } transition-colors cursor-pointer">
         ${item.label}
@@ -422,17 +425,17 @@ function mountLegacyHeader() {
         </button>
       </div>
 
-      <div class="hidden md:flex items-center justify-center gap-0.5 text-[13px] font-bold">
+      <div class="hidden md:flex items-center justify-center gap-0.5 text-[12.5px] font-bold overflow-x-auto no-scrollbar">
         ${desktopNavButtons}
         <button type="button" id="legacy-nav-auth-btn"
-          class="shrink-0 ml-3 my-1.5 px-4 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
+          class="shrink-0 ml-2.5 my-1.5 px-3.5 py-1.5 rounded-lg bg-[#0B3066] hover:bg-[#14438a] text-white text-xs font-bold transition-colors cursor-pointer">
           Sign In / Register
         </button>
       </div>
     </div>
   `;
 
-  // 3) CONTINUOUS LIVE NEWS MARQUEE BAR (Below Sticky Nav)
+  // 3) CONTINUOUS LIVE NEWS MARQUEE BAR
   const marqueeBar = document.createElement("div");
   marqueeBar.id = "legacy-marquee-bar";
   marqueeBar.className = "w-full bg-[#0B3066] text-white border-b-2 border-[#f59e0b]";
@@ -458,7 +461,6 @@ function mountLegacyHeader() {
   document.body.insertBefore(stickyNav, firstChild);
   document.body.insertBefore(marqueeBar, firstChild);
 
-  // Subtle shadow when sticky nav locks to top
   window.addEventListener(
     "scroll",
     () => {
@@ -599,20 +601,22 @@ function closeMobileDrawer() {
 }
 
 // ============================================================================
-// 4. BULLETPROOF VIEW & GALLERY ROUTING (FIXES HOME/MAP OVERLAP 100%)
+// 4. BULLETPROOF VIEW, GALLERY & QUESTION BANK ROUTING (ZERO OVERLAP)
 // ============================================================================
 function setMapVisibility(show) {
   const mapSec = document.getElementById("school-campus-map-section");
   if (mapSec) mapSec.classList.toggle("hidden", !show);
 }
 
-function hideGalleryViewIfPresent() {
-  const gal = document.getElementById("view-gallery");
-  if (gal) gal.classList.add("hidden");
+function hideExtraViews() {
+  ["view-gallery", "view-papers"].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add("hidden");
+  });
 }
 
 function activateCleanGalleryView() {
-  ["view-home", "view-guru-stambh", "view-gaurav-stambh"].forEach((id) => {
+  ["view-home", "view-guru-stambh", "view-gaurav-stambh", "view-papers"].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.classList.add("hidden");
   });
@@ -633,7 +637,12 @@ function wrapSwitchViewForGallery() {
         activateCleanGalleryView();
         return;
       }
-      hideGalleryViewIfPresent();
+      if (viewName === "papers" && typeof window.openQuestionBankPage === "function") {
+        setActiveNavTab("papers");
+        window.openQuestionBankPage();
+        return;
+      }
+      hideExtraViews();
       origSwitch(viewName);
       setMapVisibility(viewName === "home");
       if (["home", "guru-stambh", "gaurav-stambh"].includes(viewName)) {
@@ -644,8 +653,6 @@ function wrapSwitchViewForGallery() {
     window.switchView = wrapped;
   }
 
-  // Also wrap campus-experience-admin.js's openCampusGalleryPage so BOTH
-  // "Explore Full Campus Gallery" button & Nav Gallery tab work identically!
   if (typeof window.openCampusGalleryPage === "function" && !window.openCampusGalleryPage.__legWrapped) {
     const origOpenGallery = window.openCampusGalleryPage;
     const wrappedGallery = function (...args) {
@@ -672,7 +679,14 @@ function handleNavSelection(target) {
     return;
   }
 
-  hideGalleryViewIfPresent();
+  if (target === "papers") {
+    if (typeof window.openQuestionBankPage === "function") {
+      window.openQuestionBankPage();
+    }
+    return;
+  }
+
+  hideExtraViews();
 
   if (target === "home" || target === "guru-stambh" || target === "gaurav-stambh") {
     if (typeof window.switchView === "function") window.switchView(target);
@@ -698,8 +712,8 @@ function setActiveNavTab(activeKey) {
   document.querySelectorAll(".leg-nav-item").forEach((btn) => {
     const isAct = btn.getAttribute("data-leg-nav") === activeKey;
     btn.className = isAct
-      ? "leg-nav-item shrink-0 px-3.5 py-3 bg-[#f59e0b] text-slate-950 transition-colors cursor-pointer"
-      : "leg-nav-item shrink-0 px-3.5 py-3 hover:bg-amber-500/15 transition-colors cursor-pointer";
+      ? "leg-nav-item shrink-0 px-3 py-3 bg-[#f59e0b] text-slate-950 transition-colors cursor-pointer"
+      : "leg-nav-item shrink-0 px-3 py-3 hover:bg-amber-500/15 transition-colors cursor-pointer";
   });
 
   document.querySelectorAll(".leg-drawer-item").forEach((btn) => {
@@ -948,7 +962,7 @@ function openInfoModal(type) {
       <div class="space-y-3 text-xs">
         <div class="p-4 rounded-xl bg-[var(--leg-surface-alt)] border leg-border space-y-1">
           <div class="font-extrabold leg-text-primary">Student &amp; Teacher Command Portal</div>
-          <p>Sign in to view class-targeted notices, JAC syllabus links, and message verified faculty directly.</p>
+          <p>Sign in to view class-targeted notices, practice question papers, JAC syllabus links, and message verified faculty directly.</p>
           <button type="button" id="lim-open-portal-auth"
             class="mt-2 px-4 py-2 rounded-xl bg-[#0B3066] text-white font-bold cursor-pointer">
             Open Portal Sign In →
@@ -983,11 +997,11 @@ function openInfoModal(type) {
 function openPortalSearchModal() {
   const modal = ensureAdaptiveModal();
   document.getElementById("lim-badge").textContent = "QUICK PORTAL SEARCH • CTRL + K";
-  document.getElementById("lim-title").textContent = "Search Notices, Faculty & Sections";
+  document.getElementById("lim-title").textContent = "Search Notices, Papers, Faculty & Sections";
 
   const body = document.getElementById("lim-body");
   body.innerHTML = `
-    <input id="lim-search-input" type="search" placeholder="Type e.g. e-Kalyan, JAC, Gallery, Faculty, Alumni..."
+    <input id="lim-search-input" type="search" placeholder="Type e.g. Question Bank, e-Kalyan, JAC, Gallery, Faculty..."
       class="w-full px-4 py-3 rounded-xl bg-[var(--leg-surface-alt)] border leg-border leg-text-primary text-sm focus:outline-none focus:border-amber-500" />
     <div id="lim-search-results" class="space-y-2 max-h-[340px] overflow-y-auto"></div>
   `;
@@ -996,6 +1010,7 @@ function openPortalSearchModal() {
   const resultsBox = document.getElementById("lim-search-results");
 
   const quickNavEntries = [
+    { type: "nav", key: "papers", label: "📝 Question Bank & Practice Sheets (Class 1–12)" },
     { type: "nav", key: "guru-stambh", label: "👨‍🏫 Guru Stambh — Verified Faculty Directory" },
     { type: "nav", key: "gaurav-stambh", label: "🏆 Gaurav Stambh — Alumni & Toppers Wall" },
     { type: "nav", key: "gallery", label: "🖼️ Campus Photo & Video Gallery" },
@@ -1064,7 +1079,7 @@ function openPortalSearchModal() {
 }
 
 // ============================================================================
-// 7. CURVED STUDENT / TEACHER AUTH MODAL + INSTANT-COMPRESS TEACHER PHOTO
+// 7. CURVED STUDENT / TEACHER AUTH MODAL (CLASS 1–12 + INSTANT TEACHER PHOTO)
 // ============================================================================
 function mountCurvedAuthModal() {
   if (document.getElementById("legacy-auth-modal")) return;
@@ -1100,7 +1115,7 @@ function mountCurvedAuthModal() {
         <div class="w-full space-y-4 my-auto py-8">
           <h2 class="text-3xl font-extrabold tracking-tight">Welcome Back</h2>
           <p class="text-xs text-rose-100/80 max-w-[260px] mx-auto">
-            Access your class dashboard, syllabus, official notices, and direct teacher messaging.
+            Access your class dashboard, practice papers, syllabus, notices, and direct teacher messaging.
           </p>
           <div class="pt-4 space-y-3">
             <button type="button" data-auth-goto="signin"
@@ -1162,7 +1177,7 @@ function mountCurvedAuthModal() {
         </form>
       </div>
 
-      <!-- VIEW 3: CREATE ACCOUNT (UNIFIED STUDENT & GURU STAMBH TEACHER SIGNUP) -->
+      <!-- VIEW 3: CREATE ACCOUNT (INDIVIDUAL CLASS 1–12 + GURU STAMBH TEACHER) -->
       <div id="auth-view-signup" class="hidden relative z-10 flex-1 flex flex-col justify-between max-h-[92vh]">
         <div class="px-7 pt-7 pb-5 text-white shrink-0">
           <button type="button" data-auth-goto="welcome" class="text-xs text-rose-200 hover:text-white font-semibold mb-2 inline-flex items-center gap-1 cursor-pointer">← Back</button>
@@ -1206,7 +1221,11 @@ function mountCurvedAuthModal() {
                 <option value="8">Class 8</option>
                 <option value="7">Class 7</option>
                 <option value="6">Class 6</option>
-                <option value="1-5">Class 1 – 5</option>
+                <option value="5">Class 5</option>
+                <option value="4">Class 4</option>
+                <option value="3">Class 3</option>
+                <option value="2">Class 2</option>
+                <option value="1">Class 1</option>
               </select>
             </div>
             <div>
@@ -1606,7 +1625,7 @@ function openCurvedAuthModal(initialView = "welcome") {
 window.openSchoolPortalAuth = openCurvedAuthModal;
 
 // ============================================================================
-// 8. CLEAN BRIDGE FOR portal-dashboards.js & campus-experience-admin.js
+// 8. CLEAN BRIDGE FOR portal-dashboards.js, campus-experience-admin.js & question-paper-studio.js
 // ============================================================================
 window.LegacyPortalBridge = {
   getSession: () => ({
@@ -1647,7 +1666,6 @@ function bootLegacyPortal() {
   initFirebaseSafe();
   syncMarqueeNotices();
 
-  // Re-check wrappers once campus-experience-admin.js finishes module evaluation
   setTimeout(wrapSwitchViewForGallery, 300);
   window.addEventListener("load", () => {
     wrapSwitchViewForGallery();
